@@ -49,7 +49,7 @@ namespace BiggerBackpack
             if (input.IsActionButton && !input.IsSuppressed)
             {
                 input.SuppressButton();
-                if (Game1.currentLocation.name == "SeedShop" && input.Cursor.Tile.X == 7 && (input.Cursor.Tile.Y == 17 || input.Cursor.Tile.Y == 18) )
+                if (Game1.player.MaxItems == 36 && Game1.currentLocation.name == "SeedShop" && input.Cursor.Tile.X == 7 && (input.Cursor.Tile.Y == 17 || input.Cursor.Tile.Y == 18) )
                 {
                     Response yes = new Response("Purchase", "Purchase (50,000g)");
                     Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
@@ -66,7 +66,6 @@ namespace BiggerBackpack
             
             if ( args.PriorMenu is DialogueBox db )
             {
-                Log.trace("meow:"+prevSelResponse);
                 if (Game1.currentLocation.lastQuestionKey == "spacechase0.BiggerBackpack" && prevSelResponse == 0)
                 {
                     if (Game1.player.Money >= 50000)
