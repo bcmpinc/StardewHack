@@ -48,9 +48,9 @@ namespace BiggerBackpack
 
             if (input.IsActionButton && !input.IsSuppressed)
             {
-                input.SuppressButton();
                 if (Game1.player.MaxItems == 36 && Game1.currentLocation.name == "SeedShop" && input.Cursor.Tile.X == 7 && (input.Cursor.Tile.Y == 17 || input.Cursor.Tile.Y == 18) )
                 {
+                    input.SuppressButton();
                     Response yes = new Response("Purchase", "Purchase (50,000g)");
                     Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
                     Response[] resps = new Response[] { yes, no };
