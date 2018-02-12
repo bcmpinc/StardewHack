@@ -108,6 +108,10 @@ namespace BiggerBackpack
                 menuWithInv.inventory.rows = 4;
                 menuWithInv.height += 64;
             }
+            else if ( args.NewMenu is ShopMenu shop )
+            {
+                shop.inventory = new InventoryMenu(shop.inventory.xPositionOnScreen, shop.inventory.yPositionOnScreen, false, (List<Item>)null, new InventoryMenu.highlightThisItem(shop.highlightItemToSell), 48, 4, 0, 0, true);
+            }
             else if ( args.NewMenu is DialogueBox )
             {
                 GameEvents.UpdateTick += watchSelectedResponse;
