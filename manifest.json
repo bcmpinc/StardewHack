@@ -1,7 +1,7 @@
 {
   "Name": "Bigger Backpack",
   "Author": "spacechase0, yoseiri",
-  "Version": "1.0.1",
+  "Version": "1.0.2",
   "Description": "Adds another backpack size.",
   "UniqueID": "spacechase0.BiggerBackpack",
   "PerSaveConfigs": false,
