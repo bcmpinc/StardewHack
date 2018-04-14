@@ -28,6 +28,19 @@ namespace BiggerBackpack
             MenuEvents.MenuChanged += menuChanged;
             GraphicsEvents.OnPreRenderHudEvent += draw;
             InputEvents.ButtonPressed += inputPressed;
+
+            Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack.", command);
+        }
+
+        private void command( string cmd, string[] args )
+        {
+            if (args.Length != 1)
+            {
+                Log.info("Must have one command argument");
+                return;
+            }
+
+            Game1.player.MaxItems = int.Parse(args[0]);
         }
 
         private void draw(object sender, EventArgs args)
