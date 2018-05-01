@@ -2,7 +2,7 @@
    "Name": "Always Scroll Map",
    "Author": "bcmpinc",
    "Version": "0.0.1",
-   "Description": "Maps will scroll past their boundary",
+   "Description": "Makes the map scroll always, including when near the edge of the map. Useful when planting seeds while walking.",
    "UniqueID": "bcmpinc.AlwaysScrollMap",
    "EntryDll": "AlwaysScrollMap.dll",
    "MinimumApiVersion": "2.0",
