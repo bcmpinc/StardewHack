@@ -1,0 +1,10 @@
+﻿{
+   "Name": "Always Scroll Map",
+   "Author": "bcmpinc",
+   "Version": "0.0.1",
+   "Description": "Maps will scroll past their boundary",
+   "UniqueID": "bcmpinc.AlwaysScrollMap",
+   "EntryDll": "AlwaysScrollMap.dll",
+   "MinimumApiVersion": "2.0",
+   "UpdateKeys": []
+}
