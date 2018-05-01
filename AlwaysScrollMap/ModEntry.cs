@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Harmony;
 using StardewModdingAPI;
-using Harmony;
-using System.Reflection;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace AlwaysScrollMap
@@ -27,7 +27,7 @@ namespace AlwaysScrollMap
             var codes = new List<CodeInstruction>(instructions);
             int start = codes.FindIndex(i => i.opcode == OpCodes.Ldsfld && AccessTools.Field(typeof(StardewValley.Game1), "viewportFreeze") == (FieldInfo)i.operand);
             int end = codes.FindIndex(i => i.opcode == OpCodes.Ldfld && AccessTools.Field(typeof(StardewValley.GameLocation), "forceViewportPlayerFollow") == (FieldInfo)i.operand);
-            ModEntry.Log.Log($"start={start} end={end}");
+            //ModEntry.Log.Log($"start={start} end={end}");
             codes.RemoveRange(start, end-start+2);
             return codes;
         }
