@@ -3,12 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlwaysScrollMap", "AlwaysScrollMap\AlwaysScrollMap.csproj", "{AFB48E19-F526-4632-B624-5246D0609443}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftCounter", "CraftCounter\CraftCounter.csproj", "{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Release|Any CPU.ActiveCfg = Release|Any CPU

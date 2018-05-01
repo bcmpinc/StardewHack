@@ -1,0 +1,10 @@
+﻿{
+   "Name": "Craft Counter",
+   "Author": "bcmpinc",
+   "Version": "0.0.1",
+   "Description": "Adds a counter to the description of crafting recipes telling how often it has been crafted.",
+   "UniqueID": "bcmpinc.CraftCounter",
+   "EntryDll": "CraftCounter.dll",
+   "MinimumApiVersion": "2.0",
+   "UpdateKeys": []
+}
