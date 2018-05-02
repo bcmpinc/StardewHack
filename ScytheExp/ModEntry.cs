@@ -16,14 +16,14 @@ namespace ScytheExp
             var ScytheBranchTail = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
-                OpCodes.Call,
+                OpCodes.Call, // Netcode
                 OpCodes.Ldc_I4_1,
                 OpCodes.Bne_Un
             ).Follow(4);
             ScytheBranchTail.ExtendBackwards(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.Crop), "regrowAfterHarvest"),
-                OpCodes.Call,
+                OpCodes.Call, // Netcode
                 OpCodes.Ldc_I4_M1,
                 OpCodes.Bne_Un
             );
@@ -33,7 +33,7 @@ namespace ScytheExp
             var DropSunflowerSeeds = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
-                OpCodes.Call,
+                OpCodes.Call, // Netcode
                 Instructions.Ldc_I4(421), // 421 = Item ID of Sunflower.
                 OpCodes.Bne_Un_S
             );

@@ -13,8 +13,12 @@ namespace StardewHack
         public static CodeInstruction Brtrue (CodeInstruction target) => new CodeInstruction(OpCodes.Brtrue,  Hack.attachLabel(target));
 
         // C
-        public static CodeInstruction Call    (Type type, string method, params Type[] parameters) => new CodeInstruction(OpCodes.Call,     GetMethod(type, method, parameters));
-        public static CodeInstruction Callvirt(Type type, string method, params Type[] parameters) => new CodeInstruction(OpCodes.Callvirt, GetMethod(type, method, parameters));
+        public static CodeInstruction Call        (Type type, string method, params Type[] parameters) => new CodeInstruction(OpCodes.Call,     GetMethod(type, method, parameters));
+        public static CodeInstruction Callvirt    (Type type, string method, params Type[] parameters) => new CodeInstruction(OpCodes.Callvirt, GetMethod(type, method, parameters));
+        public static CodeInstruction Call_get    (Type type, string method) => new CodeInstruction(OpCodes.Call,     GetProperty(type, method).GetGetMethod());
+        public static CodeInstruction Callvirt_get(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetGetMethod());
+        public static CodeInstruction Call_set    (Type type, string method) => new CodeInstruction(OpCodes.Call,     GetProperty(type, method).GetSetMethod());
+        public static CodeInstruction Callvirt_set(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetSetMethod());
 
         // L
         public static CodeInstruction Ldarg_0() => new CodeInstruction(OpCodes.Ldarg_0);
@@ -24,6 +28,16 @@ namespace StardewHack
         public static CodeInstruction Ldarg_S(byte index) => new CodeInstruction(OpCodes.Ldarg_S, index);
 
         public static CodeInstruction Ldc_I4_0() => new CodeInstruction(OpCodes.Ldc_I4_0);
+        public static CodeInstruction Ldc_I4_1() => new CodeInstruction(OpCodes.Ldc_I4_1);
+        public static CodeInstruction Ldc_I4_2() => new CodeInstruction(OpCodes.Ldc_I4_2);
+        public static CodeInstruction Ldc_I4_3() => new CodeInstruction(OpCodes.Ldc_I4_3);
+        public static CodeInstruction Ldc_I4_4() => new CodeInstruction(OpCodes.Ldc_I4_4);
+        public static CodeInstruction Ldc_I4_5() => new CodeInstruction(OpCodes.Ldc_I4_5);
+        public static CodeInstruction Ldc_I4_6() => new CodeInstruction(OpCodes.Ldc_I4_6);
+        public static CodeInstruction Ldc_I4_7() => new CodeInstruction(OpCodes.Ldc_I4_7);
+        public static CodeInstruction Ldc_I4_8() => new CodeInstruction(OpCodes.Ldc_I4_8);
+        public static CodeInstruction Ldc_I4_M1() => new CodeInstruction(OpCodes.Ldc_I4_M1);
+        public static CodeInstruction Ldc_I4_S(byte value) => new CodeInstruction(OpCodes.Ldc_I4_S, value);
         public static CodeInstruction Ldc_I4(int value) => new CodeInstruction(OpCodes.Ldc_I4, value);
         public static CodeInstruction Ldc_R8(double value) => new CodeInstruction(OpCodes.Ldc_R8, value);
 
@@ -43,6 +57,8 @@ namespace StardewHack
         public static CodeInstruction Ret() => new CodeInstruction(OpCodes.Ret);
 
         // S
+        public static CodeInstruction Starg_S(byte index) => new CodeInstruction(OpCodes.Starg_S, index);
+
         public static CodeInstruction Stfld (Type type, string field) => new CodeInstruction(OpCodes.Stfld,  GetField(type, field));
         public static CodeInstruction Stsfld(Type type, string field) => new CodeInstruction(OpCodes.Stsfld, GetField(type, field));
         public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);

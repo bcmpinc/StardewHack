@@ -6,5 +6,8 @@
    "UniqueID": "bcmpinc.HarvestWithScythe",
    "EntryDll": "HarvestWithScythe.dll",
    "MinimumApiVersion": "2.0",
-   "UpdateKeys": []
+   "UpdateKeys": [],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.ScytheExp"
+   }]
 }
