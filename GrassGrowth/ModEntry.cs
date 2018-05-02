@@ -1,0 +1,31 @@
+﻿using System;
+using StardewHack;
+using System.Reflection.Emit;
+
+namespace GrassGrowth
+{
+    public class ModEntry : Hack
+    {
+        // Change the milk pail such that it doesn't do anything while no animal is in range. 
+        [BytecodePatch(typeof(StardewValley.GameLocation), "growWeedGrass")]
+        void GameLocation_growWeedGrass() {
+            var growWeedGrass = BeginCode();
+            // For each ofthe 4 directions
+            for (int i=0; i<4; i++) {
+                growWeedGrass = growWeedGrass.FindNext(
+                    OpCodes.Ldarg_0,
+                    OpCodes.Ldloc_3,
+                    null,
+                    null,
+                    null,
+                    Instructions.Ldstr("Diggable"),
+                    Instructions.Ldstr("Back"),
+                    Instructions.Call(typeof(StardewValley.GameLocation), "doesTileHaveProperty", typeof(int), typeof(int), typeof(string), typeof(string)),
+                    OpCodes.Brfalse_S
+                );
+                growWeedGrass.Remove();
+            }
+        }
+    }
+}
+

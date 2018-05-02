@@ -113,10 +113,18 @@ namespace StardewHack
         }
 
         /** Find the last occurance of the given sequence of instructions that follows this range.
-         * See InstructionHelpers.Find() for how the matching is performed.
+         * See FindCode() for how the matching is performed.
          */
         public InstructionRange FindCodeLast(params Object[] contains) {
             return new InstructionRange(codes, contains, codes.Count, -1);
+        }
+
+        public InstructionRange BeginCode() {
+            return new InstructionRange(codes, 0, 0);
+        }
+
+        public InstructionRange EndCode() {
+            return new InstructionRange(codes, codes.Count, 0);
         }
 
         public static void Log(string message, LogLevel level=LogLevel.Debug) {
