@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{787664E9-7DB0-4FAE-BC05-7D9B8322C82B}</ProjectGuid>
+    <ProjectGuid>{8EFA6AE4-B627-4E1A-9897-08357E4BC0A9}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>CraftCounter</RootNamespace>
-    <AssemblyName>CraftCounter</AssemblyName>
+    <RootNamespace>FixAnimalTools</RootNamespace>
+    <AssemblyName>FixAnimalTools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -40,13 +40,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
   <ItemGroup>
-    <None Include="manifest.json" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\StardewHack\StardewHack.csproj">
-      <Project>{57D4316C-C97C-41ED-A1E8-4737AE1D66AA}</Project>
-      <Name>StardewHack</Name>
-    </ProjectReference>
+    <None Include="manifest.json" />
   </ItemGroup>
 </Project>
