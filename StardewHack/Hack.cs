@@ -53,6 +53,8 @@ namespace StardewHack
             }
         }
 
+        /** Applies the given patch to the given method. 
+         * This method can be called from within a patch method, for example to patch delegate functions. */
         public void ChainPatch(MethodInfo method, MethodInfo patch) {
             var old_generator = this.generator;
             var old_codes = this.codes;

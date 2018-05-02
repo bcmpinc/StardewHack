@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StardewHack", "StardewHack\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovementSpeed", "MovementSpeed\MovementSpeed.csproj", "{81C6668E-076E-43D7-8061-BA3DFAF177E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarvestWithScythe", "HarvestWithScythe\HarvestWithScythe.csproj", "{8FF98E39-F06C-493D-8920-4700D2B9D8FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScytheExp", "ScytheExp\ScytheExp.csproj", "{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +37,17 @@ Global
 		{8EFA6AE4-B627-4E1A-9897-08357E4BC0A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EFA6AE4-B627-4E1A-9897-08357E4BC0A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EFA6AE4-B627-4E1A-9897-08357E4BC0A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FF98E39-F06C-493D-8920-4700D2B9D8FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FF98E39-F06C-493D-8920-4700D2B9D8FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FF98E39-F06C-493D-8920-4700D2B9D8FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FF98E39-F06C-493D-8920-4700D2B9D8FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -8,6 +8,7 @@ namespace StardewHack
     public static class Instructions
     {
         // B
+        public static CodeInstruction Br     (CodeInstruction target) => new CodeInstruction(OpCodes.Br,      Hack.attachLabel(target));
         public static CodeInstruction Brfalse(CodeInstruction target) => new CodeInstruction(OpCodes.Brfalse, Hack.attachLabel(target));
         public static CodeInstruction Brtrue (CodeInstruction target) => new CodeInstruction(OpCodes.Brtrue,  Hack.attachLabel(target));
 
@@ -22,12 +23,14 @@ namespace StardewHack
         public static CodeInstruction Ldarg_3() => new CodeInstruction(OpCodes.Ldarg_3);
         public static CodeInstruction Ldarg_S(byte index) => new CodeInstruction(OpCodes.Ldarg_S, index);
 
+        public static CodeInstruction Ldc_I4_0() => new CodeInstruction(OpCodes.Ldc_I4_0);
         public static CodeInstruction Ldc_I4(int value) => new CodeInstruction(OpCodes.Ldc_I4, value);
         public static CodeInstruction Ldc_R8(double value) => new CodeInstruction(OpCodes.Ldc_R8, value);
 
         public static CodeInstruction Ldfld (Type type, string field) => new CodeInstruction(OpCodes.Ldfld,  GetField(type, field));
-
         public static CodeInstruction Ldsfld(Type type, string field) => new CodeInstruction(OpCodes.Ldsfld, GetField(type, field));
+        public static CodeInstruction Ldloc_S(byte index) => new CodeInstruction(OpCodes.Ldloc_S, index);
+        public static CodeInstruction Ldloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc_S, local);
         public static CodeInstruction Ldstr(string text) => new CodeInstruction(OpCodes.Ldstr, text);
 
         // M
@@ -41,7 +44,9 @@ namespace StardewHack
 
         // S
         public static CodeInstruction Stfld (Type type, string field) => new CodeInstruction(OpCodes.Stfld,  GetField(type, field));
-
+        public static CodeInstruction Stsfld(Type type, string field) => new CodeInstruction(OpCodes.Stsfld, GetField(type, field));
+        public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);
+        public static CodeInstruction Stloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Stloc_S, local);
 
 
         /** Retrieves the field definition with the specified name. */

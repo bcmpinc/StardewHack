@@ -1,0 +1,10 @@
+﻿{
+   "Name": "Harvest With Scythe",
+   "Author": "bcmpinc",
+   "Version": "0.0.1",
+   "Description": "Allows you to harvest all crops using the scythe. Crops that were harvestable without the scythe can also still be plucked.",
+   "UniqueID": "bcmpinc.HarvestWithScythe",
+   "EntryDll": "HarvestWithScythe.dll",
+   "MinimumApiVersion": "2.0",
+   "UpdateKeys": []
+}

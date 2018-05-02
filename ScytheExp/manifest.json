@@ -1,0 +1,10 @@
+﻿{
+   "Name": "Scythe Exp Fix",
+   "Author": "bcmpinc",
+   "Version": "0.0.1",
+   "Description": "Fixes the bug where harvesting with the scythe does not yield any farming experience.",
+   "UniqueID": "bcmpinc.ScytheExp",
+   "EntryDll": "ScytheExp.dll",
+   "MinimumApiVersion": "2.0",
+   "UpdateKeys": []
+}

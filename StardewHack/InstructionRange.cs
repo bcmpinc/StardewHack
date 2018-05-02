@@ -163,18 +163,16 @@ namespace StardewHack
          * Use Extend or ExtendBackwards to give it a size.
          * The length being 0, ExtendBackwards won't include the instruction being pointed at.
          */
-        /* BROKEN
         public InstructionRange Follow(int i) {
             var op = insts[start+i].operand;
-            if (op == null || !(op is CodeInstruction)) {
+            if (op == null || !(op is Label)) {
                 throw new Exception("Expected a branch instruction, got: "+insts[start+i]);
             }
-            CodeInstruction inst = op as CodeInstruction;
-            int pos = insts.IndexOf(inst);
-            if (pos < 0) throw new Exception("CodeInstruction not found: " + inst);
+            Label lbl = (Label)op;
+            int pos = insts.FindIndex(inst => inst.labels.Contains(lbl));
+            if (pos < 0) throw new Exception($"Label not found: LBL_{lbl.GetHashCode()}");
             return new InstructionRange(insts, pos, 0);
         }
-        */
 
         /** Writes the instruction range to console. */
         public void Print() {
