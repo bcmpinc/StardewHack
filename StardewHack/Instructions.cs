@@ -21,15 +21,27 @@ namespace StardewHack
         public static CodeInstruction Ldarg_2() => new CodeInstruction(OpCodes.Ldarg_2);
         public static CodeInstruction Ldarg_3() => new CodeInstruction(OpCodes.Ldarg_3);
         public static CodeInstruction Ldarg_S(byte index) => new CodeInstruction(OpCodes.Ldarg_S, index);
+
+        public static CodeInstruction Ldc_I4(int value) => new CodeInstruction(OpCodes.Ldc_I4, value);
+        public static CodeInstruction Ldc_R8(double value) => new CodeInstruction(OpCodes.Ldc_R8, value);
+
         public static CodeInstruction Ldfld (Type type, string field) => new CodeInstruction(OpCodes.Ldfld,  GetField(type, field));
+
         public static CodeInstruction Ldsfld(Type type, string field) => new CodeInstruction(OpCodes.Ldsfld, GetField(type, field));
         public static CodeInstruction Ldstr(string text) => new CodeInstruction(OpCodes.Ldstr, text);
+
+        // M
+        public static CodeInstruction Mul() => new CodeInstruction(OpCodes.Mul);
 
         // N
         public static CodeInstruction Nop() => new CodeInstruction(OpCodes.Nop);
 
         // R
         public static CodeInstruction Ret() => new CodeInstruction(OpCodes.Ret);
+
+        // S
+        public static CodeInstruction Stfld (Type type, string field) => new CodeInstruction(OpCodes.Stfld,  GetField(type, field));
+
 
 
         /** Retrieves the field definition with the specified name. */

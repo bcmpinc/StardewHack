@@ -36,9 +36,6 @@ namespace StardewHack
         public override void Entry(IModHelper helper) {
             this.helper = helper;
             Hack.instance = this;
-            var prepare = AccessTools.Method(typeof(Hack), "Prepare");
-            var instance = AccessTools.Field(typeof(Hack), "instance");
-            var codes = AccessTools.Property(typeof(Hack), "codes");
 
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
@@ -51,36 +48,47 @@ namespace StardewHack
                 var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
                 foreach (var bp in bytecode_patches) {
                     // Apply the patch to the method specified in the annotation.
-                    MethodInfo method = bp.GetMethod();
-                    //Monitor.Log($"Create Patch {patch.Name} for {method}.");
-
-                    // Create patch proxy static method
-                    DynamicMethod proxy = new DynamicMethod(
-                        $"proxy<{patch.Name}> for {method}", 
-                        typeof(IEnumerable<CodeInstruction>), 
-                        new Type[]{typeof(ILGenerator), typeof(IEnumerable<CodeInstruction>)},
-                        typeof(Hack),
-                        true
-                    );
-                    ILGenerator il = proxy.GetILGenerator();
-                    // hack.Prepare(instructions, info);
-                    il.Emit(OpCodes.Ldsfld, instance);
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldarg_1);
-                    il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method}.");
-                    il.Emit(OpCodes.Callvirt, prepare);
-                    // hack.{patch}();
-                    il.Emit(OpCodes.Ldsfld, instance);
-                    il.Emit(OpCodes.Callvirt, patch);
-                    // return hack.codes;
-                    il.Emit(OpCodes.Ldsfld, instance);
-                    il.Emit(OpCodes.Callvirt, codes.GetGetMethod());
-                    il.Emit(OpCodes.Ret);
-
-                    // Register patch.
-                    harmony.Patch(method, null, null, new HarmonyMethod(proxy.CreateDelegate(typeof(TranspilerSignature)).Method));
+                    ChainPatch(bp.GetMethod(), patch);
                 }
             }
+        }
+
+        public void ChainPatch(MethodInfo method, MethodInfo patch) {
+            var old_generator = this.generator;
+            var old_codes = this.codes;
+
+            var prepare = AccessTools.Method(typeof(Hack), "Prepare");
+            var instance = AccessTools.Field(typeof(Hack), "instance");
+            var codes = AccessTools.Property(typeof(Hack), "codes");
+
+            // Create patch proxy static method
+            DynamicMethod proxy = new DynamicMethod(
+                $"proxy<{patch.Name}> for {method}", 
+                typeof(IEnumerable<CodeInstruction>), 
+                new Type[]{typeof(ILGenerator), typeof(IEnumerable<CodeInstruction>)},
+                typeof(Hack),
+                true
+            );
+            ILGenerator il = proxy.GetILGenerator();
+            // hack.Prepare(instructions, info);
+            il.Emit(OpCodes.Ldsfld, instance);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method}.");
+            il.Emit(OpCodes.Callvirt, prepare);
+            // hack.{patch}();
+            il.Emit(OpCodes.Ldsfld, instance);
+            il.Emit(OpCodes.Callvirt, patch);
+            // return hack.codes;
+            il.Emit(OpCodes.Ldsfld, instance);
+            il.Emit(OpCodes.Callvirt, codes.GetGetMethod());
+            il.Emit(OpCodes.Ret);
+
+            // Register patch.
+            harmony.Patch(method, null, null, new HarmonyMethod(proxy.CreateDelegate(typeof(TranspilerSignature)).Method));
+
+            this.generator = old_generator;
+            this.codes = old_codes;
         }
 
         /** Called from dynamic proxy method to prepare for patching. */ 
