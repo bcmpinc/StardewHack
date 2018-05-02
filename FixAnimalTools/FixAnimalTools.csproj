@@ -43,4 +43,10 @@
     <None Include="packages.config" />
     <None Include="manifest.json" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StardewHack\StardewHack.csproj">
+      <Project>{57D4316C-C97C-41ED-A1E8-4737AE1D66AA}</Project>
+      <Name>StardewHack</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

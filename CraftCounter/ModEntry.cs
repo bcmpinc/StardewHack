@@ -11,7 +11,7 @@ namespace StardewHack.CraftCounter
     {
         [BytecodePatch(typeof(StardewValley.CraftingRecipe),"getDescriptionHeight")]
         [BytecodePatch(typeof(StardewValley.CraftingRecipe),"drawRecipeDescription")]
-        public void AddTimesCrafted() {
+        void AddTimesCrafted() {
             var range = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.CraftingRecipe), "description")
@@ -21,7 +21,7 @@ namespace StardewHack.CraftCounter
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.CraftingRecipe),"timesCrafted"),
                 Instructions.Call(typeof(Convert), "ToString", typeof(int)),
-                Instructions.Call(typeof(string), "Concat", typeof(String), typeof(String), typeof(String))
+                Instructions.Call(typeof(string), "Concat", typeof(string), typeof(string), typeof(string))
             );
         }
     }

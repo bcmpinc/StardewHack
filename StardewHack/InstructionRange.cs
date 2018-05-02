@@ -83,6 +83,7 @@ namespace StardewHack
         public InstructionRange End   { get { return new InstructionRange(insts, start + length, 0); } }
 
         /** Changes all jumps to 'from' into jumps to 'to' (for the entire method). */
+        /* BROKEN
         public void ReplaceJump(CodeInstruction @from, CodeInstruction to) {
             if (@from == to) return;
             foreach (CodeInstruction inst in insts) {
@@ -91,6 +92,7 @@ namespace StardewHack
                 }
             }
         }
+        */
 
         /** Inserts the specified list of instructions before this range. */
         public void Prepend(params CodeInstruction[] new_insts) {
@@ -161,6 +163,7 @@ namespace StardewHack
          * Use Extend or ExtendBackwards to give it a size.
          * The length being 0, ExtendBackwards won't include the instruction being pointed at.
          */
+        /* BROKEN
         public InstructionRange Follow(int i) {
             var op = insts[start+i].operand;
             if (op == null || !(op is CodeInstruction)) {
@@ -171,12 +174,33 @@ namespace StardewHack
             if (pos < 0) throw new Exception("CodeInstruction not found: " + inst);
             return new InstructionRange(insts, pos, 0);
         }
+        */
 
         /** Writes the instruction range to console. */
         public void Print() {
+            Hack.Log("-----");
             for (int i=0; i<length; i++) {
-                Console.WriteLine(insts[start+i]);
+                var inst = insts[start+i];
+
+                // Print any labels
+                foreach (var lbl in inst.labels) {
+                    Hack.Log($"LBL_{lbl.GetHashCode()}:");
+                }
+
+                // Print the operation.
+                string res;
+                if (inst.operand == null) {
+                    res = $"{inst.opcode}";
+                } else if (inst.operand is Label) {
+                    res = $"{inst.opcode} LBL_{inst.operand.GetHashCode()}";
+                } else if (inst.operand is string) {
+                    res = $"{inst.opcode} \"{inst.operand}\"";
+                } else {
+                    res = inst.ToString();
+                }
+                Hack.Log("  " + res);
             }
+            Hack.Log("-----");
         }
 
         public CodeInstruction[] ToArray() {

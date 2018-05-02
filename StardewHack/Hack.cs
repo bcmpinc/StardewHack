@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack
 {
-    internal delegate IEnumerable<CodeInstruction> TranspilerSignature(IEnumerable<CodeInstruction> instructions);
+    internal delegate IEnumerable<CodeInstruction> TranspilerSignature(ILGenerator generator, IEnumerable<CodeInstruction> instructions);
 
     public abstract class Hack : Mod
     {
@@ -18,6 +18,11 @@ namespace StardewHack
          * Use only within methods annotated with BytecodePatch. 
          */
         public List<CodeInstruction> codes { get; private set; }
+
+        /** The generator used for patching. 
+         * Use only within methods annotated with BytecodePatch. 
+         */
+        public ILGenerator generator { get; private set; }
 
         /** Provides simpliied API's for writing mods. */
         public IModHelper helper { get; private set; }
@@ -38,7 +43,7 @@ namespace StardewHack
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
             Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Info);
-            this.harmony = HarmonyInstance.Create(UniqueID);
+            harmony = HarmonyInstance.Create(UniqueID);
 
             // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
             var methods = this.GetType().GetMethods(AccessTools.all);
@@ -53,7 +58,7 @@ namespace StardewHack
                     DynamicMethod proxy = new DynamicMethod(
                         $"proxy<{patch.Name}> for {method}", 
                         typeof(IEnumerable<CodeInstruction>), 
-                        new Type[]{typeof(IEnumerable<CodeInstruction>)},
+                        new Type[]{typeof(ILGenerator), typeof(IEnumerable<CodeInstruction>)},
                         typeof(Hack),
                         true
                     );
@@ -61,6 +66,7 @@ namespace StardewHack
                     // hack.Prepare(instructions, info);
                     il.Emit(OpCodes.Ldsfld, instance);
                     il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldarg_1);
                     il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method}.");
                     il.Emit(OpCodes.Callvirt, prepare);
                     // hack.{patch}();
@@ -78,8 +84,9 @@ namespace StardewHack
         }
 
         /** Called from dynamic proxy method to prepare for patching. */ 
-        private void Prepare(IEnumerable<CodeInstruction> instructions, string info) {
-            codes = new List<CodeInstruction>(instructions);
+        private void Prepare(ILGenerator generator, IEnumerable<CodeInstruction> instructions, string info) {
+            this.generator = generator;
+            this.codes = new List<CodeInstruction>(instructions);
             Monitor.Log(info);
         }
 
@@ -100,6 +107,16 @@ namespace StardewHack
          */
         public InstructionRange FindCodeLast(params Object[] contains) {
             return new InstructionRange(codes, contains, codes.Count, -1);
+        }
+
+        public static void Log(string message, LogLevel level=LogLevel.Debug) {
+            instance.Monitor.Log(message, level);
+        }
+
+        public static Label attachLabel(CodeInstruction target) {
+            var lbl = instance.generator.DefineLabel();
+            target.labels.Add(lbl);
+            return lbl;
         }
     }
 }
