@@ -57,9 +57,11 @@ namespace StardewHack
                         throw new ArgumentException("Unsupported type "+query.GetType()+" for argument "+(j+1)+": " + query);
                     }
                 }
+                //Hack.Log($"Found match at {i} of length {contains.Length}:");
                 this.insts = insts;
                 this.start = i;
                 this.length = contains.Length;
+                //Print();
                 return;
 
                 NO_MATCH:;
@@ -141,8 +143,8 @@ namespace StardewHack
         /** Extend the range by searching backwards to include the specified instructions. */
         public void ExtendBackwards(params Object[] contains) {
             var ext = FindPrevious(contains);
+            length = start + length - ext.start;
             start = ext.start;
-            length = start + ext.length - ext.start;
         }
 
         /** Replaces the instructions within this range with the specified new instructions. */
@@ -171,7 +173,9 @@ namespace StardewHack
             Label lbl = (Label)op;
             int pos = insts.FindIndex(inst => inst.labels.Contains(lbl));
             if (pos < 0) throw new Exception($"Label not found: LBL_{lbl.GetHashCode()}");
-            return new InstructionRange(insts, pos, 0);
+            var res = new InstructionRange(insts, pos, 0);
+            // Hack.Log($"Jump points to {pos}:");
+            return res;
         }
 
         /** Writes the instruction range to console. */
@@ -207,6 +211,11 @@ namespace StardewHack
                 array[index] = insts[start+index];
             }
             return array;
+        }
+
+        public override string ToString ()
+        {
+            return string.Format ("[InstructionRange[{0}..{1}], length={2}", start, start+length-1, length);
         }
     }
 }

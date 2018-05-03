@@ -25,9 +25,10 @@ namespace ScytheExp
                 Instructions.Ldfld(typeof(StardewValley.Crop), "regrowAfterHarvest"),
                 OpCodes.Call, // Netcode
                 OpCodes.Ldc_I4_M1,
-                OpCodes.Bne_Un
+                OpCodes.Bne_Un_S
             );
-            if (ScytheBranchTail.length > 15) throw new Exception("Too many operations in tail of harvestMethod branch");
+            Monitor.Log(ScytheBranchTail.ToString());
+            if (ScytheBranchTail.length > 30) throw new Exception("Too many operations in tail of harvestMethod branch");
 
             // Find the start of the 'drop sunflower seeds' part.
             var DropSunflowerSeeds = FindCode(
