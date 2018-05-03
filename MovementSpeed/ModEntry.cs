@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Harmony;
 using StardewModdingAPI;
-using StardewHack;
-using System.Reflection.Emit;
+using System;
 using System.Reflection;
-using Harmony;
+using System.Reflection.Emit;
 
-namespace MovementSpeed
+namespace StardewHack.MovementSpeed
 {
     
     public class ModConfig {

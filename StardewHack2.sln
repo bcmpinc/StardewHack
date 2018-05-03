@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovementSpeed", "MovementSp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarvestWithScythe", "HarvestWithScythe\HarvestWithScythe.csproj", "{8FF98E39-F06C-493D-8920-4700D2B9D8FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScytheExp", "ScytheExp\ScytheExp.csproj", "{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrassGrowth", "GrassGrowth\GrassGrowth.csproj", "{D08EA239-6DB2-4E7D-94AA-C691D78291FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixScytheExp", "FixScytheExp\FixScytheExp.csproj", "{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

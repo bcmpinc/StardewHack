@@ -1,8 +1,7 @@
 ﻿using System;
-using StardewHack;
 using System.Reflection.Emit;
 
-namespace GrassGrowth
+namespace StardewHack.GrassGrowth
 {
     public class ModEntry : Hack
     {

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D08EA239-6DB2-4E7D-94AA-C691D78291FB}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>GrassGrowth</RootNamespace>
+    <RootNamespace>StardewHack.GrassGrowth</RootNamespace>
     <AssemblyName>GrassGrowth</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

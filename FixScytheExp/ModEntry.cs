@@ -1,14 +1,13 @@
 ﻿using System;
-using StardewHack;
 using System.Reflection.Emit;
 
-namespace ScytheExp
+namespace StardewHack.FixScytheExp
 {
     public class ModEntry : Hack
     {
-        // Note that in StardewValley.Crop.harvest(...) method, the branch
+        // Note: in StardewValley.Crop.harvest(...) method, the branch
         //   if (this.harvestMethod == 1) {
-        // Does not contain code to reward Exp points.
+        // does not contain code to reward Exp points.
 
         [BytecodePatch(typeof(StardewValley.Crop), "harvest")]
         void Crop_harvest() {

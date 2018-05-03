@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{81C6668E-076E-43D7-8061-BA3DFAF177E8}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MovementSpeed</RootNamespace>
+    <RootNamespace>StardewHack.MovementSpeed</RootNamespace>
     <AssemblyName>MovementSpeed</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

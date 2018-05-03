@@ -8,6 +8,6 @@
    "MinimumApiVersion": "2.0",
    "UpdateKeys": [],
    "Dependencies": [{
-      "UniqueID": "bcmpinc.ScytheExp"
+      "UniqueID": "bcmpinc.FixScytheExp"
    }]
 }

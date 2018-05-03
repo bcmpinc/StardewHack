@@ -1,5 +1,4 @@
 ﻿using System;
-using Harmony;
 using System.Reflection.Emit;
 
 namespace StardewHack.FixAnimalTools

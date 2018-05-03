@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8FF98E39-F06C-493D-8920-4700D2B9D8FA}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>HarvestWithScythe</RootNamespace>
+    <RootNamespace>StardewHack.HarvestWithScythe</RootNamespace>
     <AssemblyName>HarvestWithScythe</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

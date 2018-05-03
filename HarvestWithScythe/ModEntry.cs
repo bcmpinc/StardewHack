@@ -1,12 +1,15 @@
 ﻿using System;
-using StardewHack;
 using System.Reflection.Emit;
-using System.Reflection;
 
-namespace HarvestWithScythe
+namespace StardewHack.HarvestWithScythe
 {
     public class ModEntry : Hack
     {
+        // Note: the branch
+        //   if (this.forageCrop)
+        // refers mainly to the crop spring union.
+        // Harvesting those with scythe behaves a bit odd.
+
         [BytecodePatch(typeof(StardewValley.TerrainFeatures.HoeDirt), "performToolAction")]
         void HoeDirt_performToolAction() {
             // Find the first harvestMethod==1 check.

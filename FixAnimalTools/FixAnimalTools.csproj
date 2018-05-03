@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8EFA6AE4-B627-4E1A-9897-08357E4BC0A9}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>FixAnimalTools</RootNamespace>
+    <RootNamespace>StardewHack.FixAnimalTools</RootNamespace>
     <AssemblyName>FixAnimalTools</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

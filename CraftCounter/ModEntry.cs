@@ -1,8 +1,4 @@
-﻿using Harmony;
-using StardewModdingAPI;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System;
 using System.Reflection.Emit;
 
 namespace StardewHack.CraftCounter
