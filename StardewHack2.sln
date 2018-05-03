@@ -17,12 +17,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrassGrowth", "GrassGrowth\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixScytheExp", "FixScytheExp\FixScytheExp.csproj", "{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TilledSoilDecay", "TilledSoilDecay\TilledSoilDecay.csproj", "{4467451C-8BB0-45A0-BF7D-440FA46332ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4467451C-8BB0-45A0-BF7D-440FA46332ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4467451C-8BB0-45A0-BF7D-440FA46332ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4467451C-8BB0-45A0-BF7D-440FA46332ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4467451C-8BB0-45A0-BF7D-440FA46332ED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57D4316C-C97C-41ED-A1E8-4737AE1D66AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57D4316C-C97C-41ED-A1E8-4737AE1D66AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57D4316C-C97C-41ED-A1E8-4737AE1D66AA}.Release|Any CPU.ActiveCfg = Release|Any CPU

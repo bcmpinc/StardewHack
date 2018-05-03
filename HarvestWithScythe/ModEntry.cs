@@ -36,7 +36,7 @@ namespace StardewHack.HarvestWithScythe
                 HarvestMethodCheck[1],
                 HarvestMethodCheck[2],
                 Instructions.Ldc_I4_1(),
-                Instructions.Call_set(typeof(Netcode.NetFieldBase<int, Netcode.NetInt>), "Value")
+                Instructions.Call_set(typeof(Netcode.NetInt), "Value")
             );
 
             // Set harvestMethod=damage after the following crop!=null check.
@@ -51,7 +51,7 @@ namespace StardewHack.HarvestWithScythe
                 HarvestMethodCheck[1],
                 HarvestMethodCheck[2],
                 Instructions.Ldarg_2(),
-                Instructions.Call_set(typeof(Netcode.NetFieldBase<int, Netcode.NetInt>), "Value")
+                Instructions.Call_set(typeof(Netcode.NetInt), "Value")
             );
         }
 

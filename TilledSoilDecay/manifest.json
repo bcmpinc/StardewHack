@@ -1,0 +1,10 @@
+﻿{
+   "Name": "Tilled Soil Decay",
+   "Author": "bcmpinc",
+   "Version": "0.0.1",
+   "Description": "Delays decay of watered tilled soil.",
+   "UniqueID": "bcmpinc.TilledSoilDecay",
+   "EntryDll": "TilledSoilDecay.dll",
+   "MinimumApiVersion": "2.0",
+   "UpdateKeys": []
+}

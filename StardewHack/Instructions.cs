@@ -8,9 +8,21 @@ namespace StardewHack
     public static class Instructions
     {
         // B
+        public static CodeInstruction Bge    (CodeInstruction target) => new CodeInstruction(OpCodes.Bge,     Hack.attachLabel(target));
+        public static CodeInstruction Bgt    (CodeInstruction target) => new CodeInstruction(OpCodes.Bgt,     Hack.attachLabel(target));
+        public static CodeInstruction Ble    (CodeInstruction target) => new CodeInstruction(OpCodes.Ble,     Hack.attachLabel(target));
+        public static CodeInstruction Blt    (CodeInstruction target) => new CodeInstruction(OpCodes.Blt,     Hack.attachLabel(target));
         public static CodeInstruction Br     (CodeInstruction target) => new CodeInstruction(OpCodes.Br,      Hack.attachLabel(target));
         public static CodeInstruction Brfalse(CodeInstruction target) => new CodeInstruction(OpCodes.Brfalse, Hack.attachLabel(target));
         public static CodeInstruction Brtrue (CodeInstruction target) => new CodeInstruction(OpCodes.Brtrue,  Hack.attachLabel(target));
+
+        public static CodeInstruction Bge    (Label target) => new CodeInstruction(OpCodes.Bge,     target);
+        public static CodeInstruction Bgt    (Label target) => new CodeInstruction(OpCodes.Bgt,     target);
+        public static CodeInstruction Ble    (Label target) => new CodeInstruction(OpCodes.Ble,     target);
+        public static CodeInstruction Blt    (Label target) => new CodeInstruction(OpCodes.Blt,     target);
+        public static CodeInstruction Br     (Label target) => new CodeInstruction(OpCodes.Br,      target);
+        public static CodeInstruction Brfalse(Label target) => new CodeInstruction(OpCodes.Brfalse, target);
+        public static CodeInstruction Brtrue (Label target) => new CodeInstruction(OpCodes.Brtrue,  target);
 
         // C
         public static CodeInstruction Call        (Type type, string method, params Type[] parameters) => new CodeInstruction(OpCodes.Call,     GetMethod(type, method, parameters));
@@ -19,6 +31,12 @@ namespace StardewHack
         public static CodeInstruction Callvirt_get(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetGetMethod());
         public static CodeInstruction Call_set    (Type type, string method) => new CodeInstruction(OpCodes.Call,     GetProperty(type, method).GetSetMethod());
         public static CodeInstruction Callvirt_set(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetSetMethod());
+
+        // D
+        public static CodeInstruction Dup() => new CodeInstruction(OpCodes.Dup);
+
+        // I
+        public static CodeInstruction Isinst(Type type) => new CodeInstruction(OpCodes.Isinst, type);
 
         // L
         public static CodeInstruction Ldarg_0() => new CodeInstruction(OpCodes.Ldarg_0);
@@ -53,9 +71,12 @@ namespace StardewHack
         // N
         public static CodeInstruction Nop() => new CodeInstruction(OpCodes.Nop);
 
+        // P
+        public static CodeInstruction Pop() => new CodeInstruction(OpCodes.Pop);
+
         // R
         public static CodeInstruction Ret() => new CodeInstruction(OpCodes.Ret);
-
+        
         // S
         public static CodeInstruction Starg_S(byte index) => new CodeInstruction(OpCodes.Starg_S, index);
 
@@ -63,6 +84,8 @@ namespace StardewHack
         public static CodeInstruction Stsfld(Type type, string field) => new CodeInstruction(OpCodes.Stsfld, GetField(type, field));
         public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);
         public static CodeInstruction Stloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Stloc_S, local);
+
+        public static CodeInstruction Sub() => new CodeInstruction(OpCodes.Sub);
 
 
         /** Retrieves the field definition with the specified name. */

@@ -102,6 +102,12 @@ namespace StardewHack
             length += new_insts.Length;
         }
 
+        /** Inserts the specified list of instructions at the given position. */
+        public void Insert(int i, params CodeInstruction[] new_insts) {
+            insts.InsertRange(start + i, new_insts);
+            length += new_insts.Length;
+        }
+
         /** Inserts the specified list of instructions after this range. */
         public void Append(params CodeInstruction[] new_insts) {
             insts.InsertRange(start + length, new_insts);

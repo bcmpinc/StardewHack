@@ -3,15 +3,16 @@ using StardewModdingAPI;
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using Newtonsoft.Json.Linq;
 
 namespace StardewHack.MovementSpeed
 {
     
     public class ModConfig {
         /** The movement speed is multiplied by this amount. The default is 1.5, meaning 50% faster movement. */
-        public double MovementSpeedMultiplier { get; set; } = 1.5;
+        public double MovementSpeedMultiplier = 1.5;
         /** Time required for charging the hoe or watering can in ms. Normally this is 600ms. The default is 600/1.5 = 400, meaning 50% faster charging. */
-        public int ToolChargeDelay { get; set; } = 400;
+        public int ToolChargeDelay = 400;
     }
 
     public class ModEntry : Hack
