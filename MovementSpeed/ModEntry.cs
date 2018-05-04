@@ -3,7 +3,6 @@ using StardewModdingAPI;
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using Newtonsoft.Json.Linq;
 
 namespace StardewHack.MovementSpeed
 {
@@ -25,7 +24,7 @@ namespace StardewHack.MovementSpeed
         }
 
         // Add a multiplier to the movement speed.
-        [BytecodePatch(typeof(StardewValley.Farmer), "getMovementSpeed")]
+        [BytecodePatch("StardewValley.Farmer::getMovementSpeed")]
         void Farmer_getMovementSpeed() {
             if (config.MovementSpeedMultiplier == 1) return;
             FindCodeLast(
@@ -37,7 +36,7 @@ namespace StardewHack.MovementSpeed
         }
 
         // Change (reduce) the time it takses to charge tools (hoe & water can).
-        [BytecodePatch(typeof(StardewValley.Game1), "UpdateControlInput")]
+        [BytecodePatch("StardewValley.Game1::UpdateControlInput")]
         void Game1_UpdateControlInput() {
             // StardewModdingAPI changed this method and moved its original code into a delegate, hence the chain patching.
             MethodInfo method = (MethodInfo)FindCode(

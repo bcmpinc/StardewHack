@@ -9,7 +9,7 @@ namespace StardewHack.FixScytheExp
         //   if (this.harvestMethod == 1) {
         // does not contain code to reward Exp points.
 
-        [BytecodePatch(typeof(StardewValley.Crop), "harvest")]
+        [BytecodePatch("StardewValley.Crop::harvest")]
         void Crop_harvest() {
             // Find tail of harvestMethod==1 branch
             var ScytheBranchTail = FindCode(

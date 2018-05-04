@@ -10,7 +10,7 @@ namespace StardewHack.HarvestWithScythe
         // refers mainly to the crop spring union.
         // Harvesting those with scythe behaves a bit odd.
 
-        [BytecodePatch(typeof(StardewValley.TerrainFeatures.HoeDirt), "performToolAction")]
+        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performToolAction")]
         void HoeDirt_performToolAction() {
             // Find the first harvestMethod==1 check.
             var HarvestMethodCheck = FindCode(
@@ -46,11 +46,11 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldfld(typeof(StardewValley.Crop), "dead"),
                 OpCodes.Call, // Netcode
                 OpCodes.Brfalse_S
-            ).Append(
+            ).Prepend(
                 HarvestMethodCheck[0],
                 HarvestMethodCheck[1],
                 HarvestMethodCheck[2],
-                Instructions.Ldarg_2(),
+                Instructions.Ldarg_2(), // damage
                 Instructions.Call_set(typeof(Netcode.NetInt), "Value")
             );
         }

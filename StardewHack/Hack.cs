@@ -71,12 +71,13 @@ namespace StardewHack
                 typeof(Hack),
                 true
             );
+
             ILGenerator il = proxy.GetILGenerator();
             // hack.Prepare(instructions, info);
             il.Emit(OpCodes.Ldsfld, instance);
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method}.");
+            il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method} in {method.DeclaringType.FullName}.");
             il.Emit(OpCodes.Callvirt, prepare);
             // hack.{patch}();
             il.Emit(OpCodes.Ldsfld, instance);

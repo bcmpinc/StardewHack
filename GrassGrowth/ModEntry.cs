@@ -6,7 +6,7 @@ namespace StardewHack.GrassGrowth
     public class ModEntry : Hack
     {
         // Change the milk pail such that it doesn't do anything while no animal is in range. 
-        [BytecodePatch(typeof(StardewValley.GameLocation), "growWeedGrass")]
+        [BytecodePatch("StardewValley.GameLocation::growWeedGrass")]
         void GameLocation_growWeedGrass() {
             var growWeedGrass = BeginCode();
             // For each ofthe 4 directions

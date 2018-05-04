@@ -5,8 +5,8 @@ namespace StardewHack.CraftCounter
 {
     public class ModEntry : Hack
     {
-        [BytecodePatch(typeof(StardewValley.CraftingRecipe),"getDescriptionHeight")]
-        [BytecodePatch(typeof(StardewValley.CraftingRecipe),"drawRecipeDescription")]
+        [BytecodePatch("StardewValley.CraftingRecipe::getDescriptionHeight")]
+        [BytecodePatch("StardewValley.CraftingRecipe::drawRecipeDescription")]
         void AddTimesCrafted() {
             var range = FindCode(
                 OpCodes.Ldarg_0,

@@ -5,7 +5,7 @@ namespace StardewHack.AlwaysScrollMap
 {
     public class ModEntry : Hack
     {
-        [BytecodePatch(typeof(StardewValley.Game1),"UpdateViewPort")]
+        [BytecodePatch("StardewValley.Game1::UpdateViewPort")]
         void Game1_UpdateViewPort()
         {
             var range = FindCode(

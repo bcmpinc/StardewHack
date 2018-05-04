@@ -6,7 +6,7 @@ namespace StardewHack.FixAnimalTools
     public class ModEntry : Hack
     {
         // Change the milk pail such that it doesn't do anything while no animal is in range. 
-        [BytecodePatch(typeof(StardewValley.Tools.MilkPail), "beginUsing")]
+        [BytecodePatch("StardewValley.Tools.MilkPail::beginUsing")]
         void MilkPail_beginUsing() {
             // Find the first animal != null check.
             var hasAnimal = FindCode(
@@ -29,7 +29,7 @@ namespace StardewHack.FixAnimalTools
         }
 
         // Change the shears such that it doesn't do anything while no animal is in range. 
-        [BytecodePatch(typeof(StardewValley.Tools.Shears),"beginUsing")]
+        [BytecodePatch("StardewValley.Tools.Shears::beginUsing")]
         void Shears_beginUsing() {
             var halt = FindCode(
                 OpCodes.Ldarg_S,

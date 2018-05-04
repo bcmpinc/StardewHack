@@ -28,7 +28,7 @@ namespace StardewHack.TilledSoilDecay
             base.Entry(helper);
         }
 
-        [BytecodePatch(typeof(StardewValley.Farm), "DayUpdate")]
+        [BytecodePatch("StardewValley.Farm::DayUpdate")]
         void Farm_DayUpdate() {
             //var crop = GetField("StardewValley.TerrainFeatures.HoeDirt::crop");
             //var state = GetField("StardewValley.TerrainFeatures.HoeDirt::state");
@@ -68,7 +68,7 @@ namespace StardewHack.TilledSoilDecay
 
         // To support the decay delay, we will use the HoeDirt.state variable to track how many days the patch has gone without being watered.
         // For example: 'state == -3' indicates that the tile hasn't been watered in the past 3 days. 
-        [BytecodePatch(typeof(StardewValley.TerrainFeatures.HoeDirt), "dayUpdate")]
+        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::dayUpdate")]
         void HoeDirt_dayUpdate() {
             if (config.DecayDelay > 0 || config.DecayDelayFirstOfMonth > 0) {
                 // Find: if (crop != null)
