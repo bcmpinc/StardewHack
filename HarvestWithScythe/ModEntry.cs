@@ -55,6 +55,53 @@ namespace StardewHack.HarvestWithScythe
             );
         }
 
+        [BytecodePatch("StardewValley.Object::performToolAction")]
+        void Object_performToolAction() {
+            var code = BeginCode();
+            code.Prepend(
+                // Check if Tool is scythe.
+                Instructions.Ldarg_1(),
+                Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
+                Instructions.Brfalse(code[0]),
+                Instructions.Ldarg_1(),
+                Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
+                Instructions.Callvirt_get(typeof(StardewValley.Tool), "BaseName"),
+                Instructions.Ldstr("Scythe"),
+                Instructions.Callvirt(typeof(System.String), "Equals", typeof(string)),
+                Instructions.Brfalse(code[0]),
+                // Hook
+                Instructions.Ldarg_0(),
+                Instructions.Ldarg_1(),
+                Instructions.Ldarg_2(),
+                Instructions.Call(typeof(ModEntry), "ScytheForage", typeof(StardewValley.Object), typeof(StardewValley.Tool), typeof(StardewValley.GameLocation)),
+                Instructions.Ret()
+            );
+        }
+
+        public static bool ScytheForage(StardewValley.Object o, StardewValley.Tool t, StardewValley.GameLocation loc) {
+            if (o.isSpawnedObject && !o.questItem && o.isForage(loc)) {
+                var who = t.getLastFarmerToUse();
+                var vector = o.TileLocation; 
+                int quality = o.quality;
+                Random random = new Random((int)StardewValley.Game1.uniqueIDForThisGame / 2 + (int)StardewValley.Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
+                if (who.professions.Contains(16)) {
+                    quality = 4;
+                } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 30)) {
+                    quality = 2;
+                } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 15)) {
+                    quality = 1;
+                }
+                who.gainExperience(2, 7);
+                StardewValley.Game1.createObjectDebris(o.ParentSheetIndex, (int)vector.X, (int)vector.Y, -1, quality, 1, loc);
+                StardewValley.Game1.stats.ItemsForaged += 1;
+                if (who.professions.Contains(13) && random.NextDouble() < 0.2) {
+                    StardewValley.Game1.createObjectDebris(o.ParentSheetIndex, (int)vector.X, (int)vector.Y, -1, quality, 1, loc);
+                    who.gainExperience(2, 7);
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }
 
