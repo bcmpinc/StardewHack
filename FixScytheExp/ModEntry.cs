@@ -26,7 +26,7 @@ namespace StardewHack.FixScytheExp
                 OpCodes.Ldc_I4_M1,
                 OpCodes.Bne_Un_S
             );
-            Monitor.Log(ScytheBranchTail.ToString());
+            // Monitor.Log(ScytheBranchTail.ToString());
             if (ScytheBranchTail.length > 30) throw new Exception("Too many operations in tail of harvestMethod branch");
 
             // Find the start of the 'drop sunflower seeds' part.

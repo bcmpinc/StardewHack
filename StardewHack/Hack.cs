@@ -41,7 +41,7 @@ namespace StardewHack
 
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
-            Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Info);
+            Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
             harmony = HarmonyInstance.Create(UniqueID);
 
             // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
@@ -76,7 +76,7 @@ namespace StardewHack
             string info = $"Applying patch {instance.patch.Name} to {instance.method} in {instance.method.DeclaringType.FullName}.";
             instance.generator = generator;
             instance.codes = new List<CodeInstruction>(instructions);
-            instance.Monitor.Log(info);
+            instance.Monitor.Log(info, LogLevel.Trace);
             instance.patch.Invoke(instance, null);
             return instance.codes;
         }
