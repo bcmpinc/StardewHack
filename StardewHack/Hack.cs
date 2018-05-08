@@ -30,6 +30,8 @@ namespace StardewHack
         #pragma warning disable 414
         /** Reference used by dynamic proxy static methods. */
         private static Hack instance;
+        private MethodInfo method;
+        private MethodInfo patch;
         #pragma warning restore 414
 
         /** Applies the methods annotated with BytecodePatch defined in this class. */
@@ -59,46 +61,24 @@ namespace StardewHack
             var old_generator = this.generator;
             var old_codes = this.codes;
 
-            var prepare = AccessTools.Method(typeof(Hack), "Prepare");
-            var instance = AccessTools.Field(typeof(Hack), "instance");
-            var codes = AccessTools.Property(typeof(Hack), "codes");
+            this.method = method;
+            this.patch = patch;
 
-            // Create patch proxy static method
-            DynamicMethod proxy = new DynamicMethod(
-                $"proxy<{patch.Name}> for {method}", 
-                typeof(IEnumerable<CodeInstruction>), 
-                new Type[]{typeof(ILGenerator), typeof(IEnumerable<CodeInstruction>)},
-                typeof(Hack),
-                true
-            );
-
-            ILGenerator il = proxy.GetILGenerator();
-            // hack.Prepare(instructions, info);
-            il.Emit(OpCodes.Ldsfld, instance);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldstr, $"Applying patch {patch.Name} to {method} in {method.DeclaringType.FullName}.");
-            il.Emit(OpCodes.Callvirt, prepare);
-            // hack.{patch}();
-            il.Emit(OpCodes.Ldsfld, instance);
-            il.Emit(OpCodes.Callvirt, patch);
-            // return hack.codes;
-            il.Emit(OpCodes.Ldsfld, instance);
-            il.Emit(OpCodes.Callvirt, codes.GetGetMethod());
-            il.Emit(OpCodes.Ret);
-
-            // Register patch.
-            harmony.Patch(method, null, null, new HarmonyMethod(proxy.CreateDelegate(typeof(TranspilerSignature)).Method));
+            var apply = AccessTools.Method(typeof(Hack), "ApplyPatch");
+            harmony.Patch(method, null, null, new HarmonyMethod(apply));
 
             this.generator = old_generator;
             this.codes = old_codes;
         }
 
         /** Called from dynamic proxy method to prepare for patching. */ 
-        private void Prepare(ILGenerator generator, IEnumerable<CodeInstruction> instructions, string info) {
-            this.generator = generator;
-            this.codes = new List<CodeInstruction>(instructions);
-            Monitor.Log(info);
+        private static IEnumerable<CodeInstruction> ApplyPatch(ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
+            string info = $"Applying patch {instance.patch.Name} to {instance.method} in {instance.method.DeclaringType.FullName}.";
+            instance.generator = generator;
+            instance.codes = new List<CodeInstruction>(instructions);
+            instance.Monitor.Log(info);
+            instance.patch.Invoke(instance, null);
+            return instance.codes;
         }
 
         /** Find the first occurance of the given sequence of instructions that follows this range.
