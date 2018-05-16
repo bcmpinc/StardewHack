@@ -8,14 +8,7 @@ namespace StardewHack
     public static class Instructions
     {
         // B
-        public static CodeInstruction Bge    (CodeInstruction target) => new CodeInstruction(OpCodes.Bge,     Hack.attachLabel(target));
-        public static CodeInstruction Bgt    (CodeInstruction target) => new CodeInstruction(OpCodes.Bgt,     Hack.attachLabel(target));
-        public static CodeInstruction Ble    (CodeInstruction target) => new CodeInstruction(OpCodes.Ble,     Hack.attachLabel(target));
-        public static CodeInstruction Blt    (CodeInstruction target) => new CodeInstruction(OpCodes.Blt,     Hack.attachLabel(target));
-        public static CodeInstruction Br     (CodeInstruction target) => new CodeInstruction(OpCodes.Br,      Hack.attachLabel(target));
-        public static CodeInstruction Brfalse(CodeInstruction target) => new CodeInstruction(OpCodes.Brfalse, Hack.attachLabel(target));
-        public static CodeInstruction Brtrue (CodeInstruction target) => new CodeInstruction(OpCodes.Brtrue,  Hack.attachLabel(target));
-
+        // Use Instructions.Br(AttachLabel(CodeInstruction)) to create branch to the given code instruction.
         public static CodeInstruction Bge    (Label target) => new CodeInstruction(OpCodes.Bge,     target);
         public static CodeInstruction Bgt    (Label target) => new CodeInstruction(OpCodes.Bgt,     target);
         public static CodeInstruction Ble    (Label target) => new CodeInstruction(OpCodes.Ble,     target);

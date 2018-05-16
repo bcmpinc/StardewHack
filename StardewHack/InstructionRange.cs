@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using StardewModdingAPI;
 
 namespace StardewHack
 {
@@ -185,14 +186,14 @@ namespace StardewHack
         }
 
         /** Writes the instruction range to console. */
-        public void Print() {
-            Hack.Log("-----");
+        public void Print(IMonitor monitor) {
+            monitor.Log("-----");
             for (int i=0; i<length; i++) {
                 var inst = insts[start+i];
 
                 // Print any labels
                 foreach (var lbl in inst.labels) {
-                    Hack.Log($"LBL_{lbl.GetHashCode()}:");
+                    monitor.Log($"LBL_{lbl.GetHashCode()}:");
                 }
 
                 // Print the operation.
@@ -206,9 +207,9 @@ namespace StardewHack
                 } else {
                     res = inst.ToString();
                 }
-                Hack.Log("  " + res);
+                monitor.Log("  " + res);
             }
-            Hack.Log("-----");
+            monitor.Log("-----");
         }
 
         public CodeInstruction[] ToArray() {

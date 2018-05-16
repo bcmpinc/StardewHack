@@ -14,15 +14,8 @@ namespace StardewHack.MovementSpeed
         public int ToolChargeDelay = 400;
     }
 
-    public class ModEntry : Hack
+    public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
-        ModConfig config;
-
-        public override void Entry(IModHelper helper) {
-            config = helper.ReadConfig<ModConfig>();
-            base.Entry(helper);
-        }
-
         // Add a multiplier to the movement speed.
         [BytecodePatch("StardewValley.Farmer::getMovementSpeed")]
         void Farmer_getMovementSpeed() {

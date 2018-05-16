@@ -13,7 +13,7 @@ namespace StardewHack
         string sig;
         string enabled;
 
-        public bool IsEnabled(Hack hack)
+        public bool IsEnabled(HackBase hack)
         {
             if (enabled == null) return true;
             var method = AccessTools.Method(hack.GetType(), enabled);

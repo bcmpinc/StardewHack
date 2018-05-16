@@ -9,15 +9,8 @@ namespace StardewHack.HarvestWithScythe
         public bool HarvestForage = true;
     }
 
-    public class ModEntry : Hack
+    public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
-        ModConfig config;
-
-        public override void Entry(IModHelper helper) {
-            config = helper.ReadConfig<ModConfig>();
-            base.Entry(helper);
-        }
-
         [BytecodePatch("StardewValley.Crop::harvest")]
         void Crop_harvest_onions() {
             // Find the line:
@@ -34,7 +27,7 @@ namespace StardewHack.HarvestWithScythe
                 // if (this.harvestMethod != 0) {
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
-                Instructions.Brfalse(AddItem[0]),
+                Instructions.Brfalse(AttachLabel(AddItem[0])),
                 // Game1.createObjectDebris (this.indexOfHarvest, xTile, yTile, -1, @object.Quality, 1, null);
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
@@ -117,23 +110,24 @@ namespace StardewHack.HarvestWithScythe
         [BytecodePatch("StardewValley.Object::performToolAction", "HarvestForageEnabled")]
         void Object_performToolAction() {
             var code = BeginCode();
+            Label begin = AttachLabel(code[0]);
             code.Prepend(
                 // Check if Tool is scythe.
                 Instructions.Ldarg_1(),
                 Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
-                Instructions.Brfalse(code[0]),
+                Instructions.Brfalse(begin),
                 Instructions.Ldarg_1(),
                 Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
                 Instructions.Callvirt_get(typeof(StardewValley.Tool), "BaseName"),
                 Instructions.Ldstr("Scythe"),
                 Instructions.Callvirt(typeof(System.String), "Equals", typeof(string)),
-                Instructions.Brfalse(code[0]),
+                Instructions.Brfalse(begin),
                 // Hook
                 Instructions.Ldarg_0(),
                 Instructions.Ldarg_1(),
                 Instructions.Ldarg_2(),
                 Instructions.Call(typeof(ModEntry), "ScytheForage", typeof(StardewValley.Object), typeof(StardewValley.Tool), typeof(StardewValley.GameLocation)),
-                Instructions.Brfalse(code[0]),
+                Instructions.Brfalse(begin),
                 Instructions.Ldc_I4_1(),
                 Instructions.Ret()
             );

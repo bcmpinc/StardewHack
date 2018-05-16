@@ -7,80 +7,37 @@ using System.Reflection.Emit;
 
 namespace StardewHack
 {
-    internal delegate IEnumerable<CodeInstruction> TranspilerSignature(ILGenerator generator, IEnumerable<CodeInstruction> instructions);
-
-    public abstract class Hack : Mod
+    /** Common Hack code */
+    public abstract class HackBase : Mod
     {
+        /** Provides simplified API's for writing mods. */
+        public IModHelper helper { get; private set; }
+
         /** The harmony instance used for patching. */
         public HarmonyInstance harmony { get; private set; }
+
+        /** The method being patched. 
+         * Use only within methods annotated with BytecodePatch. 
+         */
+        public MethodBase original { get; internal set; }
 
         /** The code that is being patched. 
          * Use only within methods annotated with BytecodePatch. 
          */
-        public List<CodeInstruction> codes { get; private set; }
+        public List<CodeInstruction> instructions { get; internal set; }
 
         /** The generator used for patching. 
          * Use only within methods annotated with BytecodePatch. 
          */
-        public ILGenerator generator { get; private set; }
+        public ILGenerator generator { get; internal set; }
 
-        /** Provides simpliied API's for writing mods. */
-        public IModHelper helper { get; private set; }
-
-        #pragma warning disable 414
-        /** Reference used by dynamic proxy static methods. */
-        private static Hack instance;
-        private MethodInfo method;
-        private MethodInfo patch;
-        #pragma warning restore 414
-
-        /** Applies the methods annotated with BytecodePatch defined in this class. */
         public override void Entry(IModHelper helper) {
             this.helper = helper;
-            Hack.instance = this;
 
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
             Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
             harmony = HarmonyInstance.Create(UniqueID);
-
-            // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
-            var methods = this.GetType().GetMethods(AccessTools.all);
-            foreach (MethodInfo patch in methods) {
-                var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
-                foreach (var bp in bytecode_patches) {
-                    if (bp.IsEnabled(this)) {
-                        // Apply the patch to the method specified in the annotation.
-                        ChainPatch(bp.GetMethod(), patch);
-                    }
-                }
-            }
-        }
-
-        /** Applies the given patch to the given method. 
-         * This method can be called from within a patch method, for example to patch delegate functions. */
-        public void ChainPatch(MethodInfo method, MethodInfo patch) {
-            var old_generator = this.generator;
-            var old_codes = this.codes;
-
-            this.method = method;
-            this.patch = patch;
-
-            var apply = AccessTools.Method(typeof(Hack), "ApplyPatch");
-            harmony.Patch(method, null, null, new HarmonyMethod(apply));
-
-            this.generator = old_generator;
-            this.codes = old_codes;
-        }
-
-        /** Called by harmony for patching. */ 
-        private static IEnumerable<CodeInstruction> ApplyPatch(ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
-            string info = $"Applying patch {instance.patch.Name} to {instance.method} in {instance.method.DeclaringType.FullName}.";
-            instance.generator = generator;
-            instance.codes = new List<CodeInstruction>(instructions);
-            instance.Monitor.Log(info, LogLevel.Trace);
-            instance.patch.Invoke(instance, null);
-            return instance.codes;
         }
 
         /** Find the first occurance of the given sequence of instructions that follows this range.
@@ -92,32 +49,121 @@ namespace StardewHack
          *  - null: always matches.
          */
         public InstructionRange FindCode(params Object[] contains) {
-            return new InstructionRange(codes, contains);
+            return new InstructionRange(instructions, contains);
         }
 
         /** Find the last occurance of the given sequence of instructions that follows this range.
          * See FindCode() for how the matching is performed.
          */
         public InstructionRange FindCodeLast(params Object[] contains) {
-            return new InstructionRange(codes, contains, codes.Count, -1);
+            return new InstructionRange(instructions, contains, instructions.Count, -1);
         }
 
         public InstructionRange BeginCode() {
-            return new InstructionRange(codes, 0, 0);
+            return new InstructionRange(instructions, 0, 0);
         }
 
         public InstructionRange EndCode() {
-            return new InstructionRange(codes, codes.Count, 0);
+            return new InstructionRange(instructions, instructions.Count, 0);
         }
 
-        public static void Log(string message, LogLevel level=LogLevel.Debug) {
-            instance.Monitor.Log(message, level);
+        public InstructionRange AllCode() {
+            return new InstructionRange(instructions, 0, instructions.Count);
         }
 
-        public static Label attachLabel(CodeInstruction target) {
-            var lbl = instance.generator.DefineLabel();
+        public Label AttachLabel(CodeInstruction target) {
+            var lbl = generator.DefineLabel();
             target.labels.Add(lbl);
             return lbl;
+        }
+    }
+
+    // I 'love' generics. :P
+    // Used to have a separate static instance variable per type T.
+    public abstract class Hack<T> : HackBase where T : Hack<T>
+    {
+        /** A reference to this class's instance. */
+        static T instance;
+
+        /** Maps the method being patched to the method doing said patching. */
+        static Dictionary<MethodBase, MethodInfo> patchmap = new Dictionary<MethodBase, MethodInfo>();
+
+        /** A stack to allow patches to trigger additional patches. 
+         * This is necessary when dealing with delegates. */
+        static Stack<MethodBase> to_be_patched = new Stack<MethodBase>();
+
+        /** Applies the methods annotated with BytecodePatch defined in this class. */
+        public override void Entry(IModHelper helper) {
+            if (typeof(T) != this.GetType()) throw new Exception($"The type of this ({this.GetType()}) must be the same as the generic argument T ({typeof(T)}).");
+            base.Entry(helper);
+            instance = (T)this;
+
+            // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
+            var methods = typeof(T).GetMethods(AccessTools.all);
+            var apply = AccessTools.Method(typeof(Hack<T>), "ApplyPatch");
+            foreach (MethodInfo patch in methods) {
+                var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
+                foreach (var bp in bytecode_patches) {
+                    if (bp.IsEnabled(this)) {
+                        // Add the patch to the to_be_patched stack.
+                        ChainPatch(bp.GetMethod(), patch);
+                    }
+                }
+                // Apply the patch to the method specified in the annotation.
+                while (to_be_patched.Count > 0) {
+                    var method = to_be_patched.Pop();
+                    harmony.Patch(method, null, null, new HarmonyMethod(apply));
+                }
+            }
+        }
+
+        /** Applies the given patch to the given method. 
+         * This method can be called from within a patch method, for example to patch delegate functions. */
+        public void ChainPatch(MethodInfo method, MethodInfo patch) {
+            if (patchmap.ContainsKey(method)) {
+                throw new Exception($"Can't apply patch {patch} to {method}, because it is already patched by {patchmap[method]}.");
+            }
+            patchmap[method] = patch;
+            to_be_patched.Push(method);
+        }
+
+        /** Called by harmony to apply a patch. */ 
+        private static IEnumerable<CodeInstruction> ApplyPatch(MethodBase original, ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
+            // Set the patch's references to this method's arguments.
+            instance.original = original;
+            instance.generator = generator;
+            instance.instructions = new List<CodeInstruction>(instructions);
+
+            // Obtain the patch method
+            var patch = patchmap[original];
+
+            // Print info 
+            string info = $"Applying patch {patch.Name} to {original} in {original.DeclaringType.FullName}.";
+            instance.Monitor.Log(info, LogLevel.Trace);
+
+            // Apply the patch
+            patch.Invoke(instance, null);
+
+            // Keep a reference to the resulting code.
+            instructions = instance.instructions;
+
+            // Clear the patch's references to this method's arguments.
+            instance.original = null;
+            instance.generator = null;
+            instance.instructions = null;
+
+            // Return the resulting code.
+            return instructions;
+        }
+    }
+
+    public abstract class HackWithConfig<T, C> : Hack<T> where T : HackWithConfig<T, C> where C : class, new()
+    {
+        public C config;
+
+        public override void Entry(IModHelper helper) {
+            config = helper.ReadConfig<C>();
+            base.Entry(helper);
         }
     }
 }

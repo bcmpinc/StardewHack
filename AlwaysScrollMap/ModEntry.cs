@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack.AlwaysScrollMap
 {
-    public class ModEntry : Hack
+    public class ModEntry : Hack<ModEntry>
     {
         [BytecodePatch("StardewValley.Game1::UpdateViewPort")]
         void Game1_UpdateViewPort()

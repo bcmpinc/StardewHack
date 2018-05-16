@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack.CraftCounter
 {
-    public class ModEntry : Hack
+    public class ModEntry : Hack<ModEntry>
     {
         [BytecodePatch("StardewValley.CraftingRecipe::getDescriptionHeight")]
         [BytecodePatch("StardewValley.CraftingRecipe::drawRecipeDescription")]

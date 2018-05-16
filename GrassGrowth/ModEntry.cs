@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack.GrassGrowth
 {
-    public class ModEntry : Hack
+    public class ModEntry : Hack<ModEntry>
     {
         // Change the milk pail such that it doesn't do anything while no animal is in range. 
         [BytecodePatch("StardewValley.GameLocation::growWeedGrass")]

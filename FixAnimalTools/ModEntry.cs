@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack.FixAnimalTools
 {
-    public class ModEntry : Hack
+    public class ModEntry : Hack<ModEntry>
     {
         // Change the milk pail such that it doesn't do anything while no animal is in range. 
         [BytecodePatch("StardewValley.Tools.MilkPail::beginUsing")]
@@ -18,7 +18,7 @@ namespace StardewHack.FixAnimalTools
                 // if (this.animal == null) {
                 hasAnimal[0],
                 hasAnimal[1],
-                Instructions.Brtrue(hasAnimal[3]),
+                Instructions.Brtrue(AttachLabel(hasAnimal[3])),
                 //    who.forceCanMove();
                 Instructions.Ldarg_S(4),
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "forceCanMove"),
@@ -40,7 +40,7 @@ namespace StardewHack.FixAnimalTools
                 // if (this.animal == null) {
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.Tools.Shears), "animal"),
-                Instructions.Brtrue(halt[1]),
+                Instructions.Brtrue(AttachLabel(halt[1])),
                 //    who.forceCanMove();
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "forceCanMove"),
                 //    return;

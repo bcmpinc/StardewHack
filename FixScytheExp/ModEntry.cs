@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace StardewHack.FixScytheExp
 {
-    public class ModEntry : Hack
+    public class ModEntry : Hack<ModEntry>
     {
         // Note: in StardewValley.Crop.harvest(...) method, the branch
         //   if (this.harvestMethod == 1) {
@@ -49,7 +49,7 @@ namespace StardewHack.FixScytheExp
                 Instructions.Ldc_I4_0(),
                 Instructions.Stloc_S((LocalBuilder)DropAmount[1].operand),
                 // Jump to the 'drop subflower seeds' part.
-                Instructions.Br(DropSunflowerSeeds[0])
+                Instructions.Br(AttachLabel(DropSunflowerSeeds[0]))
             );
         }
     }

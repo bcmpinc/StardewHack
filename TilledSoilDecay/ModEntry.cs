@@ -19,15 +19,8 @@ namespace StardewHack.TilledSoilDecay
         public int DecayDelayFirstOfMonth = 1;
     }
 
-    public class ModEntry : Hack
+    public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
-        ModConfig config;
-
-        public override void Entry(IModHelper helper) {
-            config = helper.ReadConfig<ModConfig>();
-            base.Entry(helper);
-        }
-
         [BytecodePatch("StardewValley.Farm::DayUpdate")]
         void Farm_DayUpdate() {
             //var crop = GetField("StardewValley.TerrainFeatures.HoeDirt::crop");
@@ -76,17 +69,18 @@ namespace StardewHack.TilledSoilDecay
         void HoeDirt_dayUpdate() {
             // Find: if (crop != null)
             var dayUpdate = BeginCode();
+            var begin = AttachLabel(dayUpdate[0]);
             dayUpdate.Prepend(
                 // if (crop == null 
                 Instructions.Ldarg_0(),
                 Instructions.Callvirt_get(typeof(StardewValley.TerrainFeatures.HoeDirt), "crop"),
-                Instructions.Brtrue(dayUpdate[0]),
+                Instructions.Brtrue(begin),
                 //   && state <= 0) {
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
                 Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
                 Instructions.Ldc_I4_0(),
-                Instructions.Bgt(dayUpdate[0]),
+                Instructions.Bgt(begin),
                 //   state--;
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
