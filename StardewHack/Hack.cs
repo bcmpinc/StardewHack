@@ -73,7 +73,7 @@ namespace StardewHack
             this.codes = old_codes;
         }
 
-        /** Called from dynamic proxy method to prepare for patching. */ 
+        /** Called by harmony for patching. */ 
         private static IEnumerable<CodeInstruction> ApplyPatch(ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
             string info = $"Applying patch {instance.patch.Name} to {instance.method} in {instance.method.DeclaringType.FullName}.";
             instance.generator = generator;

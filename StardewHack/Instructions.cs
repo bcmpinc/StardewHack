@@ -61,7 +61,13 @@ namespace StardewHack
 
         public static CodeInstruction Ldfld (Type type, string field) => new CodeInstruction(OpCodes.Ldfld,  GetField(type, field));
         public static CodeInstruction Ldsfld(Type type, string field) => new CodeInstruction(OpCodes.Ldsfld, GetField(type, field));
+        public static CodeInstruction Ldloc_0() => new CodeInstruction(OpCodes.Ldloc_0);
+        public static CodeInstruction Ldloc_1() => new CodeInstruction(OpCodes.Ldloc_1);
+        public static CodeInstruction Ldloc_2() => new CodeInstruction(OpCodes.Ldloc_2);
+        public static CodeInstruction Ldloc_3() => new CodeInstruction(OpCodes.Ldloc_3);
+        public static CodeInstruction Ldloc  (byte index) => new CodeInstruction(OpCodes.Ldloc,   index);
         public static CodeInstruction Ldloc_S(byte index) => new CodeInstruction(OpCodes.Ldloc_S, index);
+        public static CodeInstruction Ldloc  (LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc,   local);
         public static CodeInstruction Ldloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc_S, local);
         public static CodeInstruction Ldstr(string text) => new CodeInstruction(OpCodes.Ldstr, text);
 
