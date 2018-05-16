@@ -49,5 +49,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="manifest.json" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
