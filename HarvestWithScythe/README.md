@@ -5,9 +5,8 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 * [Fix Scythe Exp](/FixScytheExp): for making sure that you earn farming experience when using the scythe. It also makes sure that harvesting sunflowers with a scythe also drops seeds.
 
 ## Config
-none
+* HarvestForage: Should the game be patched to allow harvesting forage with the scythe?
 
 ## Known bugs
-* Cutting weeds with the scythe is currently broken.
 * Harvesting spring unions with scythe puts them directly into your inventory.
 

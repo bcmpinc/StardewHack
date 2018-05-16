@@ -66,37 +66,39 @@ namespace StardewHack.TilledSoilDecay
             }
         }
 
+        public bool UsesDelays() {
+            return config.DecayDelay > 0 || config.DecayDelayFirstOfMonth > 0;
+        }
+
         // To support the decay delay, we will use the HoeDirt.state variable to track how many days the patch has gone without being watered.
         // For example: 'state == -3' indicates that the tile hasn't been watered in the past 3 days. 
-        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::dayUpdate")]
+        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::dayUpdate", "UsesDelays")]
         void HoeDirt_dayUpdate() {
-            if (config.DecayDelay > 0 || config.DecayDelayFirstOfMonth > 0) {
-                // Find: if (crop != null)
-                var dayUpdate = BeginCode();
-                dayUpdate.Prepend(
-                    // if (crop == null 
-                    Instructions.Ldarg_0(),
-                    Instructions.Callvirt_get(typeof(StardewValley.TerrainFeatures.HoeDirt), "crop"),
-                    Instructions.Brtrue(dayUpdate[0]),
-                    //   && state <= 0) {
-                    Instructions.Ldarg_0(),
-                    Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
-                    Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
-                    Instructions.Ldc_I4_0(),
-                    Instructions.Bgt(dayUpdate[0]),
-                    //   state--;
-                    Instructions.Ldarg_0(),
-                    Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
-                    Instructions.Dup(),
-                    Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
-                    Instructions.Ldc_I4_1(),
-                    Instructions.Sub(),
-                    Instructions.Call_set(typeof(Netcode.NetInt), "Value"),
-                    //   return;
-                    Instructions.Ret()
-                    // }
-                );
-            }
+            // Find: if (crop != null)
+            var dayUpdate = BeginCode();
+            dayUpdate.Prepend(
+                // if (crop == null 
+                Instructions.Ldarg_0(),
+                Instructions.Callvirt_get(typeof(StardewValley.TerrainFeatures.HoeDirt), "crop"),
+                Instructions.Brtrue(dayUpdate[0]),
+                //   && state <= 0) {
+                Instructions.Ldarg_0(),
+                Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
+                Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
+                Instructions.Ldc_I4_0(),
+                Instructions.Bgt(dayUpdate[0]),
+                //   state--;
+                Instructions.Ldarg_0(),
+                Instructions.Ldfld(typeof(StardewValley.TerrainFeatures.HoeDirt), "state"),
+                Instructions.Dup(),
+                Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
+                Instructions.Ldc_I4_1(),
+                Instructions.Sub(),
+                Instructions.Call_set(typeof(Netcode.NetInt), "Value"),
+                //   return;
+                Instructions.Ret()
+                // }
+            );
         }
     }
 }

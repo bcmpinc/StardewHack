@@ -49,8 +49,10 @@ namespace StardewHack
             foreach (MethodInfo patch in methods) {
                 var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
                 foreach (var bp in bytecode_patches) {
-                    // Apply the patch to the method specified in the annotation.
-                    ChainPatch(bp.GetMethod(), patch);
+                    if (bp.IsEnabled(this)) {
+                        // Apply the patch to the method specified in the annotation.
+                        ChainPatch(bp.GetMethod(), patch);
+                    }
                 }
             }
         }

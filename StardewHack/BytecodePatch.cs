@@ -11,10 +11,19 @@ namespace StardewHack
     public class BytecodePatch : System.Attribute  
     {
         string sig;
+        string enabled;
 
-        public BytecodePatch(string sig)
+        public bool IsEnabled(Hack hack)
+        {
+            if (enabled == null) return true;
+            var method = AccessTools.Method(hack.GetType(), enabled);
+            return (bool)method.Invoke(hack, null);
+        }
+
+        public BytecodePatch(string sig, string enabled=null)
         {
             this.sig = sig;
+            this.enabled = enabled;
         }
 
         public MethodInfo GetMethod() 

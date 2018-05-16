@@ -4,8 +4,20 @@ using StardewModdingAPI;
 
 namespace StardewHack.HarvestWithScythe
 {
+    public class ModConfig {
+        /** Should the game be patched to allow harvesting forage with the scythe? */
+        public bool HarvestForage = true;
+    }
+
     public class ModEntry : Hack
     {
+        ModConfig config;
+
+        public override void Entry(IModHelper helper) {
+            config = helper.ReadConfig<ModConfig>();
+            base.Entry(helper);
+        }
+
         // Note: the branch
         //   if (this.forageCrop)
         // refers mainly to the crop spring union.
@@ -56,7 +68,12 @@ namespace StardewHack.HarvestWithScythe
             );
         }
 
-        [BytecodePatch("StardewValley.Object::performToolAction")]
+        public bool HarvestForageEnabled() {
+            return config.HarvestForage;
+        }
+
+
+        [BytecodePatch("StardewValley.Object::performToolAction", "HarvestForageEnabled")]
         void Object_performToolAction() {
             var code = BeginCode();
             code.Prepend(
@@ -75,6 +92,8 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldarg_1(),
                 Instructions.Ldarg_2(),
                 Instructions.Call(typeof(ModEntry), "ScytheForage", typeof(StardewValley.Object), typeof(StardewValley.Tool), typeof(StardewValley.GameLocation)),
+                Instructions.Brfalse(code[0]),
+                Instructions.Ldc_I4_1(),
                 Instructions.Ret()
             );
         }
@@ -100,8 +119,9 @@ namespace StardewHack.HarvestWithScythe
                     who.gainExperience(2, 7);
                 }
                 return true;
+            } else {
+                return false;
             }
-            return false;
         }
     }
 }
