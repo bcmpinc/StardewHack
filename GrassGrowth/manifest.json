@@ -5,6 +5,6 @@
    "Description": "Allows long grass to spread everywhere on your farm.",
    "UniqueID": "bcmpinc.GrassGrowth",
    "EntryDll": "GrassGrowth.dll",
-   "MinimumApiVersion": "2.0",
-   "UpdateKeys": []
+   "MinimumApiVersion": "2.6",
+   "UpdateKeys": ["GitHub:bcmpinc/StardewHack"]
 }

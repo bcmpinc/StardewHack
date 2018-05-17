@@ -9,6 +9,7 @@ namespace StardewHack.FixAnimalTools
         [BytecodePatch("StardewValley.Tools.MilkPail::beginUsing")]
         void MilkPail_beginUsing() {
             // Find the first animal != null check.
+            AllCode().Print(Monitor);
             var hasAnimal = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.Tools.MilkPail), "animal"),
@@ -26,6 +27,7 @@ namespace StardewHack.FixAnimalTools
                 Instructions.Ret()
                 // }
             );
+            ReplaceShortBranches();
         }
 
         // Change the shears such that it doesn't do anything while no animal is in range. 

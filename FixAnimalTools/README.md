@@ -5,5 +5,5 @@ When using the shears or milk pail, you're locked in place until the animation f
 none
 
 ## Known bugs
-none
+Currently does not work on Windows (afaik).
 

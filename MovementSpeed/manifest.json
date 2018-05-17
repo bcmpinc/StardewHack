@@ -5,6 +5,6 @@
    "Description": "Changes the player's movement speed and charging time of the hoe and watering can.",
    "UniqueID": "bcmpinc.MovementSpeed",
    "EntryDll": "MovementSpeed.dll",
-   "MinimumApiVersion": "2.0",
-   "UpdateKeys": []
+   "MinimumApiVersion": "2.6",
+   "UpdateKeys": ["GitHub:bcmpinc/StardewHack"]
 }

@@ -5,6 +5,6 @@
    "Description": "Fixes the bug where harvesting with the scythe does not yield any farming experience.",
    "UniqueID": "bcmpinc.FixScytheExp",
    "EntryDll": "FixScytheExp.dll",
-   "MinimumApiVersion": "2.0",
-   "UpdateKeys": []
+   "MinimumApiVersion": "2.6",
+   "UpdateKeys": ["GitHub:bcmpinc/StardewHack"]
 }

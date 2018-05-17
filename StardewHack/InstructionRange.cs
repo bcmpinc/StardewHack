@@ -216,9 +216,8 @@ namespace StardewHack
             return array;
         }
 
-        public override string ToString ()
-        {
-            return string.Format ("[InstructionRange[{0}..{1}], length={2}", start, start+length-1, length);
+        public override string ToString () {
+            return string.Format ("[InstructionRange[{0}..{1}], length={2}]", start, start+length-1, length);
         }
     }
 }
