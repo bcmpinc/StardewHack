@@ -13,7 +13,7 @@ namespace StardewHack.CraftCounter
                 Instructions.Ldfld(typeof(StardewValley.CraftingRecipe), "description")
             );
             range.Append(
-                Instructions.Ldstr("\n\nTimes Crafted: "),
+                Instructions.Ldstr("\n\nTimes crafted: "),
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.CraftingRecipe),"timesCrafted"),
                 Instructions.Call(typeof(Convert), "ToString", typeof(int)),
