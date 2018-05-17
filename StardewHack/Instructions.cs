@@ -13,6 +13,8 @@ namespace StardewHack
         public static CodeInstruction Bgt    (Label target) => new CodeInstruction(OpCodes.Bgt,     target);
         public static CodeInstruction Ble    (Label target) => new CodeInstruction(OpCodes.Ble,     target);
         public static CodeInstruction Blt    (Label target) => new CodeInstruction(OpCodes.Blt,     target);
+        public static CodeInstruction Beq    (Label target) => new CodeInstruction(OpCodes.Beq,     target);
+        public static CodeInstruction Bne_Un (Label target) => new CodeInstruction(OpCodes.Bne_Un,  target);
         public static CodeInstruction Br     (Label target) => new CodeInstruction(OpCodes.Br,      target);
         public static CodeInstruction Brfalse(Label target) => new CodeInstruction(OpCodes.Brfalse, target);
         public static CodeInstruction Brtrue (Label target) => new CodeInstruction(OpCodes.Brtrue,  target);
@@ -50,6 +52,7 @@ namespace StardewHack
         public static CodeInstruction Ldc_I4_M1() => new CodeInstruction(OpCodes.Ldc_I4_M1);
         public static CodeInstruction Ldc_I4_S(byte value) => new CodeInstruction(OpCodes.Ldc_I4_S, value);
         public static CodeInstruction Ldc_I4(int value) => new CodeInstruction(OpCodes.Ldc_I4, value);
+        public static CodeInstruction Ldc_R4(float value) => new CodeInstruction(OpCodes.Ldc_R4, value);
         public static CodeInstruction Ldc_R8(double value) => new CodeInstruction(OpCodes.Ldc_R8, value);
 
         public static CodeInstruction Ldfld (Type type, string field) => new CodeInstruction(OpCodes.Ldfld,  GetField(type, field));
@@ -62,6 +65,7 @@ namespace StardewHack
         public static CodeInstruction Ldloc_S(byte index) => new CodeInstruction(OpCodes.Ldloc_S, index);
         public static CodeInstruction Ldloc  (LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc,   local);
         public static CodeInstruction Ldloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc_S, local);
+        public static CodeInstruction Ldnull() => new CodeInstruction(OpCodes.Ldnull);
         public static CodeInstruction Ldstr(string text) => new CodeInstruction(OpCodes.Ldstr, text);
 
         // M

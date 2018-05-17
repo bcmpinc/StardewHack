@@ -22,23 +22,28 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "addItemToInventoryBool", typeof(StardewValley.Item), typeof(bool)),
                 OpCodes.Brfalse
             );
+
+            // Make jumps to the start of AddItem jump to the start of our new code instead.
+            var ldarg0 = Instructions.Ldarg_0();
+            AddItem.ReplaceJump(0, ldarg0);
+
             // Insert check for harvesting with scythe and act accordingly.
             AddItem.Prepend(
                 // if (this.harvestMethod != 0) {
-                Instructions.Ldarg_0(),
+                ldarg0,
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
-                Instructions.Brfalse(AttachLabel(AddItem[0])),
-                // Game1.createObjectDebris (this.indexOfHarvest, xTile, yTile, -1, @object.Quality, 1, null);
-                Instructions.Ldarg_0(),
-                Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
                 Instructions.Call_get(typeof(Netcode.NetInt), "Value"), // this.indexOfHarvest
+                Instructions.Brfalse(AttachLabel(AddItem[0])),
+                // Game1.createObjectDebris (@object.ParentSheetIndex, xTile, yTile, -1, @object.Quality, 1.0, null);
+                Instructions.Ldloc_0(),
+                Instructions.Callvirt_get(typeof(StardewValley.Item), "ParentSheetIndex"), // @object.ParentSheetIndex
                 Instructions.Ldarg_1(), // xTile
                 Instructions.Ldarg_2(), // yTile
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Ldloc_0(),
-                Instructions.Call_get(typeof(StardewValley.Object), "Quality"), // @object.Quality
-                Instructions.Ldc_I4_1(), // 1
-                Instructions.Ldc_I4_0(), // null
+                Instructions.Callvirt_get(typeof(StardewValley.Object), "Quality"), // @object.Quality
+                Instructions.Ldc_R4(1), // 1.0
+                Instructions.Ldnull(), // null
                 Instructions.Call(typeof(StardewValley.Game1), "createObjectDebris", typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(StardewValley.GameLocation)),
                 // Game1.player.gainExperience (2, howMuch);
                 Instructions.Call_get(typeof(StardewValley.Game1), "player"),

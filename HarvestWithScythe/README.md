@@ -8,5 +8,4 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 * HarvestForage: Should the game be patched to allow harvesting forage with the scythe? Default = true.
 
 ## Known bugs
-* Harvesting spring unions with scythe puts them directly into your inventory.
-
+none

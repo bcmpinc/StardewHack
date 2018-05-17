@@ -85,17 +85,13 @@ namespace StardewHack
         /** An empty InstructionRange pointing to the start of this range. */
         public InstructionRange End   { get { return new InstructionRange(insts, start + length, 0); } }
 
-        /** Changes all jumps to 'from' into jumps to 'to' (for the entire method). */
-        /* BROKEN
-        public void ReplaceJump(CodeInstruction @from, CodeInstruction to) {
-            if (@from == to) return;
-            foreach (CodeInstruction inst in insts) {
-                if (inst.operand == @from) {
-                    inst.operand = to;
-                }
-            }
+        /** Moves all jump labels for 'from' to 'to'. */
+        public void ReplaceJump(int @from, CodeInstruction to) {
+            var f = insts[start + @from];
+            if (f == to) return;
+            to.labels.AddRange(f.labels);
+            f.labels.Clear();
         }
-        */
 
         /** Inserts the specified list of instructions before this range. */
         public void Prepend(params CodeInstruction[] new_insts) {
