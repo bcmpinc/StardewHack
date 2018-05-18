@@ -24,7 +24,7 @@ namespace StardewHack.FixScytheExp
                 Instructions.Ldfld(typeof(StardewValley.Crop), "regrowAfterHarvest"),
                 OpCodes.Call, // Netcode
                 OpCodes.Ldc_I4_M1,
-                OpCodes.Bne_Un_S
+                OpCodes.Bne_Un
             );
             // Monitor.Log(ScytheBranchTail.ToString());
             if (ScytheBranchTail.length > 30) throw new Exception("Too many operations in tail of harvestMethod branch");
@@ -35,7 +35,7 @@ namespace StardewHack.FixScytheExp
                 Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
                 OpCodes.Call, // Netcode
                 Instructions.Ldc_I4(421), // 421 = Item ID of Sunflower.
-                OpCodes.Bne_Un_S
+                OpCodes.Bne_Un
             );
 
             // Find the local variable that stores the amount being dropped.

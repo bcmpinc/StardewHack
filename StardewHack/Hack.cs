@@ -76,35 +76,6 @@ namespace StardewHack
             target.labels.Add(lbl);
             return lbl;
         }
-
-        /** Maps all short style branches to their long form. */
-        Dictionary<OpCode, OpCode> long_map = new Dictionary<OpCode, OpCode>()
-        {
-            { OpCodes.Beq_S, OpCodes.Beq },
-            { OpCodes.Bge_S, OpCodes.Bge },
-            { OpCodes.Bgt_S, OpCodes.Bgt },
-            { OpCodes.Ble_S, OpCodes.Ble },
-            { OpCodes.Blt_S, OpCodes.Blt },
-            { OpCodes.Bge_Un_S, OpCodes.Bge_Un },
-            { OpCodes.Bgt_Un_S, OpCodes.Bgt_Un },
-            { OpCodes.Ble_Un_S, OpCodes.Ble_Un },
-            { OpCodes.Blt_Un_S, OpCodes.Blt_Un },
-            { OpCodes.Bne_Un_S, OpCodes.Bne_Un },
-            { OpCodes.Br_S, OpCodes.Br },
-            { OpCodes.Brfalse_S, OpCodes.Brfalse },
-            { OpCodes.Brtrue_S, OpCodes.Brtrue },
-            { OpCodes.Leave_S, OpCodes.Leave },
-        };
-
-        /** Converts all short style branches into long branches. */
-        public void ReplaceShortBranches() {
-            for (int i=0; i<instructions.Count; i++) {
-                var inst = instructions[i];
-                if (long_map.ContainsKey(inst.opcode)) {
-                    inst.opcode = long_map[inst.opcode];
-                }
-            }
-        }
     }
 
     // I 'love' generics. :P

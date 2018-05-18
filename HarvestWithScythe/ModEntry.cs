@@ -71,7 +71,7 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
                 OpCodes.Call, // Netcode
                 OpCodes.Ldc_I4_1,
-                OpCodes.Bne_Un_S
+                OpCodes.Bne_Un
             );
 
             // Change the harvestMethod==1 check to damage=harvestMethod; harvestMethod=1
@@ -97,7 +97,7 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Call_get(typeof(StardewValley.TerrainFeatures.HoeDirt), "crop"),
                 Instructions.Ldfld(typeof(StardewValley.Crop), "dead"),
                 OpCodes.Call, // Netcode
-                OpCodes.Brfalse_S
+                OpCodes.Brfalse
             ).Prepend(
                 HarvestMethodCheck[0],
                 HarvestMethodCheck[1],

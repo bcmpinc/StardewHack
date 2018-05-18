@@ -16,7 +16,7 @@ namespace StardewHack.AlwaysScrollMap
                 // if (Game1.currentLocation.forceViewportPlayerFollow)
                 Instructions.Ldsfld(typeof(StardewValley.Game1), "currentLocation"),
                 Instructions.Ldfld(typeof(StardewValley.GameLocation), "forceViewportPlayerFollow"),
-                OpCodes.Brfalse_S
+                OpCodes.Brfalse
             );
             range.Remove();
         }

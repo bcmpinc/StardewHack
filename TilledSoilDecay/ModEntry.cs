@@ -34,7 +34,7 @@ namespace StardewHack.TilledSoilDecay
                 DayUpdate = DayUpdate.FindNext(
                     Instructions.Isinst(typeof(StardewValley.TerrainFeatures.HoeDirt)),
                     Instructions.Callvirt_get(typeof(StardewValley.TerrainFeatures.HoeDirt), "crop"),
-                    OpCodes.Brtrue_S,
+                    OpCodes.Brtrue,
                     Instructions.Ldsfld(typeof(StardewValley.Game1), "random"),
                     OpCodes.Callvirt,
                     OpCodes.Ldc_R8

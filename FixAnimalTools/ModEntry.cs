@@ -26,7 +26,6 @@ namespace StardewHack.FixAnimalTools
                 Instructions.Ret()
                 // }
             );
-            ReplaceShortBranches();
         }
 
         // Change the shears such that it doesn't do anything while no animal is in range. 

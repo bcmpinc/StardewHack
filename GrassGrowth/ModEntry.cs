@@ -20,7 +20,7 @@ namespace StardewHack.GrassGrowth
                     Instructions.Ldstr("Diggable"),
                     Instructions.Ldstr("Back"),
                     Instructions.Call(typeof(StardewValley.GameLocation), "doesTileHaveProperty", typeof(int), typeof(int), typeof(string), typeof(string)),
-                    OpCodes.Brfalse_S
+                    OpCodes.Brfalse
                 );
                 growWeedGrass.Remove();
             }
