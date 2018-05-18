@@ -22,7 +22,8 @@ namespace StardewHack.FixAnimalTools
                 //    who.forceCanMove();
                 Instructions.Ldarg_S(4),
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "forceCanMove"),
-                //    return;
+                //    return false;
+                Instructions.Ldc_I4_0(),
                 Instructions.Ret()
                 // }
             );
@@ -43,7 +44,8 @@ namespace StardewHack.FixAnimalTools
                 Instructions.Brtrue(AttachLabel(halt[1])),
                 //    who.forceCanMove();
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "forceCanMove"),
-                //    return;
+                //    return false;
+                Instructions.Ldc_I4_0(),
                 Instructions.Ret(),
                 // }
                 halt[1]
