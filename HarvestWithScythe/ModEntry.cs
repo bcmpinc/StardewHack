@@ -60,9 +60,8 @@ namespace StardewHack.HarvestWithScythe
                 // }
             );
 
-            //------------
-            // Patch code to drop sunflower seeds when harvesting with scythe.
-            // Patch made configurable, so it can be disabled in case it breaks in the future.
+            // >>> Patch code to drop sunflower seeds when harvesting with scythe.
+            // Patch is configurable, so it can be disabled in case it breaks in the future.
             if (config.HarvestSeeds) {
                 // Find tail of harvestMethod==1 branch
                 var ScytheBranchTail = FindCode(

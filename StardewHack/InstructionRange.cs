@@ -82,7 +82,7 @@ namespace StardewHack
         /** An empty InstructionRange pointing to the start of this range. */
         public InstructionRange Start { get { return new InstructionRange(insts, start, 0); } }
 
-        /** An empty InstructionRange pointing to the start of this range. */
+        /** An empty InstructionRange pointing to the end of this range. */
         public InstructionRange End   { get { return new InstructionRange(insts, start + length, 0); } }
 
         /** Moves all jump labels for 'from' to 'to'. */
