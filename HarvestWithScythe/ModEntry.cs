@@ -7,12 +7,16 @@ namespace StardewHack.HarvestWithScythe
     public class ModConfig {
         /** Should the game be patched to allow harvesting forage with the scythe? */
         public bool HarvestForage = true;
+        /** Should the game be patched to drop seeds when harvesting sunflowers with the scythe? */
+        public bool HarvestSeeds = true;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         [BytecodePatch("StardewValley.Crop::harvest")]
-        void Crop_harvest_onions() {
+        void Crop_harvest() {
+            // >>> Fix harvesting of spring onions.
+
             // Find the line:
             //   if (Game1.player.addItemToInventoryBool (@object, false)) {
             var AddItem = FindCode(
@@ -55,6 +59,55 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ret()
                 // }
             );
+
+            //------------
+            // Patch code to drop sunflower seeds when harvesting with scythe.
+            // Patch made configurable, so it can be disabled in case it breaks in the future.
+            if (config.HarvestSeeds) {
+                // Find tail of harvestMethod==1 branch
+                var ScytheBranchTail = FindCode(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
+                    OpCodes.Call, // Netcode
+                    OpCodes.Ldc_I4_1,
+                    OpCodes.Bne_Un
+                ).Follow(4);
+                // Select starting from the exp code.
+                ScytheBranchTail.ExtendBackwards(
+                    Instructions.Ldsfld(typeof(StardewValley.Game1), "objectInformation"),
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
+                    OpCodes.Call, // Netcode
+                    OpCodes.Callvirt,
+                    OpCodes.Ldc_I4_1
+                );
+
+                // Monitor.Log(ScytheBranchTail.ToString());
+                if (ScytheBranchTail.length > 60) throw new Exception("Too many operations in tail of harvestMethod branch");
+
+                // Find the start of the 'drop sunflower seeds' part.
+                var DropSunflowerSeeds = FindCode(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "indexOfHarvest"),
+                    OpCodes.Call, // Netcode
+                    Instructions.Ldc_I4(421), // 421 = Item ID of Sunflower.
+                    OpCodes.Bne_Un
+                );
+
+                // Find the local variable that stores the amount being dropped.
+                var DropAmount = DropSunflowerSeeds.FindNext(
+                    Instructions.Callvirt(typeof(System.Random), "Next", typeof(int), typeof(int)),
+                    OpCodes.Stloc_S
+                );
+                // Rewrite the tail of the Scythe harvest branch. 
+                ScytheBranchTail.Replace(
+                    // Set num2 = 0.
+                    Instructions.Ldc_I4_0(),
+                    Instructions.Stloc_S((LocalBuilder)DropAmount[1].operand),
+                    // Jump to the 'drop subflower seeds' part.
+                    Instructions.Br(AttachLabel(DropSunflowerSeeds[0]))
+                );
+            }
         }
 
         // Note: the branch

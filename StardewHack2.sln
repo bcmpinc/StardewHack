@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarvestWithScythe", "Harves
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrassGrowth", "GrassGrowth\GrassGrowth.csproj", "{D08EA239-6DB2-4E7D-94AA-C691D78291FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixScytheExp", "FixScytheExp\FixScytheExp.csproj", "{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TilledSoilDecay", "TilledSoilDecay\TilledSoilDecay.csproj", "{4467451C-8BB0-45A0-BF7D-440FA46332ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E342CE6C-E8DF-4D01-B1E9-418AC4D95774}"
@@ -59,10 +57,6 @@ Global
 		{AFB48E19-F526-4632-B624-5246D0609443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB48E19-F526-4632-B624-5246D0609443}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8A2FF1F-669C-4DFC-AF01-CFB602387A35}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D08EA239-6DB2-4E7D-94AA-C691D78291FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D08EA239-6DB2-4E7D-94AA-C691D78291FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D08EA239-6DB2-4E7D-94AA-C691D78291FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
