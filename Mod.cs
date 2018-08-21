@@ -48,7 +48,7 @@ namespace BiggerBackpack
             if (!Context.IsWorldReady)
                 return;
 
-            if (Game1.currentLocation.name == "SeedShop" && Game1.player.maxItems == 36)
+            if (Game1.currentLocation.Name == "SeedShop" && Game1.player.MaxItems == 36)
             {
                 Game1.spriteBatch.Draw(bigBackpack, Game1.GlobalToLocal(new Vector2((float)(7 * Game1.tileSize + Game1.pixelZoom * 2), (float)(17 * Game1.tileSize))), new Rectangle?(new Rectangle(0, 0, 12, 14)), Color.White, 0.0f, Vector2.Zero, (float)Game1.pixelZoom, SpriteEffects.None, (float)(19.25 * (double)Game1.tileSize / 10000.0));
             }
@@ -61,7 +61,7 @@ namespace BiggerBackpack
 
             if (input.IsActionButton && !input.IsSuppressed)
             {
-                if (Game1.player.MaxItems == 36 && Game1.currentLocation.name == "SeedShop" && input.Cursor.Tile.X == 7 && (input.Cursor.Tile.Y == 17 || input.Cursor.Tile.Y == 18) )
+                if (Game1.player.MaxItems == 36 && Game1.currentLocation.Name == "SeedShop" && input.Cursor.Tile.X == 7 && (input.Cursor.Tile.Y == 17 || input.Cursor.Tile.Y == 18) )
                 {
                     input.SuppressButton();
                     Response yes = new Response("Purchase", "Purchase (50,000g)");
@@ -84,13 +84,13 @@ namespace BiggerBackpack
                     if (Game1.player.Money >= 50000)
                     {
                         Game1.player.Money -= 50000;
-                        Game1.player.maxItems += 12;
-                        for (int index = 0; index < Game1.player.maxItems; ++index)
+                        Game1.player.MaxItems += 12;
+                        for (int index = 0; index < Game1.player.MaxItems; ++index)
                         {
-                            if (Game1.player.items.Count <= index)
-                                Game1.player.items.Add((Item)null);
+                            if (Game1.player.Items.Count <= index)
+                                Game1.player.Items.Add((Item)null);
                         }
-                        Game1.player.holdUpItemThenMessage((Item)new SpecialItem(-1, 99, "Premium Pack"), true);
+                        Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack"), true);
                     }
                     else
                         Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\UI:NotEnoughMoney2"));
