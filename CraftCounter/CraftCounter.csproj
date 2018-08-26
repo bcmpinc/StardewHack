@@ -30,9 +30,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="0Harmony">
-      <HintPath>..\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="StardewValley">
       <HintPath>..\..\..\.steam\steam\steamapps\common\Stardew Valley\StardewValley.exe</HintPath>
     </Reference>
@@ -53,6 +50,9 @@
     </Reference>
     <Reference Include="StardewModdingAPI.Toolkit.CoreInterfaces">
       <HintPath>..\..\..\.steam\steam\steamapps\common\Stardew Valley\StardewModdingAPI.Toolkit.CoreInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\packages\Lib.Harmony.1.2.0.1\lib\net45\0Harmony.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
