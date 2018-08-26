@@ -13,7 +13,7 @@ namespace StardewHack.GrassGrowth
             for (int i=0; i<4; i++) {
                 growWeedGrass = growWeedGrass.FindNext(
                     OpCodes.Ldarg_0,
-                    OpCodes.Ldloc_3,
+                    null,
                     null,
                     null,
                     null,
