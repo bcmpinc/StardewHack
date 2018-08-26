@@ -121,10 +121,16 @@ namespace StardewHack
          * This method can be called from within a patch method, for example to patch delegate functions. */
         public void ChainPatch(MethodInfo method, MethodInfo patch) {
             if (patchmap.ContainsKey(method)) {
-                throw new Exception($"Can't apply patch {patch} to {method}, because it is already patched by {patchmap[method]}.");
-            }
-            patchmap[method] = patch;
-            to_be_patched.Push(method);
+				// We allow chain patch to be called multiple times with the same arguments, which will be silently ignored,
+                // because harmony can execute the patch method multiple times.
+                // Different arguments however, are an error.
+				if (!patchmap[method].Equals(patch)) {
+                    throw new Exception($"StardewHack can't apply patch {patch} to {method}, because it is already patched by {patchmap[method]}.");
+				}
+			} else {
+                patchmap[method] = patch;
+                to_be_patched.Push(method);
+			}
         }
 
         /** Called by harmony to apply a patch. */ 
