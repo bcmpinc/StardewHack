@@ -36,6 +36,12 @@
     <Reference Include="StardewModdingAPI">
       <HintPath>..\..\..\.steam\steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe</HintPath>
     </Reference>
+    <Reference Include="StardewModdingAPI">
+      <HintPath>..\..\..\.steam\steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe</HintPath>
+    </Reference>
+    <Reference Include="StardewModdingAPI">
+      <HintPath>..\..\..\.steam\steam\steamapps\common\Stardew Valley\StardewModdingAPI.exe</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
