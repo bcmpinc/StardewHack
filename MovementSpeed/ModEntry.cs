@@ -13,13 +13,16 @@ namespace StardewHack.MovementSpeed
         /** Time required for charging the hoe or watering can in ms. Normally this is 600ms. The default is 600/1.5 = 400, meaning 50% faster charging. */
         public int ToolChargeDelay = 400;
     }
-
+    
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
-        // Add a multiplier to the movement speed.
-        [BytecodePatch("StardewValley.Farmer::getMovementSpeed")]
+		public bool ChangesMovementSpeed () {
+			return Math.Abs(config.MovementSpeedMultiplier - 1) > 1e-3;
+        }
+
+		// Add a multiplier to the movement speed.
+		[BytecodePatch("StardewValley.Farmer::getMovementSpeed", "ChangesMovementSpeed")]
         void Farmer_getMovementSpeed() {
-            if (config.MovementSpeedMultiplier == 1) return;
             FindCodeLast(
                 OpCodes.Ret
             ).Prepend(
@@ -28,8 +31,12 @@ namespace StardewHack.MovementSpeed
             );
         }
 
+		public bool ChangesToolChargeDelay() {
+            return config.ToolChargeDelay != 600;
+        }
+
         // Change (reduce) the time it takses to charge tools (hoe & water can).
-        [BytecodePatch("StardewValley.Game1::UpdateControlInput")]
+		[BytecodePatch("StardewValley.Game1::UpdateControlInput", "ChangesToolChargeDelay")]
         void Game1_UpdateControlInput() {
             // StardewModdingAPI changed this method and moved its original code into a delegate, hence the chain patching.
             MethodInfo method = (MethodInfo)FindCode(
@@ -39,7 +46,6 @@ namespace StardewHack.MovementSpeed
         }
 
         void Game1_UpdateControlInput_Chain() {
-            if (config.ToolChargeDelay == 600) return;
             FindCode(
                 Instructions.Ldc_I4(600),
                 Instructions.Stfld(typeof(StardewValley.Farmer), "toolHold")

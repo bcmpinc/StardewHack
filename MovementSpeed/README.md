@@ -7,3 +7,8 @@ Changes the player's movement speed and charging time of the hoe and watering ca
 
 ## Known bugs
 none
+
+## Changes
+#### 0.4:
+* Fixed incompatibility with Mouse Move Mode mod.
+* Setting `MovementSpeedMultiplier: 1` or `ToolChargeDelay: 600` will disable the associated patch.
