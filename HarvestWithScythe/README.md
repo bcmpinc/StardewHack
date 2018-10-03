@@ -5,6 +5,7 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 None
 
 ## Config
+Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.
 * HarvestForage: Should the game be patched to allow harvesting forage with the scythe? Default = true.
 * HarvestSeeds: Should the game be patched to drop seeds when harvesting sunflowers with the scythe? Default = true.
 

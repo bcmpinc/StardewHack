@@ -5,6 +5,7 @@ Makes the map scroll past the edge of the map. Useful for:
 * checking for out of bounds objects.
 
 ## Config
+Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.
 * Enabled: Should the mod be enabled upon loading the game? Default = true.
 * ToggleScroll: The key used to toggle always scroll map. Default = OemSemicolon.
 
