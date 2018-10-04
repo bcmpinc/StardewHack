@@ -1,6 +1,5 @@
 # Craft Counter
-Adds a counter to the description of crafting recipes telling how often it has been crafted. Useful for obtaining the craft everything achievement.
-Adds a counter to the description of cooking recipes telling how often it has been cooked.
+Adds a counter to the description of crafting & cooking recipes telling how often it has been crafted/cooked. Useful for obtaining the craft/cook everything achievement.
 
 ## Config
 none
