@@ -57,7 +57,18 @@ namespace StardewHack
                     } else if (query is CodeInstruction) {
                         CodeInstruction qin = query as CodeInstruction;
                         if (!inst.opcode.Equals(qin.opcode)) goto NO_MATCH;
-                        if (!inst.operand.Equals(qin.operand)) goto NO_MATCH;
+                        if (!inst.operand.Equals(qin.operand)) {
+                            if (inst.operand is LocalBuilder) {
+                                var lb = (LocalBuilder)inst.operand;
+                                try {
+                                    if (Convert.ToInt32(qin.operand) != lb.LocalIndex) goto NO_MATCH;
+                                } catch {
+                                    goto NO_MATCH;
+                                }
+                            } else {
+                                goto NO_MATCH;
+                            }
+                        }
                     } else {
                         throw new ArgumentException("Unsupported type "+query.GetType()+" for argument "+(j+1)+": " + query);
                     }
