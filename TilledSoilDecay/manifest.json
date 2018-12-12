@@ -6,5 +6,5 @@
    "UniqueID": "bcmpinc.TilledSoilDecay",
    "EntryDll": "TilledSoilDecay.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["GitHub:bcmpinc/StardewHack","Nexus:2738"]
+   "UpdateKeys": ["Nexus:2738"]
 }

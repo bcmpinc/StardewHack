@@ -6,5 +6,5 @@
    "UniqueID": "bcmpinc.GrassGrowth",
    "EntryDll": "GrassGrowth.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["GitHub:bcmpinc/StardewHack","Nexus:2732"]
+   "UpdateKeys": ["Nexus:2732"]
 }
