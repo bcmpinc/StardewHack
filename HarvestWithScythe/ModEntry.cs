@@ -376,7 +376,17 @@ namespace StardewHack.HarvestWithScythe
         public static bool ScytheForage(StardewValley.Object o, StardewValley.Tool t, StardewValley.GameLocation loc) {
             if (o.isSpawnedObject && !o.questItem && o.isForage(loc)) {
                 var who = t.getLastFarmerToUse();
-                var vector = o.TileLocation; 
+                var vector = o.TileLocation;
+                // For objects stored in GameLocation.Objects, the TileLocation is not always set.
+                // So determine its location by looping trough all such objects.
+                if (vector.X==0 && vector.Y==0) {
+                    foreach (System.Collections.Generic.KeyValuePair<Microsoft.Xna.Framework.Vector2, StardewValley.Object> pair in loc.Objects.Pairs) {
+                        if (pair.Value.Equals(o)) {
+                            vector = pair.Key;
+                            break;
+                        }
+                    }
+                }
                 int quality = o.quality;
                 Random random = new Random((int)StardewValley.Game1.uniqueIDForThisGame / 2 + (int)StardewValley.Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
                 if (who.professions.Contains(16)) {
