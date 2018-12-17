@@ -1,5 +1,5 @@
 # Harvest With Scythe
-Allows you to harvest all crops and forage using the scythe. They can also still be plucked, without having to press a toggle button. Unlike other 'harvest with scythe' mods, this patch does not affect your savegame. So it is possible to revert to the old behavior by removing this patch. Otherwise, crops harvested with the scythe won't yield any experience points.
+Allows you to harvest all crops and forage using the scythe. They can also still be plucked, without having to press a toggle button. Unlike other 'harvest with scythe' mods, this patch does not affect your savegame. So it is possible to revert to the old behavior by removing this patch.
 
 ## Config
 Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.
