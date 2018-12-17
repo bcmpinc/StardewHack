@@ -9,14 +9,67 @@ namespace StardewHack.HarvestWithScythe
         public bool HarvestForage = true;
         /** Should quality be applied to additional harvest? */
         public bool AllHaveQuality = false;
+        /** Whether crops should also remain pluckable by hand. */
+        public bool AllowManualHarvest = true;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         [BytecodePatch("StardewValley.Crop::harvest")]
         void Crop_harvest() {
-            // >>> Fix harvesting of spring onions.
+            #region Fix vector
+            Harmony.CodeInstruction ins = null;
+            // Remove line (2x)
+            // Vector2 vector = new Vector2 ((float)xTile, (float)yTile);
+            for (int i = 0; i < 2; i++) {
+                var vec = FindCode (
+                    OpCodes.Ldloca_S,
+                    OpCodes.Ldarg_1,
+                    OpCodes.Conv_R4,
+                    OpCodes.Ldarg_2,
+                    OpCodes.Conv_R4,
+                    OpCodes.Call
+                );
+                ins = vec[5];
+                vec.Remove();
+            }
+            
+            // Add to begin of function
+            // Vector2 vector = new Vector2 ((float)xTile*64., (float)yTile*64.);
+            BeginCode().Append(
+                Instructions.Ldloca_S(3),
+                Instructions.Ldarg_1(),
+                Instructions.Conv_R4(),
+                Instructions.Ldc_R4(64),
+                Instructions.Mul(),
+                Instructions.Ldarg_2(),
+                Instructions.Conv_R4(),
+                Instructions.Ldc_R4(64),
+                Instructions.Mul(),
+                ins
+            );
+            
+            // Replace (4x):
+            //   from: new Vector2 (vector.X * 64f, vector.Y * 64f)
+            //   to:   vector
+            for (int i = 0; i < 4; i++) {
+                FindCode(
+                    null,
+                    OpCodes.Ldfld,
+                    Instructions.Ldc_R4(64),
+                    OpCodes.Mul,
+                    null,
+                    OpCodes.Ldfld,
+                    Instructions.Ldc_R4(64),
+                    OpCodes.Mul,
+                    OpCodes.Newobj
+                ).Replace(
+                    Instructions.Ldloc_3() // vector
+                );
+            }
+            #endregion
 
+            #region Support harvesting of spring onions with scythe
             // Find the lines:
             var AddItem = FindCode(
                 // if (Game1.player.addItemToInventoryBool (@object, false)) {
@@ -24,35 +77,18 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Ldloc_0,
                 OpCodes.Ldc_I4_0,
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "addItemToInventoryBool", typeof(StardewValley.Item), typeof(bool)),
-                OpCodes.Brfalse,
-                // Vector2 vector = new Vector2 ((float)xTile, (float)yTile);
-                OpCodes.Ldloca_S,
-                OpCodes.Ldarg_1,
-                OpCodes.Conv_R4,
-                OpCodes.Ldarg_2,
-                OpCodes.Conv_R4,
-                OpCodes.Call
+                OpCodes.Brfalse
             );
 
             // Make jumps to the start of AddItem jump to the start of "Vector2 vector = ..."
-            AddItem.ReplaceJump(0, AddItem[5]);
+            var ldarg0 = Instructions.Ldarg_0();
+            AddItem.ReplaceJump(0, ldarg0);
 
             // Swap the lines (add '*64' to vector) &
             // Insert check for harvesting with scythe and act accordingly.
-            AddItem.Replace(
-                // Vector2 vector = new Vector2 ((float)xTile*64., (float)yTile*64.);
-                AddItem[5],
-                AddItem[6],
-                AddItem[7],
-                Instructions.Ldc_R4(64),
-                Instructions.Mul(),
-                AddItem[8],
-                AddItem[9],
-                Instructions.Ldc_R4(64),
-                Instructions.Mul(),
-                AddItem[10],
+            AddItem.Prepend(
                 // if (this.harvestMethod != 0) {
-                Instructions.Ldarg_0(),
+                ldarg0,
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
                 Instructions.Call_get(typeof(Netcode.NetInt), "Value"), // this.indexOfHarvest
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
@@ -70,47 +106,22 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "gainExperience", typeof(int), typeof(int)),
                 // return true
                 Instructions.Ldc_I4_1(),
-                Instructions.Ret(),
-                // } else 
-                // if (Game1.player.addItemToInventoryBool (@object, false)) {
-                AddItem[0],
-                AddItem[1],
-                AddItem[2],
-                AddItem[3],
-                AddItem[4]
+                Instructions.Ret()
+                // }
             );
-
-            // Replace new Vector2 (vector.X * 64f, vector.Y * 64f) 
-            // with vector
-            for (int i = 0; i < 2; i++) {
-                var vector = FindCode (
-                    OpCodes.Ldloc_3,
-                    OpCodes.Ldfld,
-                    OpCodes.Ldc_R4,
-                    OpCodes.Mul,
-                    OpCodes.Ldloc_3,
-                    OpCodes.Ldfld,
-                    OpCodes.Ldc_R4,
-                    OpCodes.Mul,
-                    OpCodes.Newobj
-                );
-                vector.Replace(
-                    Instructions.Ldloc_3() // vector
-                );
-            }
+            #endregion
 
             // >>> Patch code to drop sunflower seeds when harvesting with scythe.
             // >>> Patch code to let harvesting with scythe drop only 1 item.
             // >>> The other item drops are handled by the plucking code.
-            
+            #region Sunflower drops 
+
             // Remove start of loop
-            var StartLoop = FindCode(
+            FindCode(
                 OpCodes.Ldc_I4_0,
                 Instructions.Stloc_S(12),
                 OpCodes.Br
-            );
-            StartLoop.ReplaceJump(0, StartLoop[3]);
-            StartLoop.Remove();
+            ).Remove();
 
             // Find the start of the 'drop sunflower seeds' part.
             var DropSunflowerSeeds = FindCode(
@@ -152,7 +163,13 @@ namespace StardewHack.HarvestWithScythe
                 // Jump to the 'drop subflower seeds' part.
                 Instructions.Br(AttachLabel(DropSunflowerSeeds[0]))
             );
+            #endregion
+
+            #region Colored flowers
             
+            
+            #endregion
+
             if (config.AllHaveQuality) {
                 // Patch function calls for additional harvest to pass on the harvest quality.
                 FindCode(
@@ -171,6 +188,17 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Newobj,
                     Instructions.Callvirt(typeof(StardewValley.Characters.JunimoHarvester), "tryToAddItemToHut", typeof(StardewValley.Item))
                 )[3] = Instructions.Ldloc_S(5);
+            }
+        }
+
+        // Proxy method for creating an object suitable for spawning as debris.
+        public static StardewValley.Object CreateObject(StardewValley.Crop crop, int quality) {
+            if (crop.programColored) {
+                return new StardewValley.Objects.ColoredObject (crop.indexOfHarvest, 1, crop.tintColor) {
+                    Quality = quality
+                };
+            } else {
+                return new StardewValley.Object(crop.indexOfHarvest, 1, false, -1, quality);
             }
         }
 

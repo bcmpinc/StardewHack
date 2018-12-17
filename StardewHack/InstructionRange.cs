@@ -126,8 +126,10 @@ namespace StardewHack
             length += new_insts.Length;
         }
 
-        /** Removes all instructions contained within this range. */
+        /** Removes all instructions contained within this range. 
+         * Automatically fixes jumps to the start of this code range. */
         public void Remove() {
+            ReplaceJump(0, insts[start + length]);
             insts.RemoveRange(start, length);
             length = 0;
         }
@@ -172,8 +174,8 @@ namespace StardewHack
                     insts[start+i] = new_insts[i];
                 }
             } else {
-                Remove();
-                Append(new_insts);
+                insts.RemoveRange(start, length);
+                insts.InsertRange(start, new_insts);
                 length = new_insts.Length;
             }
         }

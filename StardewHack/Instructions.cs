@@ -29,6 +29,18 @@ namespace StardewHack
         public static CodeInstruction Callvirt_get(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetGetMethod());
         public static CodeInstruction Call_set    (Type type, string method) => new CodeInstruction(OpCodes.Call,     GetProperty(type, method).GetSetMethod());
         public static CodeInstruction Callvirt_set(Type type, string method) => new CodeInstruction(OpCodes.Callvirt, GetProperty(type, method).GetSetMethod());
+        public static CodeInstruction Conv_I() => new CodeInstruction(OpCodes.Conv_I);
+        public static CodeInstruction Conv_U() => new CodeInstruction(OpCodes.Conv_U);
+        public static CodeInstruction Conv_I1() => new CodeInstruction(OpCodes.Conv_I1);
+        public static CodeInstruction Conv_I2() => new CodeInstruction(OpCodes.Conv_I2);
+        public static CodeInstruction Conv_I4() => new CodeInstruction(OpCodes.Conv_I4);
+        public static CodeInstruction Conv_I8() => new CodeInstruction(OpCodes.Conv_I8);
+        public static CodeInstruction Conv_R4() => new CodeInstruction(OpCodes.Conv_R4);
+        public static CodeInstruction Conv_R8() => new CodeInstruction(OpCodes.Conv_R8);
+        public static CodeInstruction Conv_U1() => new CodeInstruction(OpCodes.Conv_U1);
+        public static CodeInstruction Conv_U2() => new CodeInstruction(OpCodes.Conv_U2);
+        public static CodeInstruction Conv_U4() => new CodeInstruction(OpCodes.Conv_U4);
+        public static CodeInstruction Conv_U8() => new CodeInstruction(OpCodes.Conv_U8);
 
         // D
         public static CodeInstruction Dup() => new CodeInstruction(OpCodes.Dup);
