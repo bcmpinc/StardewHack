@@ -17,38 +17,52 @@ namespace StardewHack.HarvestWithScythe
         void Crop_harvest() {
             // >>> Fix harvesting of spring onions.
 
-            // Find the line:
-            //   if (Game1.player.addItemToInventoryBool (@object, false)) {
+            // Find the lines:
             var AddItem = FindCode(
+                // if (Game1.player.addItemToInventoryBool (@object, false)) {
                 Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 OpCodes.Ldloc_0,
                 OpCodes.Ldc_I4_0,
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "addItemToInventoryBool", typeof(StardewValley.Item), typeof(bool)),
-                OpCodes.Brfalse
+                OpCodes.Brfalse,
+                // Vector2 vector = new Vector2 ((float)xTile, (float)yTile);
+                OpCodes.Ldloca_S,
+                OpCodes.Ldarg_1,
+                OpCodes.Conv_R4,
+                OpCodes.Ldarg_2,
+                OpCodes.Conv_R4,
+                OpCodes.Call
             );
 
-            // Make jumps to the start of AddItem jump to the start of our new code instead.
-            var ldarg0 = Instructions.Ldarg_0();
-            AddItem.ReplaceJump(0, ldarg0);
+            // Make jumps to the start of AddItem jump to the start of "Vector2 vector = ..."
+            AddItem.ReplaceJump(0, AddItem[5]);
 
+            // Swap the lines (add '*64' to vector) &
             // Insert check for harvesting with scythe and act accordingly.
-            AddItem.Prepend(
+            AddItem.Replace(
+                // Vector2 vector = new Vector2 ((float)xTile*64., (float)yTile*64.);
+                AddItem[5],
+                AddItem[6],
+                AddItem[7],
+                Instructions.Ldc_R4(64),
+                Instructions.Mul(),
+                AddItem[8],
+                AddItem[9],
+                Instructions.Ldc_R4(64),
+                Instructions.Mul(),
+                AddItem[10],
                 // if (this.harvestMethod != 0) {
-                ldarg0,
+                Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
                 Instructions.Call_get(typeof(Netcode.NetInt), "Value"), // this.indexOfHarvest
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
-                // Game1.createObjectDebris (@object.ParentSheetIndex, xTile, yTile, -1, @object.Quality, 1.0, null);
-                Instructions.Ldloc_0(),
-                Instructions.Callvirt_get(typeof(StardewValley.Item), "ParentSheetIndex"), // @object.ParentSheetIndex
-                Instructions.Ldarg_1(), // xTile
-                Instructions.Ldarg_2(), // yTile
+                // Game1.createItemDebris (@object, vector, -1, null, -1)
+                Instructions.Ldloc_0(), // @object
+                Instructions.Ldloc_3(), // vector
                 Instructions.Ldc_I4_M1(), // -1
-                Instructions.Ldloc_0(),
-                Instructions.Callvirt_get(typeof(StardewValley.Object), "Quality"), // @object.Quality
-                Instructions.Ldc_R4(1), // 1.0
                 Instructions.Ldnull(), // null
-                Instructions.Call(typeof(StardewValley.Game1), "createObjectDebris", typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(StardewValley.GameLocation)),
+                Instructions.Ldc_I4_M1(), // -1
+                Instructions.Call(typeof(StardewValley.Game1), "createItemDebris", typeof(StardewValley.Item), typeof(Microsoft.Xna.Framework.Vector2), typeof(int), typeof(StardewValley.GameLocation), typeof(int)),
                 // Game1.player.gainExperience (2, howMuch);
                 Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldc_I4_2(),
@@ -56,9 +70,34 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Callvirt(typeof(StardewValley.Farmer), "gainExperience", typeof(int), typeof(int)),
                 // return true
                 Instructions.Ldc_I4_1(),
-                Instructions.Ret()
-                // }
+                Instructions.Ret(),
+                // } else 
+                // if (Game1.player.addItemToInventoryBool (@object, false)) {
+                AddItem[0],
+                AddItem[1],
+                AddItem[2],
+                AddItem[3],
+                AddItem[4]
             );
+
+            // Replace new Vector2 (vector.X * 64f, vector.Y * 64f) 
+            // with vector
+            for (int i = 0; i < 2; i++) {
+                var vector = FindCode (
+                    OpCodes.Ldloc_3,
+                    OpCodes.Ldfld,
+                    OpCodes.Ldc_R4,
+                    OpCodes.Mul,
+                    OpCodes.Ldloc_3,
+                    OpCodes.Ldfld,
+                    OpCodes.Ldc_R4,
+                    OpCodes.Mul,
+                    OpCodes.Newobj
+                );
+                vector.Replace(
+                    Instructions.Ldloc_3() // vector
+                );
+            }
 
             // >>> Patch code to drop sunflower seeds when harvesting with scythe.
             // >>> Patch code to let harvesting with scythe drop only 1 item.
