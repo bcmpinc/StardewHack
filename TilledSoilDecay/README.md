@@ -9,4 +9,4 @@ Note: run Stardew Valley once with this mod enabled to generate the `config.json
 * DecayDelayFirstOfMonth: Number of days that the patch must have been without water, before it can disappear during the night at the end of the month. Default = 1.
 
 ## Known bugs
-none
+Please report bugs on: https://github.com/bcmpinc/StardewHack/issues

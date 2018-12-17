@@ -7,7 +7,7 @@ Note: run Stardew Valley once with this mod enabled to generate the `config.json
 * ToolChargeDelay: Time required for charging the hoe or watering can in ms. Normally this is 600ms. The default is 600/1.5 = 400, meaning 50% faster charging.
 
 ## Known bugs
-none
+Please report bugs on: https://github.com/bcmpinc/StardewHack/issues
 
 ## Changes
 #### 0.4:

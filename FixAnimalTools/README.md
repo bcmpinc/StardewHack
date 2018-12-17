@@ -5,4 +5,4 @@ When using the shears or milk pail, you're locked in place until the animation f
 none
 
 ## Known bugs
-none
+Please report bugs on: https://github.com/bcmpinc/StardewHack/issues

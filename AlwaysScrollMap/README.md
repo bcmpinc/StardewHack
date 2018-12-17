@@ -13,6 +13,7 @@ Note: run Stardew Valley once with this mod enabled to generate the `config.json
 * ToggleScroll: The key used to toggle always scroll map. Default = OemSemicolon.
 
 ## Known bugs
+Please report bugs on: https://github.com/bcmpinc/StardewHack/issues
 * On the bus-stop map, the HUD also moves when scrolling past the edge of the map.
 * On a day with falling leaves, the leaves disappear when scrolling past the west edge of the map.
 
@@ -21,3 +22,5 @@ Note: run Stardew Valley once with this mod enabled to generate the `config.json
 * Added a configurable toggle button to enable/disable this mod during the game.
 #### 0.5:
 * Toggles for indoor and outdoor areas separately.
+#### 0.6:
+* Prepare mod to be SMAPI 3.0 compatible.

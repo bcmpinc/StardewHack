@@ -5,7 +5,7 @@ Adds a counter to the description of crafting & cooking recipes telling how ofte
 none
 
 ## Known bugs
-none
+Please report bugs on: https://github.com/bcmpinc/StardewHack/issues
 
 ## Changes
 #### 0.5:
