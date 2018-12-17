@@ -127,7 +127,8 @@ namespace StardewHack
         }
 
         /** Removes all instructions contained within this range. 
-         * Automatically fixes jumps to the start of this code range. */
+         * Automatically fixes jumps to the start of this code range to point to the first instruction after this code range.
+         */
         public void Remove() {
             ReplaceJump(0, insts[start + length]);
             insts.RemoveRange(start, length);
@@ -167,8 +168,11 @@ namespace StardewHack
             start = ext.start;
         }
 
-        /** Replaces the instructions within this range with the specified new instructions. */
+        /** Replaces the instructions within this range with the specified new instructions.
+         * Automatically fixes jumps to the start of this code range to point to the start of the new instructions.
+         */
         public void Replace(params CodeInstruction[] new_insts) {
+            ReplaceJump(0, new_insts[0]);
             if (length == new_insts.Length) {
                 for (int i=0; i<length; i++) {
                     insts[start+i] = new_insts[i];

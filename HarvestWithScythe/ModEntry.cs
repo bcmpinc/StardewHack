@@ -111,10 +111,10 @@ namespace StardewHack.HarvestWithScythe
             );
             #endregion
 
+            #region Sunflower drops 
             // >>> Patch code to drop sunflower seeds when harvesting with scythe.
             // >>> Patch code to let harvesting with scythe drop only 1 item.
             // >>> The other item drops are handled by the plucking code.
-            #region Sunflower drops 
 
             // Remove start of loop
             FindCode(
@@ -166,8 +166,31 @@ namespace StardewHack.HarvestWithScythe
             #endregion
 
             #region Colored flowers
-            
-            
+            // For colored flowers we need to call createItemDebris instead of createObjectDebris
+            FindCode(
+                // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
+                OpCodes.Ldarg_0,
+                OpCodes.Ldfld,
+                OpCodes.Call,
+                OpCodes.Ldarg_1,
+                OpCodes.Ldarg_2,
+                OpCodes.Ldc_I4_M1,
+                OpCodes.Ldloc_S,
+                OpCodes.Ldc_R4,
+                OpCodes.Ldnull,
+                OpCodes.Call
+            ).Replace(
+                // var tmp = CreateObject(this, num3);
+                Instructions.Ldarg_0(), // this
+                Instructions.Ldloc_S(5), // num3
+                Instructions.Call(typeof(ModEntry), "CreateObject", typeof(StardewValley.Crop), typeof(int)),
+                // Game1.createItemDebris(tmp, vector, -1, null, -1);
+                Instructions.Ldloc_3(), // vector
+                Instructions.Ldc_I4_M1(), // -1
+                Instructions.Ldnull(), // null
+                Instructions.Ldc_I4_M1(), // -1
+                Instructions.Call(typeof(StardewValley.Game1), "createItemDebris", typeof(StardewValley.Item), typeof(Microsoft.Xna.Framework.Vector2), typeof(int), typeof(StardewValley.GameLocation), typeof(int))
+            );
             #endregion
 
             if (config.AllHaveQuality) {
