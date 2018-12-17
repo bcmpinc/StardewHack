@@ -10,7 +10,7 @@ namespace StardewHack.HarvestWithScythe
         /** Should quality be applied to additional harvest? */
         public bool AllHaveQuality = false;
         /** Can flowers be harvested with the scythe? */
-        public bool ScytheHarvestFlowers = false;
+        public bool ScytheHarvestFlowers = true;
         /** Whether crops should also remain pluckable by hand. */
         public bool AllowManualHarvest = true;
     }
@@ -291,11 +291,62 @@ namespace StardewHack.HarvestWithScythe
             );
         }
 
+        public bool DisableHandHarvesting() {
+            return !config.AllowManualHarvest;
+        }
+        
+        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performUseAction", "DisableHandHarvesting")]
+        void HoeDirt_performUseAction() {
+            var harvest_hand = FindCode(
+                OpCodes.Ldarg_0,
+                OpCodes.Call,
+                OpCodes.Ldfld,
+                OpCodes.Call,
+                OpCodes.Brtrue
+            );
+            // Logic here depends on whether flowers can be harvested by scythe.
+            if (config.ScytheHarvestFlowers) {
+                // Entirely remove logic related to harvesting by hand.
+                harvest_hand.Extend(
+                    OpCodes.Ldarg_0,
+                    OpCodes.Call,
+                    OpCodes.Ldfld,
+                    OpCodes.Call,
+                    OpCodes.Ldc_I4_1,
+                    OpCodes.Bne_Un
+                );
+                harvest_hand.Remove();
+            } else {
+                // Only allow harvesting by hand for flowers. Otherwise those would not be harvestable.
+                harvest_hand.Replace(
+                    harvest_hand[0],
+                    harvest_hand[1],
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "programColored"),
+                    Instructions.Call_get(typeof(Netcode.NetBool), "Value"),
+                    Instructions.Brfalse((Label)harvest_hand[4].operand)
+                );
+                var harvest_scythe = FindCode(
+                    OpCodes.Ldarg_0,
+                    OpCodes.Call,
+                    OpCodes.Ldfld,
+                    OpCodes.Call,
+                    OpCodes.Ldc_I4_1,
+                    OpCodes.Bne_Un
+                );
+                harvest_scythe.Replace(
+                    harvest_scythe[0],
+                    harvest_scythe[1],
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "programColored"),
+                    Instructions.Call_get(typeof(Netcode.NetBool), "Value"),
+                    Instructions.Brtrue((Label)harvest_scythe[5].operand)
+                );
+            }
+        }
+
         public bool HarvestForageEnabled() {
             return config.HarvestForage;
         }
-
-
+        
         [BytecodePatch("StardewValley.Object::performToolAction", "HarvestForageEnabled")]
         void Object_performToolAction() {
             var code = BeginCode();
