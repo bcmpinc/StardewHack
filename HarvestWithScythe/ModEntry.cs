@@ -9,6 +9,8 @@ namespace StardewHack.HarvestWithScythe
         public bool HarvestForage = true;
         /** Should quality be applied to additional harvest? */
         public bool AllHaveQuality = false;
+        /** Can flowers be harvested with the scythe? */
+        public bool ScytheHarvestFlowers = false;
         /** Whether crops should also remain pluckable by hand. */
         public bool AllowManualHarvest = true;
     }
@@ -70,6 +72,10 @@ namespace StardewHack.HarvestWithScythe
             #endregion
 
             #region Support harvesting of spring onions with scythe
+            // Note: the branch
+            //   if (this.forageCrop)
+            // refers mainly to the crop spring union.
+            
             // Find the lines:
             var AddItem = FindCode(
                 // if (Game1.player.addItemToInventoryBool (@object, false)) {
@@ -80,17 +86,13 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Brfalse
             );
 
-            // Make jumps to the start of AddItem jump to the start of "Vector2 vector = ..."
-            var ldarg0 = Instructions.Ldarg_0();
-            AddItem.ReplaceJump(0, ldarg0);
-
             // Swap the lines (add '*64' to vector) &
             // Insert check for harvesting with scythe and act accordingly.
             AddItem.Prepend(
                 // if (this.harvestMethod != 0) {
-                ldarg0,
+                Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
-                Instructions.Call_get(typeof(Netcode.NetInt), "Value"), // this.indexOfHarvest
+                Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
                 // Game1.createItemDebris (@object, vector, -1, null, -1)
                 Instructions.Ldloc_0(), // @object
@@ -212,6 +214,25 @@ namespace StardewHack.HarvestWithScythe
                     Instructions.Callvirt(typeof(StardewValley.Characters.JunimoHarvester), "tryToAddItemToHut", typeof(StardewValley.Item))
                 )[3] = Instructions.Ldloc_S(5);
             }
+            
+            if (!config.ScytheHarvestFlowers) {
+                var lbl = AttachLabel(instructions[0]);
+                BeginCode().Append(
+                    // if (harvestMethod==1 && programColored) {
+                    Instructions.Ldarg_0(),
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "harvestMethod"),
+                    Instructions.Call_get(typeof(Netcode.NetInt), "Value"),
+                    Instructions.Brfalse(lbl),
+                    Instructions.Ldarg_0(),
+                    Instructions.Ldfld(typeof(StardewValley.Crop), "programColored"),
+                    Instructions.Call_get(typeof(Netcode.NetBool), "Value"),
+                    Instructions.Brfalse(lbl),
+                    // return false
+                    Instructions.Ldc_I4_0(),
+                    Instructions.Ret()
+                    // }
+                );
+            }
         }
 
         // Proxy method for creating an object suitable for spawning as debris.
@@ -224,11 +245,6 @@ namespace StardewHack.HarvestWithScythe
                 return new StardewValley.Object(crop.indexOfHarvest, 1, false, -1, quality);
             }
         }
-
-        // Note: the branch
-        //   if (this.forageCrop)
-        // refers mainly to the crop spring union.
-        // Harvesting those with scythe behaves a bit odd.
 
         [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performToolAction")]
         void HoeDirt_performToolAction() {
