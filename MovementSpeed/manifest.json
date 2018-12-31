@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.MovementSpeed",
    "EntryDll": "MovementSpeed.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:2736"]
+   "UpdateKeys": ["Nexus:2736"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }

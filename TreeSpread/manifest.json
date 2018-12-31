@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.TreeSpread",
    "EntryDll": "TreeSpread.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:3183"]
+   "UpdateKeys": ["Nexus:3183"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }

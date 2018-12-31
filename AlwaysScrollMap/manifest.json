@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.AlwaysScrollMap",
    "EntryDll": "AlwaysScrollMap.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:2733"]
+   "UpdateKeys": ["Nexus:2733"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }

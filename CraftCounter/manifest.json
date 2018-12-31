@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.CraftCounter",
    "EntryDll": "CraftCounter.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:2739"]
+   "UpdateKeys": ["Nexus:2739"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }

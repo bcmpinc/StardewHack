@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.HarvestWithScythe",
    "EntryDll": "HarvestWithScythe.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:2731"]
+   "UpdateKeys": ["Nexus:2731"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }

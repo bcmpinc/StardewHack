@@ -6,5 +6,9 @@
    "UniqueID": "bcmpinc.GrassGrowth",
    "EntryDll": "GrassGrowth.dll",
    "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:2732"]
+   "UpdateKeys": ["Nexus:2732"],
+   "Dependencies": [{
+      "UniqueID": "bcmpinc.StardewHack",
+      "MinimumVersion": "1.0"
+   }]
 }
