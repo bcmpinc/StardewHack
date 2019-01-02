@@ -16,6 +16,16 @@ namespace StardewHack.WearMoreRings
         public NetRef<Ring> ring2;
         public NetRef<Ring> ring3;
         public NetRef<Ring> ring4;
+        public void LoadRings(SaveRings sr) {
+            ring1.Set(MakeRing(sr.which1));
+            ring2.Set(MakeRing(sr.which2));
+            ring3.Set(MakeRing(sr.which3));
+            ring4.Set(MakeRing(sr.which4));
+        }
+        private Ring MakeRing(int which) {
+            if (which < 0) return null;
+            return new Ring(which);
+        }
     }
     
     /// <summary>
@@ -41,41 +51,37 @@ namespace StardewHack.WearMoreRings
 
     public class ModEntry : Hack<ModEntry>
     {
-        static ActualRingsDict playerdict = new ActualRingsDict();
+        static ActualRingsDict actualdata = new ActualRingsDict();
         
         public override void Entry(IModHelper helper) {
             base.Entry(helper);
             
-            helper.Events.GameLoop.SaveCreated += GameLoop_SaveCreated;
             helper.Events.GameLoop.Saved += GameLoop_Saved;
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
-            helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;;
-            
-        }
-
-        void GameLoop_SaveCreated(object sender, StardewModdingAPI.Events.SaveCreatedEventArgs e) {
+            helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;
             
         }
 
         void GameLoop_Saved(object sender, StardewModdingAPI.Events.SavedEventArgs e) {
             var savedata = new SaveRingsDict();
-            foreach(KeyValuePair<long, ActualRings> entry in playerdict) {
+            foreach(KeyValuePair<long, ActualRings> entry in actualdata) {
                 savedata[entry.Key] = new SaveRings(entry.Value);
             }
-            Helper.Data.WriteSaveData("extra-rings", playerdict);
+            Helper.Data.WriteSaveData("extra-rings", savedata);
         }
 
         void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e) {
             var savedata = Helper.Data.ReadSaveData<SaveRingsDict>("extra-rings");
+            foreach(KeyValuePair<long, SaveRings> entry in savedata) {
+                actualdata[entry.Key].LoadRings(entry.Value);
+            }
         }
 
         /// <summary>
-        /// Games the loop returned to title.
+        /// Clears the actual rings dictionary to prevent memory leaking.
         /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">E.</param>
         void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e) {
-            playerdict = new ActualRingsDict();
+            actualdata = new ActualRingsDict();
         }
 
     }
