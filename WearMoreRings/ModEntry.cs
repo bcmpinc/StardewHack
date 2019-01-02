@@ -1,13 +1,13 @@
 ﻿using Netcode;
+using StardewValley;
 using StardewModdingAPI;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using Ring = StardewValley.Objects.Ring;
 
 namespace StardewHack.WearMoreRings
 {
-    using Farmer = StardewValley.Farmer;
-    using Ring = StardewValley.Objects.Ring;
-    using ActualRingsDict = Dictionary<long, ActualRings>;
     using SaveRingsDict   = Dictionary<long, SaveRings>;
 
     /// <summary>
@@ -58,24 +58,29 @@ namespace StardewHack.WearMoreRings
 
     public class ModEntry : Hack<ModEntry>
     {
-        static ActualRingsDict actualdata = new ActualRingsDict();
+        static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
+        static IMonitor mon;
         
         public override void Entry(IModHelper helper) {
             base.Entry(helper);
             
-            helper.Events.GameLoop.Saved += GameLoop_Saved;
+            helper.Events.GameLoop.Saving += GameLoop_Saving;
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
-            helper.Events.GameLoop.ReturnedToTitle += GameLoop_ReturnedToTitle;
             
+            mon = Monitor;
         }
-
+        
+        static ActualRings FarmerNotFound(Farmer f) {
+            throw new System.Exception("ERROR: A Farmer object was not correctly registered with the 'WearMoreRings' mod.");
+        }
+        
         /// <summary>
         /// Serializes the worn extra rings to disk.
         /// </summary>
-        void GameLoop_Saved(object sender, StardewModdingAPI.Events.SavedEventArgs e) {
+        void GameLoop_Saving(object sender, StardewModdingAPI.Events.SavingEventArgs e) {
             var savedata = new SaveRingsDict();
-            foreach(KeyValuePair<long, ActualRings> entry in actualdata) {
-                savedata[entry.Key] = new SaveRings(entry.Value);
+            foreach(Farmer f in Game1.getAllFarmers()) {
+                savedata[f.UniqueMultiplayerID] = new SaveRings(actualdata.GetValue(f, FarmerNotFound));
             }
             Helper.Data.WriteSaveData("extra-rings", savedata);
             Monitor.Log("Saved extra rings data.");
@@ -85,22 +90,19 @@ namespace StardewHack.WearMoreRings
         /// Reads the saved extra rings and creates them.
         /// </summary>
         void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e) {
+            // Load data from mod's save file, if available.
             var savedata = Helper.Data.ReadSaveData<SaveRingsDict>("extra-rings");
             if (savedata == null) {
-                Monitor.Log("No save data loaded. Mod was probably added since last save.");
+                Monitor.Log("Save data not available.");
                 return;
             }
-            foreach(KeyValuePair<long, SaveRings> entry in savedata) {
-                actualdata[entry.Key].LoadRings(entry.Value);
+            // Iterate through each farmer to load the extra equipped rings.
+            foreach(Farmer f in Game1.getAllFarmers()) {
+                if (savedata.ContainsKey(f.UniqueMultiplayerID)) {
+                    actualdata.GetValue(f, FarmerNotFound).LoadRings(savedata[f.UniqueMultiplayerID]);
+                }
             }
             Monitor.Log("Loaded extra rings save data.");
-        }
-
-        /// <summary>
-        /// Clears the actual rings dictionary to prevent memory leaking.
-        /// </summary>
-        void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e) {
-            actualdata = new ActualRingsDict();
         }
         
         /// <summary>
@@ -108,12 +110,17 @@ namespace StardewHack.WearMoreRings
         /// </summary>
         public static void InitFarmer(Farmer f) {
             var actualrings = new ActualRings();
-            f.NetFields.AddFields(actualrings.ring1,actualrings.ring2,actualrings.ring3,actualrings.ring4);
-            actualdata[f.UniqueMultiplayerID] = actualrings;
+            f.NetFields.AddFields(
+                actualrings.ring1,
+                actualrings.ring2,
+                actualrings.ring3,
+                actualrings.ring4
+            );
+            actualdata.Add(f, actualrings);
         }
 
         [BytecodePatch("StardewValley.Farmer::farmerInit")]
-        void Tree_DayUpdate() {
+        void Farmer_farmerInit() {
             var addfields = FindCode(
                 OpCodes.Stelem_Ref,
                 Instructions.Callvirt(typeof(NetFields), "AddFields", typeof(INetSerializable[]))
@@ -123,6 +130,84 @@ namespace StardewHack.WearMoreRings
                 Instructions.Call(typeof(ModEntry), "InitFarmer", typeof(Farmer))
             );
         }
+        
+        public static int CountWearingRing(Farmer f, int id) {
+            bool IsRing(Ring r) {
+                return r != null && r.parentSheetIndex == id;
+            }
+        
+            ActualRings ar = actualdata.GetValue(f, FarmerNotFound);
+            int res = 0;
+            if (IsRing(f.leftRing)) res++;
+            if (IsRing(f.rightRing)) res++;
+            if (IsRing(ar.ring1)) res++;
+            if (IsRing(ar.ring2)) res++;
+            if (IsRing(ar.ring3)) res++;
+            if (IsRing(ar.ring4)) res++;
+            return res;
+        }
+
+        [BytecodePatch("StardewValley.Farmer::isWearingRing")]
+        void Farmer_isWearingRing() {
+            AllCode().Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Ldarg_1(),
+                Instructions.Call(typeof(ModEntry), "CountWearingRing", typeof(Farmer), typeof(int)),
+                Instructions.Ret()
+            );
+        }
+
+        public static void UpdateRings(Microsoft.Xna.Framework.GameTime time, GameLocation location, Farmer f) {
+            void update(Ring r) { 
+                if (r != null) r.update(time, location, f); 
+            };
+            
+            ActualRings ar = actualdata.GetValue(f, FarmerNotFound);
+            update(f.leftRing);
+            update(f.rightRing);
+            update(ar.ring1);
+            update(ar.ring2);
+            update(ar.ring3);
+            update(ar.ring4);
+        }
+        
+        [BytecodePatch("StardewValley.Farmer::updateCommon")]
+        void Farmer_updateCommon() {
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Farmer), "rightRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brfalse,
+                
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Farmer), "rightRing"),
+                OpCodes.Callvirt,
+                OpCodes.Ldarg_1,
+                OpCodes.Ldarg_2,
+                OpCodes.Ldarg_0,
+                OpCodes.Callvirt,
+                
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brfalse,
+                
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                OpCodes.Ldarg_1,
+                OpCodes.Ldarg_2,
+                OpCodes.Ldarg_0,
+                OpCodes.Callvirt
+            ).Replace(
+                Instructions.Ldarg_1(),
+                Instructions.Ldarg_2(),
+                Instructions.Ldarg_0(),
+                Instructions.Call(typeof(ModEntry), "UpdateRings", typeof(Microsoft.Xna.Framework.GameTime), typeof(GameLocation), typeof(Farmer)),
+                Instructions.Ret()
+            );
+        }
+
     }
 }
 
