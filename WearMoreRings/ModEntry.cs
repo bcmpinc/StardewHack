@@ -358,6 +358,51 @@ namespace StardewHack.WearMoreRings
                 range[2].operand = val;
             }
         }
+        
+        [BytecodePatch("StardewValley.Menus.InventoryPage::performHoverAction")]
+        void InventoryPage_performHoverAction() {
+            // Change code responsible for obtaining the tooltip information.
+            var var_item = generator.DeclareLocal(typeof(Item));
+            var code = FindCode(
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                OpCodes.Stloc_2,
+                OpCodes.Ldloc_2,
+                Instructions.Ldstr("Hat")
+            );
+            code.Extend(
+                OpCodes.Ldarg_0,
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "boots"),
+                OpCodes.Callvirt,
+                Instructions.Callvirt_get(typeof(Item), "DisplayName"),
+                Instructions.Stfld(typeof(StardewValley.Menus.InventoryPage), "hoverTitle")
+            );
+            code.Replace(
+                // var item = EquipmentIcon.item
+                Instructions.Ldloc_1(),
+                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "item"),
+                Instructions.Stloc_S(var_item),
+                // if (item != null)
+                Instructions.Ldloc_S(var_item),
+                Instructions.Brfalse(AttachLabel(code.End[0])),
+                // hoveredItem = item;
+                Instructions.Ldarg_0(),
+                Instructions.Ldloc_S(var_item),
+                Instructions.Stfld(typeof(StardewValley.Menus.InventoryPage), "hoveredItem"),
+                // hoverText = item.getDescription();
+                Instructions.Ldarg_0(),
+                Instructions.Ldloc_S(var_item),
+                Instructions.Callvirt(typeof(Item), "getDescription"),
+                Instructions.Stfld(typeof(StardewValley.Menus.InventoryPage), "hoverText"),
+                // hoverTitle = item.DisplayName;
+                Instructions.Ldarg_0(),
+                Instructions.Ldloc_S(var_item),
+                Instructions.Callvirt_get(typeof(Item), "DisplayName"),
+                Instructions.Stfld(typeof(StardewValley.Menus.InventoryPage), "hoverTitle")
+            );
+        }
+        
         #endregion Patch InventoryPage
         
     }
