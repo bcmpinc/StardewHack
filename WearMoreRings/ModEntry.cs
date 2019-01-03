@@ -10,6 +10,7 @@ namespace StardewHack.WearMoreRings
 {
     using SaveRingsDict   = Dictionary<long, SaveRings>;
 
+    #region Data Classes
     /// <summary>
     /// Structure used to store the actual rings.
     /// </summary> 
@@ -55,6 +56,7 @@ namespace StardewHack.WearMoreRings
             return r.ParentSheetIndex;
         }
     }
+    #endregion Data Classes
 
     public class ModEntry : Hack<ModEntry>
     {
@@ -74,6 +76,7 @@ namespace StardewHack.WearMoreRings
             throw new System.Exception("ERROR: A Farmer object was not correctly registered with the 'WearMoreRings' mod.");
         }
         
+        #region Events
         /// <summary>
         /// Serializes the worn extra rings to disk.
         /// </summary>
@@ -104,7 +107,9 @@ namespace StardewHack.WearMoreRings
             }
             Monitor.Log("Loaded extra rings save data.");
         }
+        #endregion Events
         
+        #region Patch Farmer
         /// <summary>
         /// Add the extra rings to the Netcode tree.
         /// </summary>
@@ -207,7 +212,65 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ret()
             );
         }
+        #endregion Patch Farmer
 
+        #region Patch GameLocation
+        
+        #endregion Patch GameLocation
+        
+        #region Patch InventoryPage
+        static void addEquipmentIcon(StardewValley.Menus.InventoryPage page, int x, int y, string name) {
+            var rect = new Microsoft.Xna.Framework.Rectangle(
+                page.xPositionOnScreen + 48 + x*64, 
+                page.yPositionOnScreen + StardewValley.Menus.IClickableMenu.borderWidth + StardewValley.Menus.IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*64, 
+                64, 64
+            );
+            int id = 101+10*x+y;
+            page.equipmentIcons.Add(new StardewValley.Menus.ClickableComponent(rect, name) {
+                myID = id,
+                downNeighborID = y<3 ? id+1 : -1,
+                upNeighborID = y==0 ? Game1.player.MaxItems - 12 + x : id-1,
+                rightNeighborID = x==0 ? id+10 : 105,
+                leftNeighborID = x==0 ? -1 : id-10,
+                upNeighborImmutable = y==0
+            });
+        }
+        
+        static string[] EquipmentIcons = {
+            "Hat",
+            "Left Ring",
+            "Right Ring",
+            "Boots",
+            "Extra Ring 1",
+            "Extra Ring 2",
+            "Extra Ring 3",
+            "Extra Ring 4",
+        };
+        
+        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(System.Int32,System.Int32,System.Int32,System.Int32)")]
+        void InventoryPage_ctor() {
+            var items = FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(StardewValley.Menus.InventoryPage), "equipmentIcons"),
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(StardewValley.Menus.IClickableMenu), "xPositionOnScreen"),
+                Instructions.Ldc_I4_S(48)
+            );
+            items.Extend(
+                OpCodes.Dup,
+                Instructions.Ldc_I4_S(104),
+                Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "myID"),
+                OpCodes.Dup,
+                Instructions.Ldc_I4_S(105),
+                Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "rightNeighborID"),
+                OpCodes.Callvirt
+            );
+            items.Remove();
+            
+        }
+        
+        #endregion Patch InventoryPage
+        
     }
 }
 

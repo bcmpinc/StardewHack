@@ -50,8 +50,8 @@ namespace StardewHack
                         // No query
                     } else if (query == inst) {
                         // Exact match.
-                    } else if (query is String) {
-                        if (!inst.ToString().Contains(query as String)) goto NO_MATCH; 
+                    } else if (query is string) {
+                        if (!inst.ToString().Contains(query as string)) goto NO_MATCH; 
                     } else if (query is MemberInfo) {
                         if (!query.Equals(inst.operand)) goto NO_MATCH;
                     } else if (query is OpCode) {
@@ -61,9 +61,17 @@ namespace StardewHack
                         if (!inst.opcode.Equals(qin.opcode)) goto NO_MATCH;
                         if (!inst.operand.Equals(qin.operand)) {
                             if (inst.operand is LocalBuilder) {
+                                // Local variable access can use both an index or a LocalBuilder object as operand.
                                 var lb = (LocalBuilder)inst.operand;
                                 try {
                                     if (Convert.ToInt32(qin.operand) != lb.LocalIndex) goto NO_MATCH;
+                                } catch {
+                                    goto NO_MATCH;
+                                }
+                            } else if (inst.operand!=null && qin.operand!=null) {
+                                // In case the operand is an integer, but their boxing types don't match.
+                                try {
+                                    if (Convert.ToInt64(inst.operand) != Convert.ToInt64(qin.operand)) goto NO_MATCH;
                                 } catch {
                                     goto NO_MATCH;
                                 }
