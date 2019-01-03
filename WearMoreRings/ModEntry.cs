@@ -325,6 +325,7 @@ namespace StardewHack.WearMoreRings
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
         void InventoryPage_draw() {
+            // Change the equipment slot drawing code to draw the 4 additional slots.
             object[] loop_start = {
                 Instructions.Ldloca_S(3),
                 OpCodes.Call,
@@ -343,6 +344,19 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldarg_1(),
                 Instructions.Call(typeof(ModEntry), "DrawEquipment", typeof(StardewValley.Menus.ClickableComponent), typeof(Microsoft.Xna.Framework.Graphics.SpriteBatch))
             );
+            
+            // Move other stuff 32/64px to the right to eliminate overlap.
+            for (int i=0; i<11; i++) {
+                range = range.FindNext(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(StardewValley.Menus.IClickableMenu), "xPositionOnScreen"),
+                    OpCodes.Ldc_I4,
+                    OpCodes.Add
+                );
+                int val = (int)range[2].operand + 32;
+                if (val < 256) val = 256;
+                range[2].operand = val;
+            }
         }
         #endregion Patch InventoryPage
         
