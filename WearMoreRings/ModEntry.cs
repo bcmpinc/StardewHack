@@ -4,6 +4,7 @@ using StardewModdingAPI;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using Microsoft.Xna.Framework;
 using Ring = StardewValley.Objects.Ring;
 
 namespace StardewHack.WearMoreRings
@@ -162,7 +163,7 @@ namespace StardewHack.WearMoreRings
             );
         }
 
-        public static void UpdateRings(Microsoft.Xna.Framework.GameTime time, GameLocation location, Farmer f) {
+        public static void UpdateRings(GameTime time, GameLocation location, Farmer f) {
             void update(Ring r) { 
                 if (r != null) r.update(time, location, f); 
             };
@@ -208,7 +209,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldarg_1(),
                 Instructions.Ldarg_2(),
                 Instructions.Ldarg_0(),
-                Instructions.Call(typeof(ModEntry), "UpdateRings", typeof(Microsoft.Xna.Framework.GameTime), typeof(GameLocation), typeof(Farmer)),
+                Instructions.Call(typeof(ModEntry), "UpdateRings", typeof (GameTime), typeof(GameLocation), typeof(Farmer)),
                 Instructions.Ret()
             );
         }
@@ -219,21 +220,40 @@ namespace StardewHack.WearMoreRings
         #endregion Patch GameLocation
         
         #region Patch InventoryPage
-        static void addEquipmentIcon(StardewValley.Menus.InventoryPage page, int x, int y, string name) {
-            var rect = new Microsoft.Xna.Framework.Rectangle(
+        static public void AddEquipmentIcon(StardewValley.Menus.InventoryPage page, int x, int y, string name) {
+            var rect = new Rectangle (
                 page.xPositionOnScreen + 48 + x*64, 
                 page.yPositionOnScreen + StardewValley.Menus.IClickableMenu.borderWidth + StardewValley.Menus.IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*64, 
                 64, 64
             );
+            
+            // Get the item that should be in this slot.
+            Item item = null;
+            if (x == 0) { 
+                if (y == 0) item = Game1.player.hat.Value;
+                if (y == 1) item = Game1.player.leftRing.Value;
+                if (y == 2) item = Game1.player.rightRing.Value;
+                if (y == 3) item = Game1.player.boots.Value;
+            } else {
+                ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+                if (y == 0) item = ar.ring1.Value;
+                if (y == 1) item = ar.ring2.Value;
+                if (y == 2) item = ar.ring3.Value;
+                if (y == 3) item = ar.ring4.Value;
+            }
+            
+            // Create the GUI element.
             int id = 101+10*x+y;
-            page.equipmentIcons.Add(new StardewValley.Menus.ClickableComponent(rect, name) {
+            var component = new StardewValley.Menus.ClickableComponent(rect, name) {
                 myID = id,
                 downNeighborID = y<3 ? id+1 : -1,
                 upNeighborID = y==0 ? Game1.player.MaxItems - 12 + x : id-1,
+                upNeighborImmutable = y==0,
                 rightNeighborID = x==0 ? id+10 : 105,
                 leftNeighborID = x==0 ? -1 : id-10,
-                upNeighborImmutable = y==0
-            });
+                item = item
+            };
+            page.equipmentIcons.Add(component);
         }
         
         static string[] EquipmentIcons = {
@@ -249,6 +269,7 @@ namespace StardewHack.WearMoreRings
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(System.Int32,System.Int32,System.Int32,System.Int32)")]
         void InventoryPage_ctor() {
+            // Replace code for equipment icon creation with method calls to our AddEquipmentIcon method.
             var items = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(StardewValley.Menus.InventoryPage), "equipmentIcons"),
@@ -266,9 +287,63 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Callvirt
             );
             items.Remove();
+            for (int i=0; i<EquipmentIcons.Length; i++) {
+                items.Append(
+                    Instructions.Ldarg_0(),                 // page
+                    Instructions.Ldc_I4_S((byte)(i/4)),     // x
+                    Instructions.Ldc_I4_S((byte)(i%4)),     // y
+                    Instructions.Ldstr(EquipmentIcons[i]),  // name
+                    Instructions.Call(typeof(ModEntry), "AddEquipmentIcon", typeof(StardewValley.Menus.InventoryPage), typeof(int), typeof(int), typeof(string))
+                );
+            }
             
+            // Move portrait 64px to the right.
+            // This only affects where the tooltip shows up.
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(StardewValley.Menus.IClickableMenu), "xPositionOnScreen"),
+                Instructions.Ldc_I4(192),
+                OpCodes.Add,
+                Instructions.Ldc_I4_S(64),
+                OpCodes.Sub,
+                Instructions.Ldc_I4_S(32),
+                OpCodes.Add
+            ).SubRange(4,2).Remove();
         }
         
+        static public void DrawEquipment(StardewValley.Menus.ClickableComponent icon, Microsoft.Xna.Framework.Graphics.SpriteBatch b) {
+            if (icon.item != null) {
+                b.Draw(Game1.menuTexture, icon.bounds, Game1.getSourceRectForStandardTileSheet (Game1.menuTexture, 10, -1, -1), Color.White);
+                icon.item.drawInMenu(b, new Vector2(icon.bounds.X, icon.bounds.Y), icon.scale, 1f, 0.866f, false);
+            } else {
+                int tile = 41;
+                if (icon.name == "Hat") tile = 42;
+                if (icon.name == "Boots") tile = 40;
+                b.Draw (Game1.menuTexture, icon.bounds, Game1.getSourceRectForStandardTileSheet (Game1.menuTexture, tile, -1, -1), Color.White);
+            }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
+        void InventoryPage_draw() {
+            object[] loop_start = {
+                Instructions.Ldloca_S(3),
+                OpCodes.Call,
+                Instructions.Stloc_S(4),
+                Instructions.Ldloc_S(4),
+                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                Instructions.Stloc_S(5),
+                Instructions.Ldloc_S(5),
+                Instructions.Ldstr("Hat")
+            };
+            var range = FindCode(loop_start).Follow(-1);
+            range.ExtendBackwards(loop_start);
+            range.Replace(
+                range[0],
+                range[1],
+                Instructions.Ldarg_1(),
+                Instructions.Call(typeof(ModEntry), "DrawEquipment", typeof(StardewValley.Menus.ClickableComponent), typeof(Microsoft.Xna.Framework.Graphics.SpriteBatch))
+            );
+        }
         #endregion Patch InventoryPage
         
     }

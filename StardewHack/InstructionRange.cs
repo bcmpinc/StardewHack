@@ -113,6 +113,13 @@ namespace StardewHack
         /// An empty InstructionRange pointing to the end of this range.
         /// </summary>
         public InstructionRange End   { get { return new InstructionRange(insts, start + length, 0); } }
+        
+        /// <summary>
+        /// Returns the requested sub-range.
+        /// </summary>
+        public InstructionRange SubRange(int start, int length) {
+            return new InstructionRange(insts, this.start + start, length);
+        }
 
         /// <summary>
         /// Moves all jump labels for 'from' to 'to'./// </summary>
