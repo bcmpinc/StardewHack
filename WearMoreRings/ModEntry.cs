@@ -216,7 +216,46 @@ namespace StardewHack.WearMoreRings
         #endregion Patch Farmer
 
         #region Patch GameLocation
+        public static void ring_onLeaveLocation(GameLocation location) {
+            ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+            Game1.player.leftRing.Value?.onLeaveLocation(Game1.player, location);
+            Game1.player.rightRing.Value?.onLeaveLocation(Game1.player, location);
+            ar.ring1.Value?.onLeaveLocation(Game1.player, location);
+            ar.ring2.Value?.onLeaveLocation(Game1.player, location);
+            ar.ring3.Value?.onLeaveLocation(Game1.player, location);
+            ar.ring4.Value?.onLeaveLocation(Game1.player, location);
+        }
         
+        [BytecodePatch("StardewValley.GameLocation::cleanupBeforePlayerExit")]
+        void GameLocation_cleanupBeforePlayerExit() { 
+            var code = FindCode(
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "rightRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brfalse
+            );
+            code.Extend(
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                Instructions.Call_get(typeof(Game1), "player"),
+                OpCodes.Ldarg_0,
+                Instructions.Callvirt(typeof(Ring), "onLeaveLocation", typeof(Farmer), typeof(GameLocation))
+            );
+            code.Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Call(typeof(ModEntry), "ring_onLeaveLocation", typeof(GameLocation))
+            );
+        }
+        
+        [BytecodePatch("StardewValley.GameLocation::resetForPlayerEntry")]
+        void GameLocation_resetForPlayerEntry() { 
+        
+        }
+        [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,System.Int32,System.Int32,System.Boolean,System.Single,System.Int32,System.Single,System.Single,System.Boolean,StardewValley.Farmer)")]
+        void GameLocation_damageMonster() { 
+        
+        }
         #endregion Patch GameLocation
         
         #region Patch InventoryPage
@@ -434,6 +473,10 @@ namespace StardewHack.WearMoreRings
             (helditem as Ring )?.onEquip(Game1.player, Game1.currentLocation);
             (helditem as Boots)?.onEquip();
             
+            // Swap items
+            Game1.player.CursorSlotItem = icon.item;
+            icon.item = helditem;
+
             // Update inventory
             ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
             if (icon.name == "Hat"         ) Game1.player.hat.Set(helditem as Hat);
@@ -444,10 +487,6 @@ namespace StardewHack.WearMoreRings
             if (icon.name == "Extra Ring 2") ar.ring2.Set(helditem as Ring);
             if (icon.name == "Extra Ring 3") ar.ring3.Set(helditem as Ring);
             if (icon.name == "Extra Ring 4") ar.ring4.Set(helditem as Ring);
-            
-            // Swap items
-            Game1.player.CursorSlotItem = icon.item;
-            icon.item = helditem;
         }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
