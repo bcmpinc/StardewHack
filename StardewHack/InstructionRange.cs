@@ -192,18 +192,23 @@ namespace StardewHack
         /// Extend the range up-to and including the specified instructions.
         /// </summary>
         public void Extend(params Object[] contains) {
-            var ext = FindNext(contains);
+            Extend(FindNext(contains));
+        }
+        public void Extend(InstructionRange ext) {
             length = ext.start + ext.length - start;
         }
 
         /// <summary>
-        /// Extend the range by searching backwards to include the specified instructions.
+        /// Extend the range backwards to include the specified instructions.
         /// </summary>
         public void ExtendBackwards(params Object[] contains) {
-            var ext = FindPrevious(contains);
+            ExtendBackwards(FindPrevious(contains));
+        }
+        public void ExtendBackwards(InstructionRange ext) {
             length = start + length - ext.start;
             start = ext.start;
         }
+        
 
         /// <summary>
         /// Replaces the instructions within this range with the specified new instructions.

@@ -1,11 +1,11 @@
 ﻿using Netcode;
 using StardewValley;
+using StardewValley.Objects;
 using StardewModdingAPI;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
-using Ring = StardewValley.Objects.Ring;
 
 namespace StardewHack.WearMoreRings
 {
@@ -403,6 +403,75 @@ namespace StardewHack.WearMoreRings
             );
         }
         
+        static public void EquipmentClick(StardewValley.Menus.ClickableComponent icon) {
+            // Check that item type is compatible.
+            // And play corresponding sound.
+            var helditem = Game1.player.CursorSlotItem;
+            if (helditem == null) {
+                if (icon.item == null) return;
+                Game1.playSound("dwop");
+            } else {
+                switch (icon.name) {
+                    case "Hat":
+                        if (!(helditem is Hat)) return;
+                        Game1.playSound ("grassyStep");
+                        break;
+                    case "Boots":
+                        if (!(helditem is Boots)) return;
+                        Game1.playSound ("sandyStep");
+                        DelayedAction.playSoundAfterDelay ("sandyStep", 150, null);
+                        break;
+                    default:
+                        if (!(helditem is Ring)) return;
+                        Game1.playSound ("crit");
+                        break;
+                }
+            }
+            
+            // Equip/unequip
+            (icon.item as Ring )?.onUnequip(Game1.player, Game1.currentLocation);
+            (icon.item as Boots)?.onUnequip();
+            (helditem as Ring )?.onEquip(Game1.player, Game1.currentLocation);
+            (helditem as Boots)?.onEquip();
+            
+            // Update inventory
+            ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+            if (icon.name == "Hat"         ) Game1.player.hat.Set(helditem as Hat);
+            if (icon.name == "Left Ring"   ) Game1.player.leftRing.Set(helditem as Ring);
+            if (icon.name == "Right Ring"  ) Game1.player.rightRing.Set(helditem as Ring);
+            if (icon.name == "Boots"       ) Game1.player.boots.Set(helditem as Boots);
+            if (icon.name == "Extra Ring 1") ar.ring1.Set(helditem as Ring);
+            if (icon.name == "Extra Ring 2") ar.ring2.Set(helditem as Ring);
+            if (icon.name == "Extra Ring 3") ar.ring3.Set(helditem as Ring);
+            if (icon.name == "Extra Ring 4") ar.ring4.Set(helditem as Ring);
+            
+            // Swap items
+            Game1.player.CursorSlotItem = icon.item;
+            icon.item = helditem;
+        }
+        
+        [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
+        void InventoryPage_receiveLeftClick() {
+            var code = FindCode(
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                OpCodes.Stloc_3,
+                OpCodes.Ldloc_3,
+                Instructions.Ldstr("Hat")
+            );
+            code.Extend(
+                OpCodes.Ldloc_3,
+                Instructions.Ldstr("Boots"),
+                OpCodes.Call,
+                OpCodes.Brtrue,
+                OpCodes.Br
+            );
+            code.Extend(code.End.Follow(-1));
+            code.Replace(
+                Instructions.Ldloc_1(),
+                Instructions.Call(typeof(ModEntry), "EquipmentClick", typeof(StardewValley.Menus.ClickableComponent))
+            );
+        }
         #endregion Patch InventoryPage
         
     }
