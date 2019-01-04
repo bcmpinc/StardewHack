@@ -248,13 +248,97 @@ namespace StardewHack.WearMoreRings
             );
         }
         
-        [BytecodePatch("StardewValley.GameLocation::resetForPlayerEntry")]
-        void GameLocation_resetForPlayerEntry() { 
-        
+        public static void ring_onNewLocation(GameLocation location) {
+            ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+            Game1.player.leftRing.Value?.onNewLocation(Game1.player, location);
+            Game1.player.rightRing.Value?.onNewLocation(Game1.player, location);
+            ar.ring1.Value?.onNewLocation(Game1.player, location);
+            ar.ring2.Value?.onNewLocation(Game1.player, location);
+            ar.ring3.Value?.onNewLocation(Game1.player, location);
+            ar.ring4.Value?.onNewLocation(Game1.player, location);
         }
+        
+        [BytecodePatch("StardewValley.GameLocation::resetLocalState")]
+        void GameLocation_resetLocalState() { 
+            var code = FindCode(
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "rightRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brfalse
+            );
+            code.Extend(
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                Instructions.Call_get(typeof(Game1), "player"),
+                OpCodes.Ldarg_0,
+                Instructions.Callvirt(typeof(Ring), "onNewLocation", typeof(Farmer), typeof(GameLocation))
+            );
+            code.Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Call(typeof(ModEntry), "ring_onNewLocation", typeof(GameLocation))
+            );
+        }
+         
+        public static void ring_onMonsterSlay(Farmer who, StardewValley.Monsters.Monster target) {
+            if (who==null) return;
+            ActualRings ar = actualdata.GetValue(who, FarmerNotFound);
+            who.leftRing.Value?.onMonsterSlay(target);
+            who.rightRing.Value?.onMonsterSlay(target);
+            ar.ring1.Value?.onMonsterSlay(target);
+            ar.ring2.Value?.onMonsterSlay(target);
+            ar.ring3.Value?.onMonsterSlay(target);
+            ar.ring4.Value?.onMonsterSlay(target);
+        }
+        
         [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,System.Int32,System.Int32,System.Boolean,System.Single,System.Int32,System.Single,System.Single,System.Boolean,StardewValley.Farmer)")]
         void GameLocation_damageMonster() { 
-        
+            // Arg who = 10
+            var code = FindCode(
+                Instructions.Ldarg_S(10), // who
+                OpCodes.Brfalse,
+                Instructions.Ldarg_S(10), // who
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brfalse
+            );
+            code.Extend(
+                // who.rightRing.Value
+                Instructions.Ldarg_S(10), // who
+                Instructions.Ldfld(typeof(Farmer), "rightRing"),
+                OpCodes.Callvirt,
+                // (Monster)characters[i]
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(GameLocation), "characters"),
+                OpCodes.Ldloc_1,
+                OpCodes.Ldfld,
+                OpCodes.Callvirt,
+                OpCodes.Castclass,
+                // .onMonsterSlay(...)
+                Instructions.Callvirt(typeof(Ring), "onMonsterSlay", typeof(StardewValley.Monsters.Monster))
+            );
+            var monster = code.SubRange(code.length - 7, 6);
+            code.Replace(
+                Instructions.Ldarg_S(10), // who
+                // (Monster)characters[i]
+                monster[0],
+                monster[1],
+                monster[2],
+                monster[3],
+                monster[4],
+                monster[5],
+                Instructions.Call(typeof(ModEntry), "ring_onMonsterSlay", typeof(Farmer), typeof(StardewValley.Monsters.Monster))
+            );
+            
+            /*
+            IL_05d9: ldarg.s who
+        IL_05db: brfalse.s IL_0612
+
+        IL_05dd: ldarg.s who
+        IL_05df: ldfld class Netcode.NetRef`1<class StardewValley.Objects.Ring> StardewValley.Farmer::leftRing
+        IL_05e4: callvirt instance !0 class Netcode.NetFieldBase`2<class StardewValley.Objects.Ring, class Netcode.NetRef`1<class StardewValley.Objects.Ring>>::get_Value()
+        IL_05e9: brfalse.s IL_0612
+            */
         }
         #endregion Patch GameLocation
         
