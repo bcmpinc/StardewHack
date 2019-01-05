@@ -10,6 +10,12 @@ Furthermore trees on your farm will retain their seed during the night (only if 
 * `SeedChance`: Chance that a tree will have a seed. Normally this is 0.05 (=5%). Default = 0.15 (=15%).
 * `OnlyPreventTapped`: Whether only tapped trees are prevented from dropping seeds. Default = false.
 
+## Dependencies
+This mod requires the following mods to be installed:
+
+* [SMAPI](https://www.nexusmods.com/stardewvalley/mods/2400)
+* [StardewHack](https://www.nexusmods.com/stardewvalley/mods/3213)
+
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
