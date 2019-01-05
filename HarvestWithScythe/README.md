@@ -35,3 +35,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Fixed the size of dropped spring onions.
 * Fixed flowers harvested with the scythe dropping only a single color.
 * Fixed harvesting forage in the bat cave and mines. 
+
+#### 1.0:
+* Added dependency on StardewHack.

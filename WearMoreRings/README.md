@@ -13,3 +13,7 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 * While rings from the [MoreRings](https://www.nexusmods.com/stardewvalley/mods/2054) mod can be equiped in the additional slots, their effects won't be applied.
+
+## Changes
+#### 1.0:
+* Created this mod. It hasn't been extensively tested and hence might still have some bugs.

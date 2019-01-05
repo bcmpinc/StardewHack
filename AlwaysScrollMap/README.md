@@ -37,3 +37,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 0.6:
 * Prepare mod to be SMAPI 3.0 compatible.
+
+#### 1.0:
+* Added dependency on StardewHack.

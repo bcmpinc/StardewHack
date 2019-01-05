@@ -19,3 +19,7 @@ This mod requires the following mods to be installed:
 
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
+
+## Changes
+#### 1.0:
+* Added dependency on the StardewHack library mod.

@@ -25,3 +25,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 #### 0.4:
 * Fixed incompatibility with Mouse Move Mode mod.
 * Setting `MovementSpeedMultiplier: 1` or `ToolChargeDelay: 600` will disable the associated patch.
+
+#### 1.0:
+* Added dependency on StardewHack.

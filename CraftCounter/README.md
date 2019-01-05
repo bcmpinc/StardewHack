@@ -19,3 +19,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 0.5.1:
 * Fixed exception on windows
+
+#### 1.0:
+* Added dependency on StardewHack.

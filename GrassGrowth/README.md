@@ -25,3 +25,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 ## Changes
 #### 0.5:
 * Added options to configure how (fast) grass growths & spreads.
+
+#### 1.0:
+* Added dependency on StardewHack.
