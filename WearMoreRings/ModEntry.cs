@@ -209,8 +209,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldarg_1(),
                 Instructions.Ldarg_2(),
                 Instructions.Ldarg_0(),
-                Instructions.Call(typeof(ModEntry), "UpdateRings", typeof (GameTime), typeof(GameLocation), typeof(Farmer)),
-                Instructions.Ret()
+                Instructions.Call(typeof(ModEntry), "UpdateRings", typeof (GameTime), typeof(GameLocation), typeof(Farmer))
             );
         }
         #endregion Patch Farmer
@@ -329,16 +328,6 @@ namespace StardewHack.WearMoreRings
                 monster[5],
                 Instructions.Call(typeof(ModEntry), "ring_onMonsterSlay", typeof(Farmer), typeof(StardewValley.Monsters.Monster))
             );
-            
-            /*
-            IL_05d9: ldarg.s who
-        IL_05db: brfalse.s IL_0612
-
-        IL_05dd: ldarg.s who
-        IL_05df: ldfld class Netcode.NetRef`1<class StardewValley.Objects.Ring> StardewValley.Farmer::leftRing
-        IL_05e4: callvirt instance !0 class Netcode.NetFieldBase`2<class StardewValley.Objects.Ring, class Netcode.NetRef`1<class StardewValley.Objects.Ring>>::get_Value()
-        IL_05e9: brfalse.s IL_0612
-            */
         }
         #endregion Patch GameLocation
         
