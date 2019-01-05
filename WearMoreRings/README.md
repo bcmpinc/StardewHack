@@ -19,3 +19,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 ## Changes
 #### 1.0:
 * Created this mod. It hasn't been extensively tested and hence might still have some bugs.
+
+#### 1.1:
+* Fixed horse animation and dismounting bug.
