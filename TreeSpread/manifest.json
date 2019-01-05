@@ -5,7 +5,7 @@
    "Description": "Prevents trees from spreading on your farm.",
    "UniqueID": "bcmpinc.TreeSpread",
    "EntryDll": "TreeSpread.dll",
-   "MinimumApiVersion": "2.7",
+   "MinimumApiVersion": "2.9",
    "UpdateKeys": ["Nexus:3183"],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",

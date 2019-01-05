@@ -5,8 +5,8 @@
    "Description": "When using the shears or milk pail, the animation no longer plays when no animal is nearby.",
    "UniqueID": "bcmpinc.FixAnimalTools",
    "EntryDll": "FixAnimalTools.dll",
-   "MinimumApiVersion": "2.7",
-   "UpdateKeys": ["Nexus:"],
+   "MinimumApiVersion": "2.9",
+   "UpdateKeys": ["Nexus:3215"],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",
       "MinimumVersion": "1.0"

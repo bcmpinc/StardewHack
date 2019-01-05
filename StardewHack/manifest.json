@@ -5,6 +5,6 @@
    "Description": "Library mod used by my other mods. Doesn't do much on its own.",
    "UniqueID": "bcmpinc.StardewHack",
    "EntryDll": "StardewHack.dll",
-   "MinimumApiVersion": "2.7",
+   "MinimumApiVersion": "2.9",
    "UpdateKeys": ["Nexus:3213"]
 }

@@ -5,7 +5,7 @@
    "Description": "Adds a counter to the description of crafting recipes telling how often it has been crafted.",
    "UniqueID": "bcmpinc.CraftCounter",
    "EntryDll": "CraftCounter.dll",
-   "MinimumApiVersion": "2.7",
+   "MinimumApiVersion": "2.9",
    "UpdateKeys": ["Nexus:2739"],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",
