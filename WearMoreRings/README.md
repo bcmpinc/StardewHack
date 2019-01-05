@@ -14,6 +14,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 * The mod changes the network protocol. So when playing multiplayer, all players must have this mod installed.
 * While rings from the [MoreRings](https://www.nexusmods.com/stardewvalley/mods/2054) mod can be equipped in the additional slots, their effects won't be applied.
+* Rings with a glow effect which were created through cheating will all have their glow effect disabled upon unequipping any of those rings.
 
 ## Changes
 #### 1.0:

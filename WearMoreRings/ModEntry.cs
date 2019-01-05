@@ -59,6 +59,19 @@ namespace StardewHack.WearMoreRings
     }
     #endregion Data Classes
 
+    class RingsImplementation : IWearMoreRingsAPI
+    {
+        public int CountEquippedRings(Farmer f, int which) {
+            if (f == null) throw new System.ArgumentNullException(nameof(f));
+            return ModEntry.CountWearingRing(f, which);
+        }
+
+        public IEnumerable<Ring> GetAllRings(Farmer f) {
+            if (f == null) throw new System.ArgumentNullException(nameof(f));
+            return ModEntry.ListRings(f);
+        }
+    }
+
     public class ModEntry : Hack<ModEntry>
     {
         static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
@@ -71,6 +84,10 @@ namespace StardewHack.WearMoreRings
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             
             mon = Monitor;
+        }
+        
+        public override object GetApi() {
+            return new RingsImplementation();
         }
         
         static ActualRings FarmerNotFound(Farmer f) {
@@ -135,6 +152,21 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldarg_0(),
                 Instructions.Call(typeof(ModEntry), "InitFarmer", typeof(Farmer))
             );
+        }
+        
+        public static IEnumerable<Ring> ListRings(Farmer f) {
+            var r = new List<Ring>();
+            void Add(Ring ring) {
+                if (ring!=null) r.Add(ring);
+            }
+            ActualRings ar = ModEntry.actualdata.GetValue(f, ModEntry.FarmerNotFound);
+            Add(f.leftRing);
+            Add(f.rightRing);
+            Add(ar.ring1);
+            Add(ar.ring2);
+            Add(ar.ring3);
+            Add(ar.ring4);
+            return r;
         }
         
         public static int CountWearingRing(Farmer f, int id) {
