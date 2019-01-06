@@ -76,6 +76,7 @@ namespace StardewHack.WearMoreRings
     {
         static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
         static IMonitor mon;
+        public static readonly System.Random random = new System.Random();
         
         public override void Entry(IModHelper helper) {
             base.Entry(helper);
@@ -666,10 +667,9 @@ namespace StardewHack.WearMoreRings
             );
             code = code.SubRange(2,code.length-3);
             code.Replace(
-                // (int)Utility.RandomLong(null)
-                Instructions.Ldnull(),
-                Instructions.Call(typeof(Utility), "RandomLong", typeof(System.Random)),
-                Instructions.Conv_I4()
+                // ModEntry.random.Next()
+                Instructions.Ldsfld(typeof(ModEntry), "random"),
+                Instructions.Call(typeof(System.Random), "Next")
             );
         }
         #endregion Patch Ring
