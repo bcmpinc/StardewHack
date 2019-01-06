@@ -14,7 +14,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 * The mod changes the network protocol. So when playing multiplayer, all players must have this mod installed.
 * While rings from the [MoreRings](https://www.nexusmods.com/stardewvalley/mods/2054) and [Giant Crop Ring](https://www.nexusmods.com/stardewvalley/mods/1182) mods can be equipped in the additional slots, their effects won't be applied.
-* Rings with a glow effect which were created through cheating will all have their glow effect disabled upon unequipping any of those rings.
 
 ## Changes
 #### 1.0:
@@ -24,5 +23,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Fixed horse animation and dismounting bug.
 
 #### 1.2:
-* Added Mod Integration API for mods that add new types of rings.
+* Added Mod Integration API, [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs), for mods that add new types of rings.
 * Fixed error due to save methods being called on multiplayer clients.
+* Fixed issue with unequipping one ring disabling the glow effect of all rings.
