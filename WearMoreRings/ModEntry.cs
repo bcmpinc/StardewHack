@@ -85,7 +85,7 @@ namespace StardewHack.WearMoreRings
             
             mon = Monitor;
         }
-        
+
         public override object GetApi() {
             return new RingsImplementation();
         }
@@ -620,6 +620,32 @@ namespace StardewHack.WearMoreRings
         }
         #endregion Patch InventoryPage
         
+        #region Patch Ring
+        [BytecodePatch("StardewValley.Objects.Ring::.ctor(System.Int32)")]
+        void Ring_ctor() {
+            var code = FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Ring), "uniqueID"),
+                Instructions.Ldsfld(typeof(Game1), "year"),
+                Instructions.Ldsfld(typeof(Game1), "dayOfMonth"),
+                OpCodes.Add
+            );
+            code.Extend(
+                Instructions.Call_get(typeof(Game1), "stats"),
+                Instructions.Ldfld(typeof(Stats), "itemsCrafted"),
+                OpCodes.Add,
+                Instructions.Callvirt_set(typeof(NetInt), "Value")
+            );
+            code = code.SubRange(2,code.length-3);
+            code.Replace(
+                // (int)Utility.RandomLong(null)
+                Instructions.Ldnull(),
+                Instructions.Call(typeof(Utility), "RandomLong", typeof(System.Random)),
+                Instructions.Conv_I4()
+            );
+        }
+    
+        #endregion Patch Ring
     }
 }
 
