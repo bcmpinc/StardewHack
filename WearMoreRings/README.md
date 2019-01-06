@@ -27,3 +27,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Fixed error due to save methods being called on multiplayer clients.
 * Fixed issue with unequipping one ring disabling the glow effect of all rings.
 * Fixed rings disappearing when shift+clicking them in your inventory.
+
+#### 1.3:
+* Fix exception during startup on windows.

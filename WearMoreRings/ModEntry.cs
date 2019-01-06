@@ -663,7 +663,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Call_get(typeof(Game1), "stats"),
                 Instructions.Ldfld(typeof(Stats), "itemsCrafted"),
                 OpCodes.Add,
-                Instructions.Callvirt_set(typeof(NetInt), "Value")
+                OpCodes.Callvirt
             );
             code = code.SubRange(2,code.length-3);
             code.Replace(
