@@ -596,8 +596,20 @@ namespace StardewHack.WearMoreRings
             if (icon.name == "Extra Ring 4") ar.ring4.Set(helditem as Ring);
         }
         
+        static public void AutoEquipment(StardewValley.Menus.InventoryPage page) {
+            var helditem = Game1.player.CursorSlotItem;
+            foreach (StardewValley.Menus.ClickableComponent icon in page.equipmentIcons) {
+                if (icon.item != null) continue;
+                if (icon.name == "Hat") continue;
+                if (icon.name == "Boots") continue;
+                EquipmentClick(icon);
+                break;
+            }
+        }
+        
         [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
         void InventoryPage_receiveLeftClick() {
+            // Handle a ring-inventory slot being clicked.
             var code = FindCode(
                 OpCodes.Ldloc_1,
                 Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
@@ -616,6 +628,22 @@ namespace StardewHack.WearMoreRings
             code.Replace(
                 Instructions.Ldloc_1(),
                 Instructions.Call(typeof(ModEntry), "EquipmentClick", typeof(StardewValley.Menus.ClickableComponent))
+            );
+            
+            // Handle a ring in inventory being shift+clicked.
+            code = code.FindNext(
+                Instructions.Callvirt(typeof(StardewValley.Menus.InventoryPage), "checkHeldItem", typeof(System.Func<Item, bool>)),
+                OpCodes.Brfalse,
+                Instructions.Call_get(typeof(Game1), "player"),
+                Instructions.Ldfld(typeof(Farmer), "leftRing"),
+                OpCodes.Callvirt,
+                OpCodes.Brtrue
+            );
+            code.Extend(code.Follow(1));
+            code = code.SubRange(2, code.length-2);
+            code.Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Call(typeof(ModEntry), "AutoEquipment", typeof(StardewValley.Menus.InventoryPage))
             );
         }
         #endregion Patch InventoryPage
@@ -644,7 +672,6 @@ namespace StardewHack.WearMoreRings
                 Instructions.Conv_I4()
             );
         }
-    
         #endregion Patch Ring
     }
 }

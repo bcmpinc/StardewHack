@@ -26,3 +26,4 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Added Mod Integration API, [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs), for mods that add new types of rings.
 * Fixed error due to save methods being called on multiplayer clients.
 * Fixed issue with unequipping one ring disabling the glow effect of all rings.
+* Fixed rings disappearing when shift+clicking them in your inventory.
