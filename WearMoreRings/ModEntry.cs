@@ -59,7 +59,7 @@ namespace StardewHack.WearMoreRings
     }
     #endregion Data Classes
 
-    class RingsImplementation : IWearMoreRingsAPI
+    public class RingsImplementation : IWearMoreRingsAPI
     {
         public int CountEquippedRings(Farmer f, int which) {
             if (f == null) throw new System.ArgumentNullException(nameof(f));
@@ -99,6 +99,7 @@ namespace StardewHack.WearMoreRings
         /// Serializes the worn extra rings to disk.
         /// </summary>
         void GameLoop_Saving(object sender, StardewModdingAPI.Events.SavingEventArgs e) {
+            if (!Game1.IsMasterGame) return;
             var savedata = new SaveRingsDict();
             foreach(Farmer f in Game1.getAllFarmers()) {
                 savedata[f.UniqueMultiplayerID] = new SaveRings(actualdata.GetValue(f, FarmerNotFound));
@@ -111,6 +112,7 @@ namespace StardewHack.WearMoreRings
         /// Reads the saved extra rings and creates them.
         /// </summary>
         void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e) {
+            if (!Game1.IsMasterGame) return;
             // Load data from mod's save file, if available.
             var savedata = Helper.Data.ReadSaveData<SaveRingsDict>("extra-rings");
             if (savedata == null) {

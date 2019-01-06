@@ -25,3 +25,4 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 1.2:
 * Added Mod Integration API for mods that add new types of rings.
+* Fixed error due to save methods being called on multiplayer clients.
