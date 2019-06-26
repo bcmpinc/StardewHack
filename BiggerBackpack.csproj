@@ -42,10 +42,12 @@
     <Reference Include="StardewHack">
       <HintPath>..\StardewHack\bin\Release\StardewHack.dll</HintPath>
     </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\StardewHack\bin\Debug\0Harmony.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mod.cs" />
-    <Compile Include="NewInventoryPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

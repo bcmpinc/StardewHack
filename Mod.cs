@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley.Menus;
@@ -7,6 +7,7 @@ using StardewValley;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Objects;
+using StardewHack;
 
 namespace BiggerBackpack
 {
@@ -34,7 +35,7 @@ namespace BiggerBackpack
         {
             if (args.Length != 1)
             {
-                Mod.instance.Monitor.Log("Must have one command argument", LogLevel.Info);
+                Monitor.Log("Must have one command argument", LogLevel.Info);
                 return;
             }
 
@@ -119,18 +120,6 @@ namespace BiggerBackpack
             // on new menu
             switch (e.NewMenu)
             {
-                case GameMenu gameMenu:
-                {
-                    var pages = (List<IClickableMenu>)Helper.Reflection.GetField<List<IClickableMenu>>(gameMenu, "pages").GetValue();
-                    var oldInv = pages[GameMenu.inventoryTab];
-                    if (oldInv.GetType() == typeof(InventoryPage))
-                    {
-                        pages[GameMenu.inventoryTab] = new NewInventoryPage(oldInv.xPositionOnScreen, oldInv.yPositionOnScreen, oldInv.width, oldInv.height);
-                    }
-
-                    break;
-                }
-
                 case MenuWithInventory menuWithInv:
                     menuWithInv.inventory.capacity = 48;
                     menuWithInv.inventory.rows = 4;
@@ -159,6 +148,92 @@ namespace BiggerBackpack
                 int sel = Helper.Reflection.GetField<int>(db, "selectedResponse").GetValue();
                 if (sel != -1)
                     prevSelResponse = sel;
+            }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.InventoryMenu::.ctor")]
+        void InventoryMenu_ctor() {
+            // If capacity is -1, change rows to 4.
+            var begin = AttachLabel(BeginCode()[0]);
+            BeginCode().Prepend(
+                // if (capacity<0) {
+                Instructions.Ldarg_S(6),
+                Instructions.Ldc_I4_0(),
+                Instructions.Bge(begin),
+                //   rows = 4;
+                Instructions.Ldc_I4_4(),
+                Instructions.Starg_S(7)
+                // }
+            );
+            
+            // Replace 36 with 48, twice.
+            for (int i=0; i<2; i++) {
+                var code = FindCode(
+                    Instructions.Ldarg_S(6),
+                    OpCodes.Ldc_I4_M1,
+                    OpCodes.Beq,
+                    OpCodes.Ldarg_S,
+                    OpCodes.Br,
+                    Instructions.Ldc_I4_S(36)
+                );
+                code[5].operand = (byte)48;
+            }
+        }
+        
+        public static void shiftIconsDown(List<ClickableComponent> equipmentIcons){
+            foreach (var icon in equipmentIcons) {
+                icon.bounds.Y += Game1.tileSize;
+            }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor")]
+        void InventoryPage_ctor() {
+            BeginCode().Prepend(
+                // height += Game1.tileSize;
+                Instructions.Ldarg_S(4),
+                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Add(),
+                Instructions.Starg_S(4)
+            );
+            
+            EndCode().Insert(-1,
+                Instructions.Ldarg_0(),
+                Instructions.Ldfld(typeof(InventoryPage), "equipmentIcons"),
+                Instructions.Call(GetType(), "shiftIconsDown", typeof(List<ClickableComponent>))
+            );
+        }
+
+        [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
+        void InventoryPage_draw() {
+            var code = BeginCode();
+            
+            // var yoffset = yPositionOnScreen + borderWidth + spaceToClearTopBorder + Game1.tileSize
+            var yoffset = generator.DeclareLocal(typeof(int));
+            code.Prepend(
+                Instructions.Ldarg_0(),
+                Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                Instructions.Add(),
+                Instructions.Ldsfld(typeof(IClickableMenu), "spaceToClearTopBorder"),
+                Instructions.Add(),
+                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Add(),
+                Instructions.Stloc_S(yoffset)
+            );
+            
+            // Replace all remaining `yPositionOnScreen + borderWidth + spaceToClearTopBorder` by `yoffset`.
+            for (var i=0; i<12; i++) {
+                code = code.FindNext(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                    Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                    OpCodes.Add,
+                    Instructions.Ldsfld(typeof(IClickableMenu), "spaceToClearTopBorder"),
+                    OpCodes.Add
+                );
+                code.Replace(
+                    Instructions.Ldloc_S(yoffset)
+                );
             }
         }
     }
