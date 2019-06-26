@@ -10,7 +10,7 @@ using StardewValley.Objects;
 
 namespace BiggerBackpack
 {
-    public class Mod : StardewModdingAPI.Mod
+    public class Mod : StardewHack.Hack<Mod>
     {
         public static Mod instance;
 
@@ -20,7 +20,7 @@ namespace BiggerBackpack
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            instance = this;
+            base.Entry(helper);
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
 
             helper.Events.Display.MenuChanged += onMenuChanged;

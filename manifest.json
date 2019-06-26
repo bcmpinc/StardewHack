@@ -7,5 +7,9 @@
   "EntryDll": "BiggerBackpack.dll",
   "MinimumApiVersion": "2.9.0",
   "UpdateKeys": [ "Nexus:1845", "Chucklefish:5191" ],
-  "spacechase0": "bigger-backpack"
+  "spacechase0": "bigger-backpack",
+  "Dependencies": [{
+    "UniqueID": "bcmpinc.StardewHack",
+    "MinimumVersion": "1.0"
+  }]
 }
