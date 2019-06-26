@@ -34,7 +34,7 @@ namespace BiggerBackpack
         {
             if (args.Length != 1)
             {
-                Log.info("Must have one command argument");
+                Mod.instance.Monitor.Log("Must have one command argument", LogLevel.Info);
                 return;
             }
 
