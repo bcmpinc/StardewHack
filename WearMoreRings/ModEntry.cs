@@ -85,12 +85,12 @@ namespace StardewHack.WearMoreRings
         public static readonly System.Random random = new System.Random();
         
         public override void Entry(IModHelper helper) {
+            mon = Monitor;
+            
             base.Entry(helper);
             
             helper.Events.GameLoop.Saving += GameLoop_Saving;
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
-            
-            mon = Monitor;
         }
 
         public override object GetApi() {
@@ -496,18 +496,40 @@ namespace StardewHack.WearMoreRings
         [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
         void InventoryPage_draw() {
             // Change the equipment slot drawing code to draw the 4 additional slots.
-            object[] loop_start = {
-                Instructions.Ldloca_S(3),
-                OpCodes.Call,
-                Instructions.Stloc_S(4),
-                Instructions.Ldloc_S(4),
-                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
-                Instructions.Stloc_S(5),
-                Instructions.Ldloc_S(5),
-                Instructions.Ldstr("Hat")
-            };
-            var range = FindCode(loop_start).Follow(-1);
-            range.ExtendBackwards(loop_start);
+            InstructionRange range = null;
+            try {
+                range = FindCode(
+                    // switch (equipmentIcon.name) {
+                    Instructions.Ldloca_S(3),
+                    OpCodes.Call,
+                    Instructions.Stloc_S(4),
+                    Instructions.Ldloc_S(4),
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    Instructions.Stloc_S(5),
+                    Instructions.Ldloc_S(5),
+                    // case "Hat":
+                    Instructions.Ldstr("Hat")
+                );
+            } catch {
+                range = FindCode(
+                    // switch (equipmentIcon.name) {
+                    Instructions.Ldloca_S(1),
+                    OpCodes.Call,
+                    Instructions.Stloc_0(),
+                    Instructions.Ldloc_0(),
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    Instructions.Stloc_2(),
+                    Instructions.Ldloc_2(),
+                    // case null (shortcut)
+                    OpCodes.Brfalse,
+                    Instructions.Ldloc_2(),
+                    // case "Hat":
+                    Instructions.Ldstr("Hat")
+                );
+            }
+            if (range.length != 8 && range.length != 10) throw new System.Exception($"Failed to properly match code. Length={range.length}");
+            
+            range.Extend(range.Follow(-1));
             range.Replace(
                 range[0],
                 range[1],
