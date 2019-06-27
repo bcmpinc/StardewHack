@@ -30,7 +30,12 @@ namespace StardewHack.WearMoreRings
         
         private Ring MakeRing(int which) {
             if (which < 0) return null;
-            return new Ring(which);
+            try {
+                return new Ring(which);
+            } catch {
+                // Ring no longer exists, so delete it.
+                return null;
+            }
         }
     }
     
