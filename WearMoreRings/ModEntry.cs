@@ -555,13 +555,26 @@ namespace StardewHack.WearMoreRings
         void InventoryPage_performHoverAction() {
             // Change code responsible for obtaining the tooltip information.
             var var_item = generator.DeclareLocal(typeof(Item));
-            var code = FindCode(
-                OpCodes.Ldloc_1,
-                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
-                OpCodes.Stloc_2,
-                OpCodes.Ldloc_2,
-                Instructions.Ldstr("Hat")
-            );
+            InstructionRange code;
+            try {
+                code = FindCode(
+                    OpCodes.Ldloc_1,
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    OpCodes.Stloc_2,
+                    OpCodes.Ldloc_2,
+                    Instructions.Ldstr("Hat")
+                );
+            } catch {
+                code = FindCode(
+                    OpCodes.Ldloc_0,
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    OpCodes.Stloc_2,
+                    OpCodes.Ldloc_2,
+                    OpCodes.Brfalse,
+                    OpCodes.Ldloc_2,
+                    Instructions.Ldstr("Hat")
+                );
+            }
             code.Extend(
                 OpCodes.Ldarg_0,
                 Instructions.Call_get(typeof(Game1), "player"),
@@ -572,7 +585,7 @@ namespace StardewHack.WearMoreRings
             );
             code.Replace(
                 // var item = EquipmentIcon.item
-                Instructions.Ldloc_1(),
+                code[0],
                 Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "item"),
                 Instructions.Stloc_S(var_item),
                 // if (item != null)
