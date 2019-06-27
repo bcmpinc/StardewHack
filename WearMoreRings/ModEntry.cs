@@ -373,42 +373,6 @@ namespace StardewHack.WearMoreRings
         #endregion Patch GameLocation
         
         #region Patch InventoryPage
-        static public void AddEquipmentIcon(StardewValley.Menus.InventoryPage page, int x, int y, string name) {
-            var rect = new Rectangle (
-                page.xPositionOnScreen + 48 + x*64, 
-                page.yPositionOnScreen + StardewValley.Menus.IClickableMenu.borderWidth + StardewValley.Menus.IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*64, 
-                64, 64
-            );
-            
-            // Get the item that should be in this slot.
-            Item item = null;
-            if (x == 0) { 
-                if (y == 0) item = Game1.player.hat.Value;
-                if (y == 1) item = Game1.player.leftRing.Value;
-                if (y == 2) item = Game1.player.rightRing.Value;
-                if (y == 3) item = Game1.player.boots.Value;
-            } else {
-                ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
-                if (y == 0) item = ar.ring1.Value;
-                if (y == 1) item = ar.ring2.Value;
-                if (y == 2) item = ar.ring3.Value;
-                if (y == 3) item = ar.ring4.Value;
-            }
-            
-            // Create the GUI element.
-            int id = 101+10*x+y;
-            var component = new StardewValley.Menus.ClickableComponent(rect, name) {
-                myID = id,
-                downNeighborID = y<3 ? id+1 : -1,
-                upNeighborID = y==0 ? Game1.player.MaxItems - 12 + x : id-1,
-                upNeighborImmutable = y==0,
-                rightNeighborID = x==0 ? id+10 : 105,
-                leftNeighborID = x==0 ? -1 : id-10,
-                item = item
-            };
-            page.equipmentIcons.Add(component);
-        }
-        
         static string[] EquipmentIcons = {
             "Hat",
             "Left Ring",
@@ -419,6 +383,48 @@ namespace StardewHack.WearMoreRings
             "Extra Ring 3",
             "Extra Ring 4",
         };
+
+        static public void AddEquipmentIcons(StardewValley.Menus.InventoryPage page) {
+            for (int i=0; i<EquipmentIcons.Length; i++) {
+                int x = i/4;
+                int y = i%4;
+                string name = EquipmentIcons[i];
+                
+                var rect = new Rectangle (
+                    page.xPositionOnScreen + 48 + x*64, 
+                    page.yPositionOnScreen + StardewValley.Menus.IClickableMenu.borderWidth + StardewValley.Menus.IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*64, 
+                    64, 64
+                );
+                
+                // Get the item that should be in this slot.
+                Item item = null;
+                if (x == 0) { 
+                    if (y == 0) item = Game1.player.hat.Value;
+                    if (y == 1) item = Game1.player.leftRing.Value;
+                    if (y == 2) item = Game1.player.rightRing.Value;
+                    if (y == 3) item = Game1.player.boots.Value;
+                } else {
+                    ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+                    if (y == 0) item = ar.ring1.Value;
+                    if (y == 1) item = ar.ring2.Value;
+                    if (y == 2) item = ar.ring3.Value;
+                    if (y == 3) item = ar.ring4.Value;
+                }
+                
+                // Create the GUI element.
+                int id = 101+10*x+y;
+                var component = new StardewValley.Menus.ClickableComponent(rect, name) {
+                    myID = id,
+                    downNeighborID = y<3 ? id+1 : -1,
+                    upNeighborID = y==0 ? Game1.player.MaxItems - 12 + x : id-1,
+                    upNeighborImmutable = y==0,
+                    rightNeighborID = x==0 ? id+10 : 105,
+                    leftNeighborID = x==0 ? -1 : id-10,
+                    item = item
+                };
+                page.equipmentIcons.Add(component);
+            }
+        }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(System.Int32,System.Int32,System.Int32,System.Int32)")]
         void InventoryPage_ctor() {
@@ -455,18 +461,11 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Callvirt
                 );
             }
-            items.Remove();
-            
             // Add our own equipment icons
-            for (int i=0; i<EquipmentIcons.Length; i++) {
-                items.Append(
-                    Instructions.Ldarg_0(),                 // page
-                    Instructions.Ldc_I4_S((byte)(i/4)),     // x
-                    Instructions.Ldc_I4_S((byte)(i%4)),     // y
-                    Instructions.Ldstr(EquipmentIcons[i]),  // name
-                    Instructions.Call(typeof(ModEntry), "AddEquipmentIcon", typeof(StardewValley.Menus.InventoryPage), typeof(int), typeof(int), typeof(string))
-                );
-            }
+            items.Replace(
+                Instructions.Ldarg_0(), // page
+                Instructions.Call(typeof(ModEntry), "AddEquipmentIcons", typeof(StardewValley.Menus.InventoryPage))
+            );
             
             // Move portrait 64px to the right.
             // This only affects where the tooltip shows up.
