@@ -9,6 +9,6 @@
    "UpdateKeys": ["Nexus:2731"],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",
-      "MinimumVersion": "1.0"
+      "MinimumVersion": "1.1"
    }]
 }
