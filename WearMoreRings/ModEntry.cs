@@ -679,13 +679,26 @@ namespace StardewHack.WearMoreRings
         [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
         void InventoryPage_receiveLeftClick() {
             // Handle a ring-inventory slot being clicked.
-            var code = FindCode(
-                OpCodes.Ldloc_1,
-                Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
-                OpCodes.Stloc_3,
-                OpCodes.Ldloc_3,
-                Instructions.Ldstr("Hat")
-            );
+            InstructionRange code;
+            try {
+                code = FindCode(
+                    OpCodes.Ldloc_1,
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    OpCodes.Stloc_3,
+                    OpCodes.Ldloc_3,
+                    Instructions.Ldstr("Hat")
+                );
+            } catch {
+                code = FindCode(
+                    OpCodes.Ldloc_0,
+                    Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
+                    OpCodes.Stloc_3,
+                    OpCodes.Ldloc_3,
+                    OpCodes.Brfalse,
+                    OpCodes.Ldloc_3,
+                    Instructions.Ldstr("Hat")
+                );
+            }
             code.Extend(
                 OpCodes.Ldloc_3,
                 Instructions.Ldstr("Boots"),
@@ -695,7 +708,7 @@ namespace StardewHack.WearMoreRings
             );
             code.Extend(code.End.Follow(-1));
             code.Replace(
-                Instructions.Ldloc_1(),
+                code[0],
                 Instructions.Call(typeof(ModEntry), "EquipmentClick", typeof(StardewValley.Menus.ClickableComponent))
             );
             
