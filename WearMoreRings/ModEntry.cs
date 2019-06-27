@@ -34,6 +34,7 @@ namespace StardewHack.WearMoreRings
                 return new Ring(which);
             } catch {
                 // Ring no longer exists, so delete it.
+                ModEntry.mon.Log($"Failed to create ring with id {which}.", LogLevel.Warn);
                 return null;
             }
         }
@@ -80,7 +81,7 @@ namespace StardewHack.WearMoreRings
     public class ModEntry : Hack<ModEntry>
     {
         static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
-        static IMonitor mon;
+        public static IMonitor mon;
         public static readonly System.Random random = new System.Random();
         
         public override void Entry(IModHelper helper) {
@@ -429,16 +430,34 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldfld(typeof(StardewValley.Menus.IClickableMenu), "xPositionOnScreen"),
                 Instructions.Ldc_I4_S(48)
             );
-            items.Extend(
-                OpCodes.Dup,
-                Instructions.Ldc_I4_S(104),
-                Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "myID"),
-                OpCodes.Dup,
-                Instructions.Ldc_I4_S(105),
-                Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "rightNeighborID"),
-                OpCodes.Callvirt
-            );
+            // Differences in optimization might cause CIL to contain either ldloc or dup.
+            // Use EAFP to figure out which we're dealing with here.
+            try {
+                items.Extend(
+                    OpCodes.Dup,
+                    Instructions.Ldc_I4_S(104),
+                    Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "myID"),
+                    OpCodes.Dup,
+                    Instructions.Ldc_I4_S(105),
+                    Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "rightNeighborID"),
+                    OpCodes.Callvirt
+                );
+            } catch {
+                items.Extend(
+                    OpCodes.Stloc_0,
+                    OpCodes.Ldloc_0,
+                    Instructions.Ldc_I4_S(104),
+                    Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "myID"),
+                    OpCodes.Ldloc_0,
+                    Instructions.Ldc_I4_S(105),
+                    Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "rightNeighborID"),
+                    OpCodes.Ldloc_0,
+                    OpCodes.Callvirt
+                );
+            }
             items.Remove();
+            
+            // Add our own equipment icons
             for (int i=0; i<EquipmentIcons.Length; i++) {
                 items.Append(
                     Instructions.Ldarg_0(),                 // page
