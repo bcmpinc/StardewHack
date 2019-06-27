@@ -5,6 +5,11 @@ namespace StardewHack.Library
 {
     public class ModEntry : StardewModdingAPI.Mod
     {
+        /// <summary>
+        /// During startup mods that are broken are added to this list. Used to produce an error message during startup.
+        /// </summary>
+        static public System.Collections.Generic.List<string> broken_mods = new System.Collections.Generic.List<string>();
+    
         public override void Entry(IModHelper helper) {
             // Check versions
             var harmony_version = typeof(HarmonyInstance).Assembly.GetName().Version;
