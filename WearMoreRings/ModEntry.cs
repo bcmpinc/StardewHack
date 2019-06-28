@@ -448,7 +448,8 @@ namespace StardewHack.WearMoreRings
                     Instructions.Stfld(typeof(StardewValley.Menus.ClickableComponent), "rightNeighborID"),
                     OpCodes.Callvirt
                 );
-            } catch {
+            } catch (System.Exception err) {
+                LogException(err, LogLevel.Trace);
                 items.Extend(
                     OpCodes.Stloc_0,
                     OpCodes.Ldloc_0,
@@ -510,7 +511,8 @@ namespace StardewHack.WearMoreRings
                     // case "Hat":
                     Instructions.Ldstr("Hat")
                 );
-            } catch {
+            } catch (System.Exception err) {
+                LogException(err, LogLevel.Trace);
                 range = FindCode(
                     // switch (equipmentIcon.name) {
                     Instructions.Ldloca_S(1),
@@ -564,7 +566,8 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Ldloc_2,
                     Instructions.Ldstr("Hat")
                 );
-            } catch {
+            } catch (System.Exception err) {
+                LogException(err, LogLevel.Trace);
                 code = FindCode(
                     OpCodes.Ldloc_0,
                     Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),
@@ -688,7 +691,8 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Ldloc_3,
                     Instructions.Ldstr("Hat")
                 );
-            } catch {
+            } catch (System.Exception err) {
+                LogException(err, LogLevel.Trace);
                 code = FindCode(
                     OpCodes.Ldloc_0,
                     Instructions.Ldfld(typeof(StardewValley.Menus.ClickableComponent), "name"),

@@ -146,11 +146,17 @@ namespace StardewHack
                             StardewHack.Library.ModEntry.broken_mods.Add(helper.ModRegistry.ModID);
                             broken = true;
                         }
-                        while (err.InnerException != null) err = err.InnerException;
-                        Monitor.Log(err.Message + System.Environment.NewLine + err.StackTrace, LogLevel.Error);
+                        LogException(err);
                     }
                 }
             }
+        }
+        
+        public void LogException(Exception err, LogLevel level = LogLevel.Error) {
+            while (err.InnerException != null) {
+                err = err.InnerException;
+            }
+            Monitor.Log(err.Message + System.Environment.NewLine + err.StackTrace, level);
         }
 
         /// <summary>
