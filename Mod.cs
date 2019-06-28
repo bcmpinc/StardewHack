@@ -120,15 +120,11 @@ namespace BiggerBackpack
             // on new menu
             switch (e.NewMenu)
             {
-                case MenuWithInventory menuWithInv:
+                /*case MenuWithInventory menuWithInv:
                     menuWithInv.inventory.capacity = 48;
                     menuWithInv.inventory.rows = 4;
                     menuWithInv.height += 64;
-                    break;
-
-                case ShopMenu shop:
-                    shop.inventory = new InventoryMenu(shop.inventory.xPositionOnScreen, shop.inventory.yPositionOnScreen, false, (List<Item>)null, new InventoryMenu.highlightThisItem(shop.highlightItemToSell), 48, 4, 0, 0, true);
-                    break;
+                    break;*/
 
                 case DialogueBox _:
                     Helper.Events.GameLoop.UpdateTicked += watchSelectedResponse;
@@ -197,10 +193,33 @@ namespace BiggerBackpack
             );
             
             EndCode().Insert(-1,
+                // Shift icons down by `Game1.tileSize` pixels
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(InventoryPage), "equipmentIcons"),
                 Instructions.Call(GetType(), "shiftIconsDown", typeof(List<ClickableComponent>))
             );
+            
+            try {
+                // Move portrait `Game1.tileSize` pixels down.
+                // This only affects where the tooltip shows up.
+                FindCode(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                    Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                    OpCodes.Add,
+                    Instructions.Ldsfld(typeof(IClickableMenu), "spaceToClearTopBorder"),
+                    OpCodes.Add,
+                    Instructions.Ldc_I4(256),
+                    OpCodes.Add,
+                    Instructions.Ldc_I4_8(),
+                    OpCodes.Sub,
+                    Instructions.Ldc_I4_S(64),
+                    OpCodes.Add
+                )[6].operand = 256 + Game1.tileSize;
+            } catch (System.Exception err) {
+                Monitor.Log("Failed to fix portrait tooltip position.", LogLevel.Warn);
+                LogException(err, LogLevel.Warn);
+            }
         }
 
         [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
