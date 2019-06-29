@@ -87,9 +87,10 @@ namespace StardewHack
         /// <summary>
         /// Retrieves the type definition with the specified name.
         /// For inner types, specify the path seperated by '/'.
+        /// Generic types are supported using the parameter type enclosed in <>, currently only a single parameter type is supported.
         /// </summary>
         internal static Type GetType(string type) {
-            string[] a = type.Trim().Split('/');
+            string[] a = type.Trim().Split('/','<','>');
             
             // Retrieve the base type.
             var res = AccessTools.TypeByName(a[0]);
@@ -97,13 +98,22 @@ namespace StardewHack
                 throw new TypeAccessException($"ERROR: type \"{a[0]}\" not found.");
             }
             
-            // Recursively retrieve the inner type (if any)
+            
             for (int i=1; i<a.Length; i++) {
-                res = AccessTools.Inner(res, a[i]);
-                if (res == null) {
-                    throw new TypeAccessException($"ERROR: sub-type \"{a[i]}\" not found.");
+                if (a[i-1].EndsWith("`1", StringComparison.Ordinal)) {
+                    // Make the generic type.
+                    res = res.MakeGenericType(AccessTools.TypeByName(a[i]));
+                    // Skip the "entry" after '>'. 
+                    i++;
+                } else {
+                    // Recursively retrieve the inner type (if any)
+                    res = AccessTools.Inner(res, a[i]);
+                    if (res == null) {
+                        throw new TypeAccessException($"ERROR: sub-type \"{a[i]}\" not found.");
+                    }
                 }
             }
+            
             return res;
         }
     }
