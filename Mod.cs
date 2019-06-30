@@ -255,5 +255,114 @@ namespace BiggerBackpack
                 );
             }
         }
+
+        [BytecodePatch("StardewValley.Menus.CraftingPage::.ctor")]
+        void CraftingPage_ctor() {
+            // Make the crafting page a bit higher too, to accomodate the bigger inventory.
+            BeginCode().Prepend(
+                // height += Game1.tileSize;
+                Instructions.Ldarg_S(4),
+                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Add(),
+                Instructions.Starg_S(4)
+            );
+        }
+        
+        [BytecodePatch("StardewValley.Menus.ShopMenu::.ctor(System.Collections.Generic.List<StardewValley.Item>,System.Int32,System.String)")]
+        void ShopMenu_ctor() {
+            var code = BeginCode();
+            for (int i=0; i<2; i++) {
+                code = code.FindNext(
+                    Instructions.Ldc_I4(600),
+                    Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                    Instructions.Ldc_I4_2(),
+                    OpCodes.Mul,
+                    OpCodes.Add
+                );
+                code[0].operand = 600 + Game1.tileSize;
+            }
+            
+            // Fix the size of the shop buttons.
+            // Replace `((height - 256) / 4)` with 106
+            for (int i=0; i<2; i++) {
+                code = FindCode(
+                    OpCodes.Ldarg_0,
+                    Instructions.Ldfld(typeof(IClickableMenu), "height"),
+                    Instructions.Ldc_I4(256),
+                    OpCodes.Sub,
+                    Instructions.Ldc_I4_4(),
+                    OpCodes.Div
+                );
+                code.Replace(
+                    Instructions.Ldc_I4(106)
+                );
+            }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.ShopMenu::draw")]
+        void ShopMenu_draw() {
+            // Position the inventory background
+            // Change `yPositionOnScreen + height - 256 + 40` to `yPositionOnScreen + 464`
+            // Note: originally height = 680.
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "height"),
+                OpCodes.Add,
+                Instructions.Ldc_I4(256),
+                OpCodes.Sub,
+                Instructions.Ldc_I4_S(40),
+                OpCodes.Add
+            ).SubRange(2,6).Replace(
+                Instructions.Ldc_I4(464)
+            );
+            // Change `height - 448 + 20` to `inventory.height + 44`
+            // Note: originally inventory.height = 3*64+16 = 208.
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "height"),
+                Instructions.Ldc_I4(448),
+                OpCodes.Sub,
+                Instructions.Ldc_I4_S(20),
+                OpCodes.Add
+            ).Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Ldfld(typeof(ShopMenu), "inventory"),
+                Instructions.Ldfld(typeof(IClickableMenu), "height"),
+                Instructions.Ldc_I4_S(44),
+                Instructions.Add()
+            );
+            
+            // Position the shop stock background
+            // Change `height - 256 + 32 + 4` to 460.
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "height"),
+                Instructions.Ldc_I4(256),
+                OpCodes.Sub,
+                Instructions.Ldc_I4_S(32),
+                OpCodes.Add,
+                Instructions.Ldc_I4_4(),
+                OpCodes.Add
+            ).Replace(
+                Instructions.Ldc_I4(460)
+            );
+        }
+        
+        [BytecodePatch("StardewValley.Menus.MenuWithInventory::.ctor")]
+        void ShippingMenu_ctor() {
+            var code = BeginCode();
+            for (int i=0; i<2; i++) {
+                code = code.FindNext(
+                    Instructions.Ldc_I4(600),
+                    Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                    Instructions.Ldc_I4_2(),
+                    OpCodes.Mul,
+                    OpCodes.Add
+                );
+                code[0].operand = 600 + Game1.tileSize;
+            }
+        }
     }
 }
