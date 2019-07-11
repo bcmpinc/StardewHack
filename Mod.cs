@@ -52,11 +52,12 @@ namespace BiggerBackpack
             Game1.player.MaxItems = int.Parse(args[0]);
         }
 
+#region Draw Premium Backpack
         public static void drawBiggerBackpack(SpriteBatch b) {
             b.Draw(bigBackpack, Game1.GlobalToLocal(new Vector2 (456f, 1088f)), new Rectangle(0, 0, 12, 14), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, (float)(19.25 * Game1.tileSize / 10000.0));
         }
 
-        // Inject code for rendering the larger backpack.
+        // Inject code for rendering the larger backpack in the shop.
         [BytecodePatch("StardewValley.Locations.SeedShop::draw")]
         void SeedShop_draw() {
             var check = FindCode(
@@ -81,7 +82,7 @@ namespace BiggerBackpack
                 // else if (maxItems < 48)
                 Instructions.Call(typeof(StardewValley.Game1), "get_player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
-                check[2], // Nothing jumps here so this should be OK.
+                check[2], // Nothing jumps here so reusing this should be OK.
                 Instructions.Ldc_I4_S(48),
                 check[4], // We'll create a new jump in check later.
                 // drawBiggerBackpack(b);
@@ -93,7 +94,44 @@ namespace BiggerBackpack
             // Create a new jump in check.
             check[4] = Instructions.Bge(AttachLabel(pos[0]));
         }
+        
+        static public TemporaryAnimatedSprite getBackpackSprite(Vector2 position) {
+            return new TemporaryAnimatedSprite (null, new Rectangle(0, 0, 12, 14), position + new Vector2 (16f, 0f), false, 0f, Color.White) {
+                scale = 4f,
+                layerDepth = 1f,
+                texture = bigBackpack
+            };
+        }
+        
+        // Inject code for rendering the larger backpack when picked up.
+        [BytecodePatch("StardewValley.Objects.SpecialItem::getTemporarySpriteForHoldingUp")]
+        void SpecialItem_getTemporarySpriteForHoldingUp() {
+            var code = FindCode(
+                Instructions.Ldstr("LooseSprites\\Cursors"),
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                OpCodes.Call,
+                Instructions.Ldc_I4_S(36),
+                OpCodes.Beq
+            );
+            
+            code.Prepend(
+                // if (maxItems==48) {
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                code[3], // Nothing jumps here so reusing this should be OK.
+                Instructions.Ldc_I4_S(48),
+                Instructions.Bne_Un(AttachLabel(code[0])),
+                // return getBackpackSprite(position);
+                Instructions.Ldarg_1(),
+                Instructions.Call(GetType(), "getBackpackSprite", typeof(Vector2)),
+                Instructions.Ret()
+                // }
+            );
+        }
+#endregion
 
+#region Buy Backpack
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -114,7 +152,7 @@ namespace BiggerBackpack
                 }
             }
         }
-
+        
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -134,7 +172,7 @@ namespace BiggerBackpack
                             if (Game1.player.Items.Count <= index)
                                 Game1.player.Items.Add((Item)null);
                         }
-                        Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack"), true);
+                        Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = "Premium Pack" }, true);
                     }
                     else
                         Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\UI:NotEnoughMoney2"));
@@ -167,7 +205,9 @@ namespace BiggerBackpack
                     prevSelResponse = sel;
             }
         }
-        
+#endregion
+
+#region Resize GUI 
         public static void shiftIconsDown(List<ClickableComponent> equipmentIcons){
             foreach (var icon in equipmentIcons) {
                 icon.bounds.Y += Game1.tileSize;
@@ -377,5 +417,6 @@ namespace BiggerBackpack
                 code[0].operand = 600 + Game1.tileSize;
             }
         }
+#endregion
     }
 }
