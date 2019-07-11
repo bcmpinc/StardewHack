@@ -1,15 +1,13 @@
 {
-  "Name": "Bigger Backpack",
-  "Author": "spacechase0, yoseiri",
-  "Version": "1.0.6",
+  "Name": "Bigger Backpack Fork",
+  "Author": "spacechase0, yoseiri, bcmpinc",
+  "Version": "1.1.0",
   "Description": "Adds another backpack size.",
-  "UniqueID": "spacechase0.BiggerBackpack",
-  "EntryDll": "BiggerBackpack.dll",
-  "MinimumApiVersion": "2.9.0",
-  "UpdateKeys": [ "Nexus:1845", "Chucklefish:5191" ],
-  "spacechase0": "bigger-backpack",
+  "UniqueID": "bcmpinc.BiggerBackpackFork",
+  "EntryDll": "BiggerBackpackFork.dll",
+  "MinimumApiVersion": "2.9",
   "Dependencies": [{
     "UniqueID": "bcmpinc.StardewHack",
-    "MinimumVersion": "1.0"
+    "MinimumVersion": "1.2"
   }]
 }
