@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley.Menus;
 using StardewValley;
 using Microsoft.Xna.Framework;
