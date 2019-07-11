@@ -15,7 +15,7 @@ namespace BiggerBackpack
     {
         public static Mod instance;
 
-        private Texture2D bigBackpack;
+        private static Texture2D bigBackpack;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -25,7 +25,6 @@ namespace BiggerBackpack
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
 
             helper.Events.Display.MenuChanged += onMenuChanged;
-            helper.Events.Display.RenderingHud += onRenderingHud;
             helper.Events.Input.ButtonPressed += onButtonPressed;
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack.", command);
@@ -53,18 +52,46 @@ namespace BiggerBackpack
             Game1.player.MaxItems = int.Parse(args[0]);
         }
 
-        /// <summary>Raised before drawing the HUD (item toolbar, clock, etc) to the screen. The vanilla HUD may be hidden at this point (e.g. because a menu is open).</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void onRenderingHud(object sender, RenderingHudEventArgs e)
-        {
-            if (!Context.IsWorldReady)
-                return;
+        public static void drawBiggerBackpack(SpriteBatch b) {
+            b.Draw(bigBackpack, Game1.GlobalToLocal(new Vector2 (456f, 1088f)), new Rectangle(0, 0, 12, 14), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, (float)(19.25 * Game1.tileSize / 10000.0));
+        }
 
-            if (Game1.currentLocation.Name == "SeedShop" && Game1.player.MaxItems == 36)
+        // Inject code for rendering the larger backpack.
+        [BytecodePatch("StardewValley.Locations.SeedShop::draw")]
+        void SeedShop_draw() {
+            var check = FindCode(
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                OpCodes.Call,
+                Instructions.Ldc_I4_S(36),
+                OpCodes.Bge
+            );
+            
+            var pos = check.Follow(4);
+            
+            // Do a sanity check
+            if (pos[-1].opcode != OpCodes.Ret ||
+                pos[0].opcode != OpCodes.Ldarg_1)
             {
-                e.SpriteBatch.Draw(bigBackpack, Game1.GlobalToLocal(new Vector2(7 * Game1.tileSize + Game1.pixelZoom * 2, 17 * Game1.tileSize)), new Rectangle(0, 0, 12, 14), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, (float)(19.25 * Game1.tileSize / 10000.0));
+                throw new System.Exception("Jump does not go to expected location.");
             }
+            
+            // Inject check and call to drawBiggerBackpack.
+            pos.Insert(0,
+                // else if (maxItems < 48)
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                check[2], // Nothing jumps here so this should be OK.
+                Instructions.Ldc_I4_S(48),
+                check[4], // We'll create a new jump in check later.
+                // drawBiggerBackpack(b);
+                Instructions.Ldarg_1(),
+                Instructions.Call(GetType(), "drawBiggerBackpack", typeof(SpriteBatch))
+                // }
+            );
+            
+            // Create a new jump in check.
+            check[4] = Instructions.Bge(AttachLabel(pos[0]));
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
