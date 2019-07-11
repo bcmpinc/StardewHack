@@ -24,8 +24,6 @@ namespace BiggerBackpack
             base.Entry(helper);
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
 
-            helper.Events.Display.MenuChanged += onMenuChanged;
-
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack.", command);
         }
 
@@ -48,7 +46,7 @@ namespace BiggerBackpack
                 for (int i = Game1.player.Items.Count; i < Game1.player.MaxItems; ++i)
                     Game1.player.Items.Add(null);
             }
-            Game1.player.MaxItems = int.Parse(args[0]);
+            Game1.player.MaxItems = newMax;
         }
 
 #region Draw Premium Backpack
@@ -60,7 +58,7 @@ namespace BiggerBackpack
         [BytecodePatch("StardewValley.Locations.SeedShop::draw")]
         void SeedShop_draw() {
             var check = FindCode(
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 OpCodes.Call,
                 Instructions.Ldc_I4_S(36),
@@ -79,7 +77,7 @@ namespace BiggerBackpack
             // Inject check and call to drawBiggerBackpack.
             pos.Insert(0,
                 // else if (maxItems < 48)
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 check[2], // Nothing jumps here so reusing this should be OK.
                 Instructions.Ldc_I4_S(48),
@@ -107,7 +105,7 @@ namespace BiggerBackpack
         void SpecialItem_getTemporarySpriteForHoldingUp() {
             var code = FindCode(
                 Instructions.Ldstr("LooseSprites\\Cursors"),
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 OpCodes.Call,
                 Instructions.Ldc_I4_S(36),
@@ -116,7 +114,7 @@ namespace BiggerBackpack
             
             code.Prepend(
                 // if (maxItems==48) {
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 code[3], // Nothing jumps here so reusing this should be OK.
                 Instructions.Ldc_I4_S(48),
@@ -136,67 +134,14 @@ namespace BiggerBackpack
             Response yes = new Response("Purchase", "Purchase (50,000g)");
             Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
             Response[] resps = new Response[] { yes, no };
-            Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "spacechase0.BiggerBackpack");
+            Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "Backpack");
         }
         
-        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void onMenuChanged(object sender, MenuChangedEventArgs e)
-        {
-            // on closed
-            if (Context.IsWorldReady && e.OldMenu is DialogueBox)
-            {
-                if (Game1.currentLocation.lastQuestionKey == "spacechase0.BiggerBackpack" && prevSelResponse == 0)
-                {
-                    if (Game1.player.Money >= 50000)
-                    {
-                        Game1.player.Money -= 50000;
-                        Game1.player.MaxItems += 12;
-                        for (int index = 0; index < Game1.player.MaxItems; ++index)
-                        {
-                            if (Game1.player.Items.Count <= index)
-                                Game1.player.Items.Add((Item)null);
-                        }
-                        Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = "Premium Pack" }, true);
-                    }
-                    else
-                        Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\UI:NotEnoughMoney2"));
-                }
-
-                Helper.Events.GameLoop.UpdateTicked -= watchSelectedResponse;
-                prevSelResponse = -1;
-            }
-
-            // on new menu
-            switch (e.NewMenu)
-            {
-                case DialogueBox _:
-                    Helper.Events.GameLoop.UpdateTicked += watchSelectedResponse;
-                    break;
-            }
-        }
-
-        int prevSelResponse = -1;
-
-        /// <summary>Raised after the game state is updated (≈60 times per second), while waiting for a dialogue response.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void watchSelectedResponse(object sender, UpdateTickedEventArgs e)
-        {
-            if (Game1.activeClickableMenu is DialogueBox db)
-            {
-                int sel = Helper.Reflection.GetField<int>(db, "selectedResponse").GetValue();
-                if (sel != -1)
-                    prevSelResponse = sel;
-            }
-        }
-        
-        // Inject code for rendering the larger backpack when picked up.
+        // Inject code to show the buying dialogue when the premium backpack  is clicked.
         [BytecodePatch("StardewValley.GameLocation::performAction")]
         void GameLocation_performAction() {
             var code = FindCode(
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 OpCodes.Call,
                 Instructions.Ldc_I4_S(36),
@@ -209,7 +154,7 @@ namespace BiggerBackpack
             );
             var len = code.length;
             code.Append(
-                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 code[2],
                 Instructions.Ldc_I4_S(48),
@@ -219,6 +164,50 @@ namespace BiggerBackpack
             );
             code[4] = Instructions.Bge(AttachLabel(code[len]));
         }
+
+        static void buyBackpack() {
+            Game1.player.Money -= 50000;
+            Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = "Premium Pack" }, true);
+            Game1.player.increaseBackpackSize(12);
+            // Game1.multiplayer.globalChatInfoMessage ("BackpackDeluxe", Game1.player.Name);
+        }
+        
+        // Inject code for rendering the larger backpack when picked up.
+        [BytecodePatch("StardewValley.GameLocation::answerDialogueAction")]
+        void GameLocation_answerDialogueAction() {
+            var code = FindCode(
+                // else if ((int)Game1.player.maxItems != 36) {
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                OpCodes.Call,
+                Instructions.Ldc_I4_S(36),
+                OpCodes.Beq
+            );
+            var get_player = Instructions.Call_get(typeof(StardewValley.Game1), "player");
+            code.Replace(
+                // else if ((int)Game1.player.maxItems < 36
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                code[2],
+                Instructions.Ldc_I4_S(48),
+                Instructions.Bge(AttachLabel(get_player)),
+                //   && Game1.player.Money >= 50000) {
+                Instructions.Call_get(typeof(StardewValley.Game1), "player"),
+                Instructions.Callvirt_get(typeof(StardewValley.Farmer), "Money"),
+                Instructions.Ldc_I4(50000),
+                Instructions.Blt(AttachLabel(get_player)),
+                //   buyBackpack();
+                Instructions.Call(GetType(), "buyBackpack"),
+                // }
+                // else if ((int)Game1.player.maxItems != 48) {
+                get_player,
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                code[2],
+                Instructions.Ldc_I4_S(48),
+                code[4]
+            );
+        }
+        
 #endregion
 
 #region Resize GUI 
