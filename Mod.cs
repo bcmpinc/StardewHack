@@ -25,7 +25,6 @@ namespace BiggerBackpack
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
 
             helper.Events.Display.MenuChanged += onMenuChanged;
-            helper.Events.Input.ButtonPressed += onButtonPressed;
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack.", command);
         }
@@ -132,25 +131,12 @@ namespace BiggerBackpack
 #endregion
 
 #region Buy Backpack
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void onButtonPressed(object sender, ButtonPressedEventArgs e)
+        static public void clickBackpack()
         {
-            if (!Context.IsWorldReady)
-                return;
-
-            if (e.Button.IsActionButton() && !this.Helper.Input.IsSuppressed(e.Button))
-            {
-                if (Game1.player.MaxItems == 36 && Game1.currentLocation.Name == "SeedShop" && e.Cursor.Tile.X == 7 && (e.Cursor.Tile.Y == 17 || e.Cursor.Tile.Y == 18) )
-                {
-                    this.Helper.Input.Suppress(e.Button);
-                    Response yes = new Response("Purchase", "Purchase (50,000g)");
-                    Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
-                    Response[] resps = new Response[] { yes, no };
-                    Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "spacechase0.BiggerBackpack");
-                }
-            }
+            Response yes = new Response("Purchase", "Purchase (50,000g)");
+            Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
+            Response[] resps = new Response[] { yes, no };
+            Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "spacechase0.BiggerBackpack");
         }
         
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
@@ -204,6 +190,34 @@ namespace BiggerBackpack
                 if (sel != -1)
                     prevSelResponse = sel;
             }
+        }
+        
+        // Inject code for rendering the larger backpack when picked up.
+        [BytecodePatch("StardewValley.GameLocation::performAction")]
+        void GameLocation_performAction() {
+            var code = FindCode(
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                OpCodes.Call,
+                Instructions.Ldc_I4_S(36),
+                OpCodes.Bge
+            );
+            code.Extend(
+                Instructions.Ldstr("Backpack"),
+                OpCodes.Call,
+                OpCodes.Br
+            );
+            var len = code.length;
+            code.Append(
+                Instructions.Call(typeof(StardewValley.Game1), "get_player"),
+                Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
+                code[2],
+                Instructions.Ldc_I4_S(48),
+                code[4],
+                Instructions.Call(GetType(), "clickBackpack"),
+                code[len-1]
+            );
+            code[4] = Instructions.Bge(AttachLabel(code[len]));
         }
 #endregion
 
