@@ -120,12 +120,6 @@ namespace BiggerBackpack
             // on new menu
             switch (e.NewMenu)
             {
-                /*case MenuWithInventory menuWithInv:
-                    menuWithInv.inventory.capacity = 48;
-                    menuWithInv.inventory.rows = 4;
-                    menuWithInv.height += 64;
-                    break;*/
-
                 case DialogueBox _:
                     Helper.Events.GameLoop.UpdateTicked += watchSelectedResponse;
                     break;
@@ -147,39 +141,23 @@ namespace BiggerBackpack
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.InventoryMenu::.ctor")]
-        void InventoryMenu_ctor() {
-            // If capacity is -1, change rows to 4.
-            var begin = AttachLabel(BeginCode()[0]);
-            BeginCode().Prepend(
-                // if (capacity<0) {
-                Instructions.Ldarg_S(6),
-                Instructions.Ldc_I4_0(),
-                Instructions.Bge(begin),
-                //   rows = 4;
-                Instructions.Ldc_I4_4(),
-                Instructions.Starg_S(7)
-                // }
-            );
-            
-            // Replace 36 with 48, twice.
-            for (int i=0; i<2; i++) {
-                var code = FindCode(
-                    Instructions.Ldarg_S(6),
-                    OpCodes.Ldc_I4_M1,
-                    OpCodes.Beq,
-                    OpCodes.Ldarg_S,
-                    OpCodes.Br,
-                    Instructions.Ldc_I4_S(36)
-                );
-                code[5].operand = (byte)48;
-            }
-        }
-        
         public static void shiftIconsDown(List<ClickableComponent> equipmentIcons){
             foreach (var icon in equipmentIcons) {
                 icon.bounds.Y += Game1.tileSize;
             }
+        }
+        
+        void resize_inventory() {
+            // Change inventory size from default (36) to 48
+            var inv = FindCode(
+                OpCodes.Ldc_I4_M1,  // Size (-1 = default)
+                OpCodes.Ldc_I4_3,   // Rows
+                OpCodes.Ldc_I4_0,
+                OpCodes.Ldc_I4_0,
+                OpCodes.Ldc_I4_1
+            );
+            inv[0] = Instructions.Ldc_I4(48);
+            inv[1] = Instructions.Ldc_I4_4();
         }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor")]
@@ -191,6 +169,8 @@ namespace BiggerBackpack
                 Instructions.Add(),
                 Instructions.Starg_S(4)
             );
+            
+            resize_inventory();
             
             EndCode().Insert(-1,
                 // Shift icons down by `Game1.tileSize` pixels
@@ -266,10 +246,14 @@ namespace BiggerBackpack
                 Instructions.Add(),
                 Instructions.Starg_S(4)
             );
+            
+            resize_inventory();
         }
         
         [BytecodePatch("StardewValley.Menus.ShopMenu::.ctor(System.Collections.Generic.List<StardewValley.Item>,System.Int32,System.String)")]
         void ShopMenu_ctor() {
+            resize_inventory();
+            
             var code = BeginCode();
             for (int i=0; i<2; i++) {
                 code = code.FindNext(
@@ -352,6 +336,8 @@ namespace BiggerBackpack
         
         [BytecodePatch("StardewValley.Menus.MenuWithInventory::.ctor")]
         void ShippingMenu_ctor() {
+            resize_inventory();
+            
             var code = BeginCode();
             for (int i=0; i<2; i++) {
                 code = code.FindNext(
