@@ -92,7 +92,7 @@ namespace BiggerBackpack
         }
         
         static public TemporaryAnimatedSprite getBackpackSprite(Vector2 position) {
-            return new TemporaryAnimatedSprite (null, new Rectangle(0, 0, 12, 14), position + new Vector2 (16f, 0f), false, 0f, Color.White) {
+            return new TemporaryAnimatedSprite (null, new Rectangle(1, 0, 11, 13), position + new Vector2 (16f, 0f), false, 0f, Color.White) {
                 scale = 4f,
                 layerDepth = 1f,
                 texture = bigBackpack
