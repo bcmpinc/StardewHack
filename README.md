@@ -3,6 +3,9 @@
 ## Description
 Buy a bigger backpack at Pierre's for only 50,000g! This backpack has 48 slots.
 
+## Console Commands
+* `player_setbackpacksize slots`: Changes the size of your inventory. Valid values for slots are 12, 24, 36 and 48. Items in the removed slots will be spilled onto the ground.
+
 ## Dependencies
 This mod requires the following mods to be installed:
 
@@ -12,6 +15,9 @@ This mod requires the following mods to be installed:
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
+## Uninstalling
+To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console and safe your game. 
+
 ## Changes
 #### 1.1:
 * Added dependency on StardewHack.
@@ -19,3 +25,4 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Ring can now (hopefully) also be bought using gamepad.
 * The backpack no longer overlays the player or deluxe backpack.
 * Compatible with the [Wear More Rings](https://www.nexusmods.com/stardewvalley/mods/3214) mod.
+* The `player_setbackpacksize 36` will spill items on the ground rather than deleting them.

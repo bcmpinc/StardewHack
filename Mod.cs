@@ -23,27 +23,43 @@ namespace BiggerBackpack
             base.Entry(helper);
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
 
-            Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack.", command);
+            Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
         }
 
         private void command( string cmd, string[] args )
         {
             if (args.Length != 1)
             {
-                Monitor.Log("Must have one command argument", LogLevel.Info);
+                Monitor.Log("Must have one command argument", LogLevel.Error);
                 return;
             }
 
-            int newMax = int.Parse(args[0]);
+            // Parse the new size. Make sure it's a valid size. 
+            int newMax;
+            switch (args[0]) {
+                case "12": newMax = 12; break;
+                case "24": newMax = 24; break;
+                case "36": newMax = 36; break;
+                case "48": newMax = 48; break;
+                default:
+                    Monitor.Log("The new size must be 12, 24, 36 or 48.", LogLevel.Error);
+                    return;
+            }
+            
             if (newMax < Game1.player.MaxItems)
             {
-                for (int i = Game1.player.MaxItems - 1; i >= newMax; --i)
+                // Shrink the inventory, spilling any items in the removed slots to the ground.
+                for (int i = Game1.player.MaxItems - 1; i >= newMax; --i) {
+                    Game1.createItemDebris(Game1.player.Items[i], Game1.player.getStandingPosition(), Game1.player.getDirection(), null, -1);
                     Game1.player.Items.RemoveAt(i);
+                }
             }
             else
             {
-                for (int i = Game1.player.Items.Count; i < Game1.player.MaxItems; ++i)
+                // Grow the inventory.
+                for (int i = Game1.player.Items.Count; i < Game1.player.MaxItems; ++i) {
                     Game1.player.Items.Add(null);
+                }
             }
             Game1.player.MaxItems = newMax;
         }
