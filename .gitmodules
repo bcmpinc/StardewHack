@@ -1,4 +1,4 @@
 [submodule "BiggerBackpack"]
 	path = BiggerBackpack
-	url = git@github.com:bcmpinc/BiggerBackpack.git
+	url = git@github.com:spacechase0/BiggerBackpack.git
 	branch = master

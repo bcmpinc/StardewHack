@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeSpread", "TreeSpread\Tr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WearMoreRings", "WearMoreRings\WearMoreRings.csproj", "{EA217BBF-7300-4783-9B3A-676AA96E6ECE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiggerBackpackFork", "BiggerBackpack\BiggerBackpackFork.csproj", "{78E48279-65FB-4C18-A511-3B51ED68386B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiggerBackpack", "BiggerBackpack\BiggerBackpack.csproj", "{78E48279-65FB-4C18-A511-3B51ED68386B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
