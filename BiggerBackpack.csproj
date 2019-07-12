@@ -6,7 +6,7 @@
     <ProjectGuid>{78E48279-65FB-4C18-A511-3B51ED68386B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>BiggerBackpack</RootNamespace>
-    <AssemblyName>BiggerBackpackFork</AssemblyName>
+    <AssemblyName>BiggerBackpack</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
