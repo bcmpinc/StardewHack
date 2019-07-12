@@ -1,9 +1,7 @@
-# Bigger Backpack Fork
+# Bigger Backpack
 
 ## Description
 Buy a bigger backpack at Pierre's for only 50,000g! This backpack has 48 slots.
-
-This mod is a fork of the Bigger Backpack mod by Spacechase0. The original mod can be found at [Spacechase0's site](http://spacechase0.com/mods/stardew-valley/bigger-backpack/), [Nexus](https://www.nexusmods.com/stardewvalley/mods/1845/), [Chucklefish forums](https://community.playstarbound.com/resources/bigger-backpack.5191/), and the source code [GitHub](https://github.com/spacechase0/BiggerBackpack).
 
 ## Dependencies
 This mod requires the following mods to be installed:
