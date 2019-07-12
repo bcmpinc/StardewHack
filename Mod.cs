@@ -460,23 +460,22 @@ namespace BiggerBackpack
 
             // Change inventory from a 6x6 grid to a 7x7 grid.
             FindCode(
-                OpCodes.Ldsfld,
                 Instructions.Ldc_I4_S(36),
                 OpCodes.Ldc_I4_6,
                 OpCodes.Ldc_I4_8,
                 OpCodes.Ldc_I4_8,
                 OpCodes.Ldc_I4_0
-            ).SubRange(1,4).Replace(
+            ).Replace(
                 Instructions.Ldc_I4_S(49),
                 Instructions.Ldc_I4_7(),
                 Instructions.Ldc_I4_4(),
-                Instructions.Ldc_I4_4()
+                Instructions.Ldc_I4_4(),
+                Instructions.Ldc_I4_0()
             );
             FindCode(
-                OpCodes.Ldloc_0,
                 Instructions.Ldc_I4_S(36),
                 Instructions.Stfld(typeof(InventoryMenu), "capacity")
-            )[1].operand = 49;
+            )[0].operand = 49;
             
             code = BeginCode();
             for (int i=0; i<2; i++) {
