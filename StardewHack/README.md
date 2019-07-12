@@ -1,7 +1,7 @@
 # Stardew Hack
 
 ## Description
-This is a library/core mod, containing bits of code that all my other mods use. It has some functions to make small bytecode changes to Stardew Valley in a way that is somewhat update proof, but also makes sure it reliably breaks in cases where it isn't. My other mods contain descriptions of byte code changes and passes those to StardewHack to apply them. Without any of my other mods instaled, StardewHack won't do much. 
+This is a library/core mod, containing bits of code that all my other mods use. It has some functions to make small bytecode changes to Stardew Valley in a way that is somewhat update proof, but also makes sure it reliably breaks in cases where it isn't. My other mods contain descriptions of byte code changes and passes those to StardewHack to apply them. Without any of my other mods installed, StardewHack won't do much. 
 
 While I could just package a copy of this core mod with all my other mods, that allows people to have mixed versions, which cause really weird bugs. Having StardewHack as a separate mod ensures there's only one copy and thus no version issues.
 
