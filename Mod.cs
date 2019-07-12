@@ -15,6 +15,7 @@ namespace BiggerBackpack
         public static Mod instance;
 
         private static Texture2D bigBackpack;
+        public  static Texture2D junimoNote;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -22,6 +23,7 @@ namespace BiggerBackpack
         {
             base.Entry(helper);
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
+            junimoNote  = Helper.Content.Load<Texture2D>("JunimoNote.png");
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
         }
@@ -50,7 +52,10 @@ namespace BiggerBackpack
             {
                 // Shrink the inventory, spilling any items in the removed slots to the ground.
                 for (int i = Game1.player.MaxItems - 1; i >= newMax; --i) {
-                    Game1.createItemDebris(Game1.player.Items[i], Game1.player.getStandingPosition(), Game1.player.getDirection(), null, -1);
+                    if (Game1.player.Items[i] != null) {
+                        // Spill the item.
+                        Game1.createItemDebris(Game1.player.Items[i], Game1.player.getStandingPosition(), Game1.player.getDirection(), null, -1);
+                    }
                     Game1.player.Items.RemoveAt(i);
                 }
             }
@@ -435,6 +440,78 @@ namespace BiggerBackpack
                 );
                 code[0].operand = 600 + Game1.tileSize;
             }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.JunimoNoteMenu::setUpMenu")]
+        void JunimoNoteMenu_setUpMenu() {
+            // Move the grid a few pixels
+            var code = FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "xPositionOnScreen"),
+                Instructions.Ldc_I4(128),
+                OpCodes.Add,
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                Instructions.Ldc_I4(140),
+                OpCodes.Add
+            );
+            code[2].operand = 104;
+            code[6].operand = 120;
+
+            // Change inventory from a 6x6 grid to a 7x7 grid.
+            FindCode(
+                OpCodes.Ldsfld,
+                Instructions.Ldc_I4_S(36),
+                OpCodes.Ldc_I4_6,
+                OpCodes.Ldc_I4_8,
+                OpCodes.Ldc_I4_8,
+                OpCodes.Ldc_I4_0
+            ).SubRange(1,4).Replace(
+                Instructions.Ldc_I4_S(49),
+                Instructions.Ldc_I4_7(),
+                Instructions.Ldc_I4_4(),
+                Instructions.Ldc_I4_4()
+            );
+            FindCode(
+                OpCodes.Ldloc_0,
+                Instructions.Ldc_I4_S(36),
+                Instructions.Stfld(typeof(InventoryMenu), "capacity")
+            )[1].operand = 49;
+            
+            code = BeginCode();
+            for (int i=0; i<2; i++) {
+                code = code.FindNext(
+                    Instructions.Ldsfld(typeof(IClickableMenu), "borderWidth"),
+                    OpCodes.Ldc_I4_2,
+                    OpCodes.Mul,
+                    OpCodes.Add
+                );
+                code.Remove();
+            }
+        }
+        
+        [BytecodePatch("StardewValley.Menus.JunimoNoteMenu::draw")]
+        void JunimoNoteMenu_draw() {
+            var code = FindCode(
+                OpCodes.Ldarg_1,
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(JunimoNoteMenu), "noteTexture"),
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "xPositionOnScreen"),
+                OpCodes.Conv_R4,
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), "yPositionOnScreen"),
+                OpCodes.Conv_R4,
+                OpCodes.Newobj,
+                Instructions.Ldc_I4(320), // Line 10
+                Instructions.Ldc_I4_0(),
+                Instructions.Ldc_I4(320),
+                Instructions.Ldc_I4(180)
+            );
+            code[10] = Instructions.Ldc_I4_0();
+            code.SubRange(1,2).Replace(
+                Instructions.Ldsfld(GetType(), "junimoNote")
+            );
         }
 #endregion
     }

@@ -13,7 +13,7 @@ This mod requires the following mods to be installed:
 * [StardewHack](https://www.nexusmods.com/stardewvalley/mods/3213)
 
 ## Known bugs
-Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
+Please report bugs on [GitHub](https://github.com/spacechase0/BiggerBackpack/issues) or [Nexus](https://www.nexusmods.com/stardewvalley/mods/1845?tab=bugs).
 
 ## Uninstalling
 To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console and safe your game. 
@@ -25,4 +25,8 @@ To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console an
 * Ring can now (hopefully) also be bought using gamepad.
 * The backpack no longer overlays the player or deluxe backpack.
 * Compatible with the [Wear More Rings](https://www.nexusmods.com/stardewvalley/mods/3214) mod.
-* The `player_setbackpacksize 36` will spill items on the ground rather than deleting them.
+* The `player_setbackpacksize` will spill items on the ground rather than deleting them.
+
+#### 1.2:
+* Fixed `player_setbackpacksize` not working when empty inventory slots are being removed.
+* Add support for the community center.
