@@ -83,9 +83,10 @@ namespace BiggerBackpack
             var pos = check.Follow(4);
             
             // Do a sanity check
-            if (pos[-1].opcode != OpCodes.Ret ||
-                pos[0].opcode != OpCodes.Ldarg_1)
-            {
+            if ((pos[-1].opcode == OpCodes.Ret || pos[-1].opcode == OpCodes.Br) &&
+                  pos[0].opcode == OpCodes.Ldarg_1) {
+                // Ok
+            } else {
                 throw new System.Exception("Jump does not go to expected location.");
             }
             
@@ -123,8 +124,8 @@ namespace BiggerBackpack
                 Instructions.Call_get(typeof(StardewValley.Game1), "player"),
                 Instructions.Ldfld(typeof(StardewValley.Farmer), "maxItems"),
                 OpCodes.Call,
-                Instructions.Ldc_I4_S(36),
-                OpCodes.Beq
+                Instructions.Ldc_I4_S(36)
+                // Beq or Bne_un
             );
             
             code.Prepend(
@@ -175,7 +176,7 @@ namespace BiggerBackpack
                 Instructions.Ldc_I4_S(48),
                 code[4],
                 Instructions.Call(GetType(), "clickBackpack"),
-                code[len-1]
+                Instructions.Br((Label)code[len-1].operand)
             );
             code[4] = Instructions.Bge(AttachLabel(code[len]));
         }
