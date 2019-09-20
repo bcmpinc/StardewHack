@@ -1,6 +1,9 @@
 #Autosave files
 *~
 
+#Visual Studio metadata
+.vs/
+
 #build
 [Oo]bj/
 [Bb]in/
