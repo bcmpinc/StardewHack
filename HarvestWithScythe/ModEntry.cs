@@ -251,12 +251,12 @@ namespace StardewHack.HarvestWithScythe
 
         // Proxy method for creating an object suitable for spawning as debris.
         public static StardewValley.Object CreateObject(Crop crop, int quality) {
-            if (crop.programColored) {
-                return new StardewValley.Objects.ColoredObject (crop.indexOfHarvest, 1, crop.tintColor) {
+            if (crop.programColored.Value) {
+                return new StardewValley.Objects.ColoredObject(crop.indexOfHarvest.Value, 1, crop.tintColor.Value) {
                     Quality = quality
                 };
             } else {
-                return new StardewValley.Object(crop.indexOfHarvest, 1, false, -1, quality);
+                return new StardewValley.Object(crop.indexOfHarvest.Value, 1, false, -1, quality);
             }
         }
 
@@ -388,12 +388,14 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public static bool ScytheForage(StardewValley.Object o, Tool t, GameLocation loc) {
-            if (o.isSpawnedObject && !o.questItem && o.isForage(loc)) {
+            if (o.IsSpawnedObject && !o.questItem.Value && o.isForage(loc)) {
                 var who = t.getLastFarmerToUse();
                 var vector = o.TileLocation;
                 // For objects stored in GameLocation.Objects, the TileLocation is not always set.
                 // So determine its location by looping trough all such objects.
+#pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
                 if (vector.X==0 && vector.Y==0) {
+#pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
                     foreach (System.Collections.Generic.KeyValuePair<Vector2, StardewValley.Object> pair in loc.Objects.Pairs) {
                         if (pair.Value.Equals(o)) {
                             vector = pair.Key;
@@ -401,7 +403,7 @@ namespace StardewHack.HarvestWithScythe
                         }
                     }
                 }
-                int quality = o.quality;
+                int quality = o.Quality;
                 Random random = new Random((int)Game1.uniqueIDForThisGame / 2 + (int)Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
                 if (who.professions.Contains(16)) {
                     quality = 4;

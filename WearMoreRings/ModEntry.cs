@@ -53,16 +53,16 @@ namespace StardewHack.WearMoreRings
 
         public SaveRings() { }
         
-        public SaveRings(ActualRings er) {
-            which1 = getWhich(er.ring1);
-            which2 = getWhich(er.ring2);
-            which3 = getWhich(er.ring3);
-            which4 = getWhich(er.ring4);
+        public SaveRings(ActualRings ar) {
+            which1 = getWhich(ar.ring1.Value);
+            which2 = getWhich(ar.ring2.Value);
+            which3 = getWhich(ar.ring3.Value);
+            which4 = getWhich(ar.ring4.Value);
         }
         
         private int getWhich(Ring r) {
             if (r==null) return -1;
-            return r.indexInTileSheet;
+            return r.indexInTileSheet.Value;
         }
     }
     #endregion Data Classes
@@ -176,28 +176,28 @@ namespace StardewHack.WearMoreRings
                 if (ring!=null) r.Add(ring);
             }
             ActualRings ar = ModEntry.actualdata.GetValue(f, ModEntry.FarmerNotFound);
-            Add(f.leftRing);
-            Add(f.rightRing);
-            Add(ar.ring1);
-            Add(ar.ring2);
-            Add(ar.ring3);
-            Add(ar.ring4);
+            Add(f.leftRing.Value);
+            Add(f.rightRing.Value);
+            Add(ar.ring1.Value);
+            Add(ar.ring2.Value);
+            Add(ar.ring3.Value);
+            Add(ar.ring4.Value);
             return r;
         }
         
         public static int CountWearingRing(Farmer f, int id) {
             bool IsRing(Ring r) {
-                return r != null && r.indexInTileSheet == id;
+                return r != null && r.indexInTileSheet.Value == id;
             }
         
             ActualRings ar = actualdata.GetValue(f, FarmerNotFound);
             int res = 0;
-            if (IsRing(f.leftRing)) res++;
-            if (IsRing(f.rightRing)) res++;
-            if (IsRing(ar.ring1)) res++;
-            if (IsRing(ar.ring2)) res++;
-            if (IsRing(ar.ring3)) res++;
-            if (IsRing(ar.ring4)) res++;
+            if (IsRing(f.leftRing.Value)) res++;
+            if (IsRing(f.rightRing.Value)) res++;
+            if (IsRing(ar.ring1.Value)) res++;
+            if (IsRing(ar.ring2.Value)) res++;
+            if (IsRing(ar.ring3.Value)) res++;
+            if (IsRing(ar.ring4.Value)) res++;
             return res;
         }
 
@@ -217,12 +217,12 @@ namespace StardewHack.WearMoreRings
             };
             
             ActualRings ar = actualdata.GetValue(f, FarmerNotFound);
-            update(f.leftRing);
-            update(f.rightRing);
-            update(ar.ring1);
-            update(ar.ring2);
-            update(ar.ring3);
-            update(ar.ring4);
+            update(f.leftRing.Value);
+            update(f.rightRing.Value);
+            update(ar.ring1.Value);
+            update(ar.ring2.Value);
+            update(ar.ring3.Value);
+            update(ar.ring4.Value);
         }
         
         [BytecodePatch("StardewValley.Farmer::updateCommon")]
