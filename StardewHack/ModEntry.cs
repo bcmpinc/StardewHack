@@ -30,7 +30,8 @@ namespace StardewHack.Library
             CheckIncompatible(helper, "bcmpinc.TreeSpread",        new SemanticVersion(1,0,0));
             CheckIncompatible(helper, "bcmpinc.WearMoreRings",     new SemanticVersion(1,4,0));
             
-            Helper.Events.Display.MenuChanged += Display_MenuChanged;
+            // Register event to show warning in case some mod's patches failed to apply cleanly.
+            Helper.Events.GameLoop.OneSecondUpdateTicked += GameLoop_OneSecondUpdateTicked;
         }
         
         public void CheckIncompatible(IModHelper helper, string uniqueID, SemanticVersion version) {
@@ -40,10 +41,13 @@ namespace StardewHack.Library
             }
         }
 
-        void Display_MenuChanged(object sender, StardewModdingAPI.Events.MenuChangedEventArgs e)
+        private void GameLoop_OneSecondUpdateTicked(object sender, StardewModdingAPI.Events.OneSecondUpdateTickedEventArgs e)
         {
-            // Fire the first time a menu is being loaded, but only fire once.
-            Helper.Events.Display.MenuChanged -= Display_MenuChanged;
+            // Only fire after 1 sec. in-game.
+            if (e.Ticks < 60) return;
+        
+            // And only fire once.
+            Helper.Events.GameLoop.OneSecondUpdateTicked -= GameLoop_OneSecondUpdateTicked;
             
             // Create a warning message if patches failed to apply cleanly.
             if (broken_mods.Count==0) return;
