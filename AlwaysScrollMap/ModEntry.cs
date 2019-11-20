@@ -61,8 +61,6 @@ namespace StardewHack.AlwaysScrollMap
                 Instructions.Brtrue(AttachLabel(range.End[0]))
             );
             range.ReplaceJump(2, range[0]);
-            
-            AllCode().Print(Monitor);
         }
     }
 }
