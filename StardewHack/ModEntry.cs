@@ -58,7 +58,7 @@ namespace StardewHack.Library
             var dialogue = new List<string>() {
                 "StardewHack failed to apply some bytecode patches. The following mods won't work correctly or at all: " +
                 mod_list.Join() +
-                ". Check your console for further instructions."
+                ". Check your console or error log for further instructions."
             };
             
             // Create the dialogue box. We can't pass a string directly as the signature differs between the PC and android version.
