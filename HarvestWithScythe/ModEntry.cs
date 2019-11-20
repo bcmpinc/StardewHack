@@ -118,7 +118,37 @@ namespace StardewHack.HarvestWithScythe
             );
             #endregion
 
-            #region Sunflower drops 
+            #region Colored flowers
+            // For colored flowers we need to call createItemDebris instead of createObjectDebris
+            var code = FindCode(
+                // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
+                OpCodes.Ldarg_0,
+                OpCodes.Ldfld,
+                OpCodes.Call,
+                OpCodes.Ldarg_1,
+                OpCodes.Ldarg_2,
+                OpCodes.Ldc_I4_M1,
+                OpCodes.Ldloc_S, // [6] num3: quality
+                OpCodes.Ldc_R4,
+                OpCodes.Ldnull,
+                OpCodes.Call
+            );
+            var var_quality = code[6].operand as LocalBuilder; // num3
+            code.Replace(
+                // var tmp = CreateObject(this, num3);
+                Instructions.Ldarg_0(), // this
+                Instructions.Ldloc_S(var_quality), // num3
+                Instructions.Call(typeof(ModEntry), nameof(CreateObject), typeof(Crop), typeof(int)),
+                // Game1.createItemDebris(tmp, vector, -1, null, -1);
+                Instructions.Ldloc_3(), // vector
+                Instructions.Ldc_I4_M1(), // -1
+                Instructions.Ldnull(), // null
+                Instructions.Ldc_I4_M1(), // -1
+                Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int))
+            );
+            #endregion
+            
+            #region Sunflower drops
             // >>> Patch code to drop sunflower seeds when harvesting with scythe.
             // >>> Patch code to let harvesting with scythe drop only 1 item.
             // >>> The other item drops are handled by the plucking code.
@@ -151,7 +181,7 @@ namespace StardewHack.HarvestWithScythe
             // Set quality for seeds to 0.
             DropSunflowerSeeds.Append(
                 Instructions.Ldc_I4_0(),
-                Instructions.Stloc_S(5)
+                Instructions.Stloc_S(var_quality)
             );
 
             // Remove end of loop and everything after that until the end of the harvest==1 branch.
@@ -182,36 +212,6 @@ namespace StardewHack.HarvestWithScythe
             );
             #endregion
 
-            #region Colored flowers
-            // For colored flowers we need to call createItemDebris instead of createObjectDebris
-            var code = FindCode(
-                // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
-                OpCodes.Ldarg_0,
-                OpCodes.Ldfld,
-                OpCodes.Call,
-                OpCodes.Ldarg_1,
-                OpCodes.Ldarg_2,
-                OpCodes.Ldc_I4_M1,
-                OpCodes.Ldloc_S, // [6] num3
-                OpCodes.Ldc_R4,
-                OpCodes.Ldnull,
-                OpCodes.Call
-            );
-            var var_num3 = code[6].operand as LocalBuilder;
-            code.Replace(
-                // var tmp = CreateObject(this, num3);
-                Instructions.Ldarg_0(), // this
-                Instructions.Ldloc_S(var_num3), // num3
-                Instructions.Call(typeof(ModEntry), nameof(CreateObject), typeof(Crop), typeof(int)),
-                // Game1.createItemDebris(tmp, vector, -1, null, -1);
-                Instructions.Ldloc_3(), // vector
-                Instructions.Ldc_I4_M1(), // -1
-                Instructions.Ldnull(), // null
-                Instructions.Ldc_I4_M1(), // -1
-                Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int))
-            );
-            #endregion
-
             if (config.AllHaveQuality) {
                 // Patch function calls for additional harvest to pass on the harvest quality.
                 FindCode(
@@ -220,7 +220,7 @@ namespace StardewHack.HarvestWithScythe
                     Instructions.Ldc_R4(1.0f),
                     OpCodes.Ldnull,
                     Instructions.Call(typeof(Game1), nameof(Game1.createObjectDebris), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(GameLocation))
-                )[1] = Instructions.Ldloc_S(var_num3);
+                )[1] = Instructions.Ldloc_S(var_quality);
 
                 FindCode(
                     OpCodes.Ldc_I4_1,
@@ -229,7 +229,7 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Ldc_I4_0,
                     OpCodes.Newobj,
                     Instructions.Callvirt(typeof(JunimoHarvester), nameof(JunimoHarvester.tryToAddItemToHut), typeof(Item))
-                )[3] = Instructions.Ldloc_S(var_num3);
+                )[3] = Instructions.Ldloc_S(var_quality);
             }
             
             if (!config.ScytheHarvestFlowers) {

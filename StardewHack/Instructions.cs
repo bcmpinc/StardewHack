@@ -111,7 +111,7 @@ namespace StardewHack
         public static CodeInstruction Stloc_1() => new CodeInstruction(OpCodes.Stloc_1);
         public static CodeInstruction Stloc_2() => new CodeInstruction(OpCodes.Stloc_2);
         public static CodeInstruction Stloc_3() => new CodeInstruction(OpCodes.Stloc_3);
-        public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);
+        //public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);
         public static CodeInstruction Stloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Stloc_S, local);
 
         public static CodeInstruction Sub() => new CodeInstruction(OpCodes.Sub);
