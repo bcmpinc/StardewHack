@@ -62,6 +62,55 @@ namespace StardewHack.HarvestWithScythe
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
+        /** Check whether the used harvest method is allowed for the given harvest mode. 
+         * Method: 0 = plucking, 1 = scything.
+         */
+        public static bool CanHarvest(HarvestMode mode, int method) {
+            // If mode is BOTH, then set mode depending on whether the scythe is currently equipped.
+            if (mode == HarvestMode.BOTH) {
+                var t = Game1.player.CurrentTool;
+                if (t is StardewValley.Tools.MeleeWeapon && (t as StardewValley.Tools.MeleeWeapon).BaseName.Equals("Scythe")) {
+                    mode = HarvestMode.SCYTHE;
+                } else {
+                    mode = HarvestMode.HANDS;
+                }
+            }
+            
+            // Determine if the currently used harvesting method is currently allowed.
+            if (method == 0) {
+                return mode == HarvestMode.HANDS;
+            } else {
+                return mode == HarvestMode.SCYTHE;
+            }
+        }    
+    
+        /** Determine whether the given crop can be harvested using the given method. */
+        public static bool CanHarvestCrop(Crop crop, int method) {
+            // Get harvest settings from config
+            ModConfig config = getInstance().config;
+            HarvestMode mode;
+            if (crop.programColored.Value) {
+                mode = config.HarvestFlowers;
+            } else if (crop.forageCrop.Value) {
+                mode = config.HarvestSpringOnion;
+            } else if (crop.harvestMethod.Value == 0) {
+                mode = config.HarvestPluckableCrops;
+            } else {
+                mode = config.HarvestScythableCrops;
+            }
+            return CanHarvest(mode, method);
+        }
+
+        /** Determine whether the given object can be harvested using the given method. 
+         * Assumes that isForage() returned true. */
+        public static bool CanHarvestObject(StardewValley.Object obj, int method) {
+            // Get harvest settings from config
+            ModConfig config = getInstance().config;
+            HarvestMode mode = config.HarvestForage;
+            return CanHarvest(mode, method);
+        }
+    
+    
         // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
         // Vector is stored in loc_3.
         private void Crop_harvest_fix_vector() {
