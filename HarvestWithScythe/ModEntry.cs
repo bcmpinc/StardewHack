@@ -3,7 +3,6 @@ using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
 using Netcode;
 using StardewValley;
-using StardewValley.Characters;
 using StardewValley.TerrainFeatures;
 
 namespace StardewHack.HarvestWithScythe
@@ -15,16 +14,52 @@ namespace StardewHack.HarvestWithScythe
     }
 
     public class ModConfig {
-        /** How should flowers be harvested? */
+        /** How should flowers be harvested? 
+         * Any Crop that is `programColored` is considered a flower. */
         public HarvestMode HarvestFlowers = HarvestMode.BOTH;
-        /** How should forage be harvested? */
+        
+        /** How should forage be harvested? 
+         * Any Object that `isForage()` is considered forage. */
         public HarvestMode HarvestForage = HarvestMode.BOTH;
-        /** How should pluckable crops be harvested? */
+        
+        /** How should spring onions be harvested?
+         * Any Crop that is `forageCrop` is considered a spring onion. */
+        public HarvestMode HarvestSpringOnion = HarvestMode.BOTH;
+        
+        /** How should pluckable crops be harvested? 
+         * Any Crop that has `harvestMethod == 0` is considered a pluckable crop. */
         public HarvestMode HarvestPluckableCrops = HarvestMode.BOTH;
-        /** How should scythable crops be harvested? */
+        
+        /** How should scythable crops be harvested?
+         * Any Crop that has `harvestMethod == 1` is considered a scythable crop. */
         public HarvestMode HarvestScythableCrops = HarvestMode.SCYTHE;
     }
-
+    
+    /**
+     * This is the core of the Harvest With Scythe mod.
+     *
+     * Crops are either harvested by hand, which is initiatied by HoeDirt.PerformUseAction(), 
+     * or harvested by scythe, which is initiated by HoeDirt.PerformToolAction().
+     * These methods check whether the crop is allowed to be harvested by this method and 
+     * then passes control to Crop.harvest() to perform the actual harvesting. 
+     *
+     * Crop.Harvest() can do further checks whether harvesting is possible. If not, it returns
+     * false to indicate that harvesting failed.
+     * 
+     * The harvesting behavior, i.e. whether the item drops on the ground (scything) or 
+     * is held above the head (plucking) is determined by the value of `harvestMethod`.
+     * Hence HoeDirt.Perform*Action must set this field to the appropriate value and restore 
+     * it afterwards.
+     *
+     * Flowers can have different colors, which is not supported by the original scythe harvesting 
+     * code. To support it, this mod provides a `CreateObject()` method as a proxy for spawning the
+     * dropped crops/flowers.
+     *
+     * Forage are plain Objects with `isForage()` returning true. Those are handled by
+     * Object.performUseAction() and Object.performToolAction(). As the game does not provide
+     * logic for scythe harvesting of forage, this is provided by this mod, see ScytheForage().
+     *
+     */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
@@ -157,9 +192,11 @@ namespace StardewHack.HarvestWithScythe
             return var_quality;
         }
 
-       // >>> Patch code to drop sunflower seeds when harvesting with scythe.
-       // >>> Patch code to let harvesting with scythe drop only 1 item.
-       // >>> The other item drops are handled by the plucking code.
+       /**
+        * Patch code to drop sunflower seeds when harvesting with scythe.
+        * Patch code to let harvesting with scythe drop only 1 item.
+        * The other item drops are handled by the plucking code. 
+        */
        void Crop_harvest_sunflower_drops(LocalBuilder var_quality) {
             // Remove start of loop
             var start_loop = FindCode(
@@ -228,6 +265,9 @@ namespace StardewHack.HarvestWithScythe
             Crop_harvest_sunflower_drops(var_quality);
             
             if (config.HarvestFlowers == HarvestMode.HANDS) {
+                // If the crop is a flower and being harvested with scythe, 
+                // return with false indicating harvesting has failed.
+                // TODO: this should be moved to HoeDirt.performToolAction().
                 var lbl = AttachLabel(instructions[0]);
                 BeginCode().Append(
                     // if (harvestMethod==1 && programColored) {
