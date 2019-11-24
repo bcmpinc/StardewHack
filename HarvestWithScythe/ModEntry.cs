@@ -63,6 +63,9 @@ namespace StardewHack.HarvestWithScythe
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
 #region CanHarvest methods
+        public const int HARVEST_PLUCKING = 0;
+        public const int HARVEST_SCYTHING = 1;
+
         /** Check whether the used harvest method is allowed for the given harvest mode. 
          * Method: 0 = plucking, 1 = scything.
          */
@@ -78,7 +81,7 @@ namespace StardewHack.HarvestWithScythe
             }
             
             // Determine if the currently used harvesting method is currently allowed.
-            if (method == 0) {
+            if (method == HARVEST_PLUCKING) {
                 return mode == HarvestMode.HANDS;
             } else {
                 return mode == HarvestMode.SCYTHE;
@@ -330,17 +333,21 @@ namespace StardewHack.HarvestWithScythe
 
         [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performToolAction")]
         void HoeDirt_performToolAction() {
-            // Find the first harvestMethod==1 check.
+            // Find the first (and only) harvestMethod==1 check.
             var HarvestMethodCheck = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
-                OpCodes.Call, // Netcode
+                OpCodes.Call, // Netcode implicit conversion
                 OpCodes.Ldc_I4_1,
                 OpCodes.Bne_Un
             );
 
-            // Change the harvestMethod==1 check to damage=harvestMethod; harvestMethod=1
+            // Change the harvestMethod==1 check to:
+            //   damage=harvestMethod; 
+            //   if (CanHarvestCrop(crop, 1)) {
+            //   harvestMethod=1
+            // This code block is followed by a call to crop.harvest().
             HarvestMethodCheck.Replace(
                 // damage = crop.harvestMethod.
                 HarvestMethodCheck[0],
@@ -349,6 +356,13 @@ namespace StardewHack.HarvestWithScythe
                 HarvestMethodCheck[3],
                 Instructions.Starg_S(2), // damage
 
+                // if (CanHarvestCrop(crop, 1)) {
+                HarvestMethodCheck[0],
+                HarvestMethodCheck[1],
+                Instructions.Ldc_I4_1(),
+                Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
+                HarvestMethodCheck[5],
+                
                 // crop.harvestMethod = 1
                 HarvestMethodCheck[0],
                 HarvestMethodCheck[1],
@@ -357,7 +371,8 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Call_set(typeof(NetInt), nameof(NetInt.Value))
             );
 
-            // Set harvestMethod=damage after the following crop!=null check.
+            // Restore harvestMethod by setting harvestMethod=damage 
+            // after the following crop!=null check.
             HarvestMethodCheck.FindNext(
                 OpCodes.Ldarg_0,
                 Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
@@ -456,7 +471,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public static bool ScytheForage(StardewValley.Object o, Tool t, GameLocation loc) {
-            if (o.IsSpawnedObject && !o.questItem.Value && o.isForage(loc)) {
+            if (o.IsSpawnedObject && !o.questItem.Value && o.isForage(loc) && CanHarvestObject(o, HARVEST_SCYTHING)) {
                 var who = t.getLastFarmerToUse();
                 var vector = o.TileLocation;
                 // For objects stored in GameLocation.Objects, the TileLocation is not always set.
