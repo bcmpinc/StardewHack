@@ -506,15 +506,16 @@ namespace StardewHack.WearMoreRings
             // Change the equipment slot drawing code to draw the 4 additional slots.
             InstructionRange range = null;
             try {
+                // TODO: check whether this is still working properly.
                 range = FindCode(
                     // switch (equipmentIcon.name) {
                     Instructions.Ldloca_S(3),
                     OpCodes.Call,
-                    Instructions.Stloc_S(4),
-                    Instructions.Ldloc_S(4),
+                    OpCodes.Stloc_S, // 4
+                    OpCodes.Ldloc_S, // 4
                     Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    Instructions.Stloc_S(5),
-                    Instructions.Ldloc_S(5),
+                    OpCodes.Stloc_S, // 5
+                    OpCodes.Ldloc_S, // 5
                     // case "Hat":
                     Instructions.Ldstr("Hat")
                 );
