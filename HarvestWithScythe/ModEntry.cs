@@ -62,6 +62,7 @@ namespace StardewHack.HarvestWithScythe
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
+#region CanHarvest methods
         /** Check whether the used harvest method is allowed for the given harvest mode. 
          * Method: 0 = plucking, 1 = scything.
          */
@@ -109,8 +110,9 @@ namespace StardewHack.HarvestWithScythe
             HarvestMode mode = config.HarvestForage;
             return CanHarvest(mode, method);
         }
+#endregion
     
-    
+#region Patch Crop_harvest
         // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
         // Vector is stored in loc_3.
         private void Crop_harvest_fix_vector() {
@@ -312,29 +314,8 @@ namespace StardewHack.HarvestWithScythe
             Crop_harvest_support_spring_onion();
             var var_quality = Crop_harvest_colored_fowers();
             Crop_harvest_sunflower_drops(var_quality);
-            
-            if (config.HarvestFlowers == HarvestMode.HANDS) {
-                // If the crop is a flower and being harvested with scythe, 
-                // return with false indicating harvesting has failed.
-                // TODO: this should be moved to HoeDirt.performToolAction().
-                var lbl = AttachLabel(instructions[0]);
-                BeginCode().Append(
-                    // if (harvestMethod==1 && programColored) {
-                    Instructions.Ldarg_0(),
-                    Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
-                    Instructions.Call_get(typeof(NetInt), nameof(NetInt.Value)),
-                    Instructions.Brfalse(lbl),
-                    Instructions.Ldarg_0(),
-                    Instructions.Ldfld(typeof(Crop), nameof(Crop.programColored)),
-                    Instructions.Call_get(typeof(NetBool), nameof(NetBool.Value)),
-                    Instructions.Brfalse(lbl),
-                    // return false
-                    Instructions.Ldc_I4_0(),
-                    Instructions.Ret()
-                    // }
-                );
-            }
         }
+#endregion
 
         // Proxy method for creating an object suitable for spawning as debris.
         public static StardewValley.Object CreateObject(Crop crop, int quality) {
