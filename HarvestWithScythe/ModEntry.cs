@@ -15,8 +15,6 @@ namespace StardewHack.HarvestWithScythe
     }
 
     public class ModConfig {
-        /** Should quality be applied to additional harvest? */
-        public bool ExtraDropsHaveQuality = false;
         /** How should flowers be harvested? */
         public HarvestMode HarvestFlowers = HarvestMode.BOTH;
         /** How should forage be harvested? */
@@ -228,26 +226,6 @@ namespace StardewHack.HarvestWithScythe
             Crop_harvest_support_spring_onion();
             var var_quality = Crop_harvest_colored_fowers();
             Crop_harvest_sunflower_drops(var_quality);
-
-            if (config.ExtraDropsHaveQuality) {
-                // Patch function calls for additional harvest to pass on the harvest quality.
-                FindCode(
-                    OpCodes.Ldc_I4_M1,
-                    OpCodes.Ldc_I4_0,
-                    Instructions.Ldc_R4(1.0f),
-                    OpCodes.Ldnull,
-                    Instructions.Call(typeof(Game1), nameof(Game1.createObjectDebris), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(GameLocation))
-                )[1] = Instructions.Ldloc_S(var_quality);
-
-                FindCode(
-                    OpCodes.Ldc_I4_1,
-                    OpCodes.Ldc_I4_0,
-                    OpCodes.Ldc_I4_M1,
-                    OpCodes.Ldc_I4_0,
-                    OpCodes.Newobj,
-                    Instructions.Callvirt(typeof(JunimoHarvester), nameof(JunimoHarvester.tryToAddItemToHut), typeof(Item))
-                )[3] = Instructions.Ldloc_S(var_quality);
-            }
             
             if (config.HarvestFlowers == HarvestMode.HANDS) {
                 var lbl = AttachLabel(instructions[0]);
