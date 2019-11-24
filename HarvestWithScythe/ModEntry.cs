@@ -2,30 +2,38 @@
 using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
 using Netcode;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.TerrainFeatures;
 
 namespace StardewHack.HarvestWithScythe
 {
+    public enum HarvestMode {
+        HANDS,
+        SCYTHE,
+        BOTH, // I.e. determined by whether the scythe is equipped.
+    }
+
     public class ModConfig {
-        /** Should the game be patched to allow harvesting forage with the scythe? */
-        public bool HarvestForage = true;
         /** Should quality be applied to additional harvest? */
-        public bool AllHaveQuality = false;
-        /** Can flowers be harvested with the scythe? */
-        public bool ScytheHarvestFlowers = true;
-        /** Whether crops should also remain pluckable by hand. */
-        public bool AllowManualHarvest = true;
+        public bool ExtraDropsHaveQuality = false;
+        /** How should flowers be harvested? */
+        public HarvestMode HarvestFlowers = HarvestMode.BOTH;
+        /** How should forage be harvested? */
+        public HarvestMode HarvestForage = HarvestMode.BOTH;
+        /** How should pluckable crops be harvested? */
+        public HarvestMode HarvestPluckableCrops = HarvestMode.BOTH;
+        /** How should scythable crops be harvested? */
+        public HarvestMode HarvestScythableCrops = HarvestMode.SCYTHE;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
-        [BytecodePatch("StardewValley.Crop::harvest")]
-        void Crop_harvest() {
-            #region Fix vector
-            Harmony.CodeInstruction ins = null;
+        // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
+        // Vector is stored in loc_3.
+        private void Crop_harvest_fix_vector() {
+            Harmony.CodeInstruction vector2_constructor = null;
+
             // Remove line (2x)
             // Vector2 vector = new Vector2 ((float)xTile, (float)yTile);
             for (int i = 0; i < 2; i++) {
@@ -37,7 +45,7 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Conv_R4,
                     OpCodes.Call
                 );
-                ins = vec[5];
+                vector2_constructor = vec[5];
                 vec.Remove();
             }
             
@@ -53,7 +61,7 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Conv_R4(),
                 Instructions.Ldc_R4(64),
                 Instructions.Mul(),
-                ins
+                vector2_constructor
             );
             
             // Replace (4x):
@@ -74,9 +82,10 @@ namespace StardewHack.HarvestWithScythe
                     Instructions.Ldloc_3() // vector
                 );
             }
-            #endregion
+        }
 
-            #region Support harvesting of spring onions with scythe
+        // Support harvesting of spring onions with scythe
+        private void Crop_harvest_support_spring_onion() {
             // Note: the branch
             //   if (this.forageCrop)
             // refers mainly to the crop spring union.
@@ -116,10 +125,11 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ret()
                 // }
             );
-            #endregion
+        }
 
-            #region Colored flowers
-            // For colored flowers we need to call createItemDebris instead of createObjectDebris
+        // For colored flowers we need to call createItemDebris instead of createObjectDebris
+        // Returns the local variable used for storing the quality of the crop.
+        private LocalBuilder Crop_harvest_colored_fowers() {
             var code = FindCode(
                 // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
                 OpCodes.Ldarg_0,
@@ -146,13 +156,13 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int))
             );
-            #endregion
-            
-            #region Sunflower drops
-            // >>> Patch code to drop sunflower seeds when harvesting with scythe.
-            // >>> Patch code to let harvesting with scythe drop only 1 item.
-            // >>> The other item drops are handled by the plucking code.
+            return var_quality;
+        }
 
+       // >>> Patch code to drop sunflower seeds when harvesting with scythe.
+       // >>> Patch code to let harvesting with scythe drop only 1 item.
+       // >>> The other item drops are handled by the plucking code.
+       void Crop_harvest_sunflower_drops(LocalBuilder var_quality) {
             // Remove start of loop
             var start_loop = FindCode(
                 // for (int i = 0
@@ -210,9 +220,16 @@ namespace StardewHack.HarvestWithScythe
                 // Jump to the 'drop subflower seeds' part.
                 Instructions.Br(AttachLabel(DropSunflowerSeeds[0]))
             );
-            #endregion
+        }
 
-            if (config.AllHaveQuality) {
+        [BytecodePatch("StardewValley.Crop::harvest")]
+        void Crop_harvest() {
+            Crop_harvest_fix_vector();
+            Crop_harvest_support_spring_onion();
+            var var_quality = Crop_harvest_colored_fowers();
+            Crop_harvest_sunflower_drops(var_quality);
+
+            if (config.ExtraDropsHaveQuality) {
                 // Patch function calls for additional harvest to pass on the harvest quality.
                 FindCode(
                     OpCodes.Ldc_I4_M1,
@@ -232,7 +249,7 @@ namespace StardewHack.HarvestWithScythe
                 )[3] = Instructions.Ldloc_S(var_quality);
             }
             
-            if (!config.ScytheHarvestFlowers) {
+            if (config.HarvestFlowers == HarvestMode.HANDS) {
                 var lbl = AttachLabel(instructions[0]);
                 BeginCode().Append(
                     // if (harvestMethod==1 && programColored) {
@@ -309,7 +326,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public bool DisableHandHarvesting() {
-            return !config.AllowManualHarvest;
+            return config.HarvestPluckableCrops == HarvestMode.SCYTHE;
         }
         
         [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performUseAction", "DisableHandHarvesting")]
@@ -322,7 +339,7 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Brtrue
             );
             // Logic here depends on whether flowers can be harvested by scythe.
-            if (config.ScytheHarvestFlowers) {
+            if (config.HarvestFlowers == HarvestMode.SCYTHE) {
                 // Entirely remove logic related to harvesting by hand.
                 harvest_hand.Extend(
                     OpCodes.Ldarg_0,
@@ -361,7 +378,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public bool HarvestForageEnabled() {
-            return config.HarvestForage;
+            return config.HarvestForage != HarvestMode.HANDS;
         }
         
         [BytecodePatch("StardewValley.Object::performToolAction", "HarvestForageEnabled")]

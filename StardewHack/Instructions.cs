@@ -81,8 +81,6 @@ namespace StardewHack
         public static CodeInstruction Ldloc_1() => new CodeInstruction(OpCodes.Ldloc_1);
         public static CodeInstruction Ldloc_2() => new CodeInstruction(OpCodes.Ldloc_2);
         public static CodeInstruction Ldloc_3() => new CodeInstruction(OpCodes.Ldloc_3);
-        //public static CodeInstruction Ldloc  (byte index) => new CodeInstruction(OpCodes.Ldloc,   index);
-        //public static CodeInstruction Ldloc_S(byte index) => new CodeInstruction(OpCodes.Ldloc_S, index);
         public static CodeInstruction Ldloc  (LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc,   local);
         public static CodeInstruction Ldloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Ldloc_S, local);
         public static CodeInstruction Ldloca  (ushort index) => new CodeInstruction(OpCodes.Ldloca,   index);
@@ -111,7 +109,6 @@ namespace StardewHack
         public static CodeInstruction Stloc_1() => new CodeInstruction(OpCodes.Stloc_1);
         public static CodeInstruction Stloc_2() => new CodeInstruction(OpCodes.Stloc_2);
         public static CodeInstruction Stloc_3() => new CodeInstruction(OpCodes.Stloc_3);
-        //public static CodeInstruction Stloc_S(byte index) => new CodeInstruction(OpCodes.Stloc_S, index);
         public static CodeInstruction Stloc_S(LocalBuilder local) => new CodeInstruction(OpCodes.Stloc_S, local);
 
         public static CodeInstruction Sub() => new CodeInstruction(OpCodes.Sub);
