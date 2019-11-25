@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
+using Harmony;
 using Microsoft.Xna.Framework;
 using Netcode;
 using StardewValley;
@@ -534,6 +536,45 @@ namespace StardewHack.HarvestWithScythe
                 return false;
             }
         }
+
+        [BytecodePatch("StardewValley.GameLocation::checkAction", "ScythableForageEnabled")]
+        void GameLocation_checkAction() {
+            // The code we need to patch is contained in a delegate, so use chain patching.
+            MethodInfo method = (MethodInfo)FindCode(
+                OpCodes.Ldftn
+            )[0].operand;
+            ChainPatch(method, AccessTools.Method(typeof(ModEntry), nameof(GameLocation_checkAction_Chain)));
+        }
+
+        void GameLocation_checkAction_Chain() {
+            var var_object = generator.DeclareLocal(typeof(StardewValley.Object));
+            var code = FindCode(
+                // if (who.couldInventoryAcceptThisItem (objects [vector])) {
+                OpCodes.Ldarg_0,
+                OpCodes.Ldfld,
+                OpCodes.Ldarg_0,
+                OpCodes.Ldfld,
+                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                OpCodes.Ldloc_1,
+                OpCodes.Callvirt,
+                // <- Insert is here.
+                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem)),
+                OpCodes.Brfalse
+            );
+            // Check whether harvesting forage by hand is allowed.
+            code.Insert(7,
+                // var object = objects [vector];
+                Instructions.Stloc_S(var_object),
+                // if (ModEntry.CanHarvestObject(object, 0)) {
+                Instructions.Ldloc_S(var_object),
+                Instructions.Ldc_I4_0(),
+                Instructions.Call(typeof(ModEntry), nameof(CanHarvestObject), typeof(StardewValley.Object), typeof(int)),
+                Instructions.Brfalse((Label)code[8].operand),
+                // object
+                Instructions.Ldloc_S(var_object)
+            );
+        }
+
 #endregion
     }
 }
