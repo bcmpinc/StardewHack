@@ -556,7 +556,7 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Ldarg_0,
                 OpCodes.Ldfld, // objects
                 Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                OpCodes.Ldloc_1,
+                null, // Either LdLoc_1 or LdLoc_S(8).
                 OpCodes.Callvirt,
                 // <- Insert is here.
                 Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
@@ -589,7 +589,7 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Ldarg_0,
                 OpCodes.Ldfld,
                 Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                OpCodes.Ldloc_1,
+                null, // Either LdLoc_1 or LdLoc_S(8).
                 OpCodes.Callvirt,
                 OpCodes.Ldloc_S,
                 Instructions.Callvirt_set(typeof(StardewValley.Object), nameof(StardewValley.Object.Quality))
