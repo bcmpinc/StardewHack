@@ -509,7 +509,7 @@ namespace StardewHack.WearMoreRings
                 // TODO: check whether this is still working properly.
                 range = FindCode(
                     // switch (equipmentIcon.name) {
-                    Instructions.Ldloca_S(3),
+                    OpCodes.Ldloca_S,
                     OpCodes.Call,
                     OpCodes.Stloc_S, // 4
                     OpCodes.Ldloc_S, // 4
@@ -523,13 +523,13 @@ namespace StardewHack.WearMoreRings
                 LogException(err, LogLevel.Trace);
                 range = FindCode(
                     // switch (equipmentIcon.name) {
-                    Instructions.Ldloca_S(1),
+                    OpCodes.Ldloca_S,
                     OpCodes.Call,
-                    Instructions.Stloc_0(),
-                    Instructions.Ldloc_0(),
+                    OpCodes.Stloc_0,
+                    OpCodes.Ldloc_0,
                     Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    Instructions.Stloc_2(),
-                    Instructions.Ldloc_2(),
+                    OpCodes.Stloc_2,
+                    OpCodes.Ldloc_2,
                     // case null (shortcut)
                     OpCodes.Brfalse,
                     Instructions.Ldloc_2(),
