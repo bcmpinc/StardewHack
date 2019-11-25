@@ -393,56 +393,74 @@ namespace StardewHack.HarvestWithScythe
             );
         }
 
-        public bool DisableHandHarvesting() {
-            return config.HarvestMode.PluckableCrops == HarvestModeEnum.SCYTHE;
-        }
-        
-        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performUseAction", "DisableHandHarvesting")]
-        void HoeDirt_performUseAction() {
+
+        private void HoeDirt_performUseAction_hand(LocalBuilder var_temp_harvestMethod) {
+            // Do plucking logic
             var harvest_hand = FindCode(
+                // if ((int)crop.harvestMethod == 0) {
                 OpCodes.Ldarg_0,
-                OpCodes.Call,
-                OpCodes.Ldfld,
-                OpCodes.Call,
+                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
+                OpCodes.Call, // NetCode implicit cast.
                 OpCodes.Brtrue
             );
-            // Logic here depends on whether flowers can be harvested by scythe.
-            if (config.HarvestMode.Flowers == HarvestModeEnum.SCYTHE) {
-                // Entirely remove logic related to harvesting by hand.
-                harvest_hand.Extend(
-                    OpCodes.Ldarg_0,
-                    OpCodes.Call,
-                    OpCodes.Ldfld,
-                    OpCodes.Call,
-                    OpCodes.Ldc_I4_1,
-                    OpCodes.Bne_Un
-                );
-                harvest_hand.Remove();
-            } else {
-                // Only allow harvesting by hand for flowers. Otherwise those would not be harvestable.
-                harvest_hand.Replace(
-                    harvest_hand[0],
-                    harvest_hand[1],
-                    Instructions.Ldfld(typeof(Crop), nameof(Crop.programColored)),
-                    Instructions.Call_get(typeof(NetBool), nameof(NetBool.Value)),
-                    Instructions.Brfalse((Label)harvest_hand[4].operand)
-                );
-                var harvest_scythe = FindCode(
-                    OpCodes.Ldarg_0,
-                    OpCodes.Call,
-                    OpCodes.Ldfld,
-                    OpCodes.Call,
-                    OpCodes.Ldc_I4_1,
-                    OpCodes.Bne_Un
-                );
-                harvest_scythe.Replace(
-                    harvest_scythe[0],
-                    harvest_scythe[1],
-                    Instructions.Ldfld(typeof(Crop), nameof(Crop.programColored)),
-                    Instructions.Call_get(typeof(NetBool), nameof(NetBool.Value)),
-                    Instructions.Brtrue((Label)harvest_scythe[5].operand)
-                );
-            }
+            harvest_hand.Replace(
+                // var temp_harvestmethod = crop.harvestMethod;
+                harvest_hand[0],
+                harvest_hand[1],
+                harvest_hand[2],
+                harvest_hand[3],
+                Instructions.Stloc_S(var_temp_harvestMethod),
+                
+                // if (ModEntry.CanHarvestCrop(crop, 0)) {
+                Instructions.Ldarg_0(),
+                harvest_hand[1],
+                Instructions.Ldc_I4_0(),
+                Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
+                Instructions.Brfalse((Label)harvest_hand[4].operand),
+                
+                // crop.harvestMethod = 0;
+                Instructions.Ldarg_0(),
+                harvest_hand[1],
+                harvest_hand[2],
+                Instructions.Ldc_I4_0(),
+                Instructions.Call_set(typeof(NetInt), nameof(NetInt.Value))
+            );
+        }
+
+        private void HoeDirt_performUseAction_scythe(LocalBuilder var_temp_harvestMethod) {
+            // Do scything logic
+            var harvest_scythe = FindCode(
+                // if ((int)crop.harvestMethod == 1) {
+                OpCodes.Ldarg_0,
+                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
+                OpCodes.Call, // NetCode implicit cast.
+                OpCodes.Ldc_I4_1,
+                OpCodes.Bne_Un
+            );
+            harvest_scythe.Replace(
+                // crop.harvestMethod = temp_harvestmethod;
+                harvest_scythe[0],
+                harvest_scythe[1],
+                harvest_scythe[2],
+                Instructions.Ldloc_S(var_temp_harvestMethod),
+                Instructions.Call_set(typeof(NetInt), nameof(NetInt.Value)),
+
+                // if (ModEntry.CanHarvestCrop(crop, 1)) {
+                Instructions.Ldarg_0(),
+                harvest_scythe[1],
+                Instructions.Ldc_I4_1(),
+                Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
+                Instructions.Brfalse((Label)harvest_scythe[5].operand)
+            );
+        }
+
+        [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performUseAction")]
+        void HoeDirt_performUseAction() {
+            LocalBuilder var_temp_harvestMethod = generator.DeclareLocal(typeof(int));
+            HoeDirt_performUseAction_hand(var_temp_harvestMethod);
+            HoeDirt_performUseAction_scythe(var_temp_harvestMethod);
         }
 
         public bool ScythableForageEnabled() {
