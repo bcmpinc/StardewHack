@@ -7,32 +7,35 @@ using StardewValley.TerrainFeatures;
 
 namespace StardewHack.HarvestWithScythe
 {
-    public enum HarvestMode {
+    public enum HarvestModeEnum {
         HANDS,
         SCYTHE,
         BOTH, // I.e. determined by whether the scythe is equipped.
     }
 
     public class ModConfig {
-        /** How should flowers be harvested? 
-         * Any Crop that is `programColored` is considered a flower. */
-        public HarvestMode HarvestFlowers = HarvestMode.BOTH;
-        
-        /** How should forage be harvested? 
-         * Any Object that `isForage()` is considered forage. */
-        public HarvestMode HarvestForage = HarvestMode.BOTH;
-        
-        /** How should spring onions be harvested?
-         * Any Crop that is `forageCrop` is considered a spring onion. */
-        public HarvestMode HarvestSpringOnion = HarvestMode.BOTH;
-        
-        /** How should pluckable crops be harvested? 
-         * Any Crop that has `harvestMethod == 0` is considered a pluckable crop. */
-        public HarvestMode HarvestPluckableCrops = HarvestMode.BOTH;
-        
-        /** How should scythable crops be harvested?
-         * Any Crop that has `harvestMethod == 1` is considered a scythable crop. */
-        public HarvestMode HarvestScythableCrops = HarvestMode.SCYTHE;
+        public class HarvestModeClass {
+            /** How should flowers be harvested? 
+             * Any Crop that is `programColored` is considered a flower. */
+            public HarvestModeEnum Flowers = HarvestModeEnum.BOTH;
+            
+            /** How should forage be harvested? 
+             * Any Object that `isForage()` is considered forage. */
+            public HarvestModeEnum Forage = HarvestModeEnum.BOTH;
+            
+            /** How should spring onions be harvested?
+             * Any Crop that is `forageCrop` is considered a spring onion. */
+            public HarvestModeEnum SpringOnion = HarvestModeEnum.BOTH;
+            
+            /** How should pluckable crops be harvested? 
+             * Any Crop that has `harvestMethod == 0` is considered a pluckable crop. */
+            public HarvestModeEnum PluckableCrops = HarvestModeEnum.BOTH;
+            
+            /** How should scythable crops be harvested?
+             * Any Crop that has `harvestMethod == 1` is considered a scythable crop. */
+            public HarvestModeEnum ScythableCrops = HarvestModeEnum.SCYTHE;
+        }
+        public HarvestModeClass HarvestMode = new HarvestModeClass();
     }
     
     /**
@@ -69,38 +72,38 @@ namespace StardewHack.HarvestWithScythe
         /** Check whether the used harvest method is allowed for the given harvest mode. 
          * Method: 0 = plucking, 1 = scything.
          */
-        public static bool CanHarvest(HarvestMode mode, int method) {
+        public static bool CanHarvest(HarvestModeEnum mode, int method) {
             // If mode is BOTH, then set mode depending on whether the scythe is currently equipped.
-            if (mode == HarvestMode.BOTH) {
+            if (mode == HarvestModeEnum.BOTH) {
                 var t = Game1.player.CurrentTool;
                 if (t is StardewValley.Tools.MeleeWeapon && (t as StardewValley.Tools.MeleeWeapon).BaseName.Equals("Scythe")) {
-                    mode = HarvestMode.SCYTHE;
+                    mode = HarvestModeEnum.SCYTHE;
                 } else {
-                    mode = HarvestMode.HANDS;
+                    mode = HarvestModeEnum.HANDS;
                 }
             }
             
             // Determine if the currently used harvesting method is currently allowed.
             if (method == HARVEST_PLUCKING) {
-                return mode == HarvestMode.HANDS;
+                return mode == HarvestModeEnum.HANDS;
             } else {
-                return mode == HarvestMode.SCYTHE;
+                return mode == HarvestModeEnum.SCYTHE;
             }
         }    
     
         /** Determine whether the given crop can be harvested using the given method. */
         public static bool CanHarvestCrop(Crop crop, int method) {
             // Get harvest settings from config
-            ModConfig config = getInstance().config;
-            HarvestMode mode;
+            ModConfig.HarvestModeClass config = getInstance().config.HarvestMode;
+            HarvestModeEnum mode;
             if (crop.programColored.Value) {
-                mode = config.HarvestFlowers;
+                mode = config.Flowers;
             } else if (crop.forageCrop.Value) {
-                mode = config.HarvestSpringOnion;
+                mode = config.SpringOnion;
             } else if (crop.harvestMethod.Value == 0) {
-                mode = config.HarvestPluckableCrops;
+                mode = config.PluckableCrops;
             } else {
-                mode = config.HarvestScythableCrops;
+                mode = config.ScythableCrops;
             }
             return CanHarvest(mode, method);
         }
@@ -109,8 +112,8 @@ namespace StardewHack.HarvestWithScythe
          * Assumes that isForage() returned true. */
         public static bool CanHarvestObject(StardewValley.Object obj, int method) {
             // Get harvest settings from config
-            ModConfig config = getInstance().config;
-            HarvestMode mode = config.HarvestForage;
+            ModConfig.HarvestModeClass config = getInstance().config.HarvestMode;
+            HarvestModeEnum mode = config.Forage;
             return CanHarvest(mode, method);
         }
 #endregion
@@ -119,6 +122,7 @@ namespace StardewHack.HarvestWithScythe
         // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
         // Vector is stored in loc_3.
         private void Crop_harvest_fix_vector() {
+            Harmony.CodeInstruction vector2_ldloca_S = null;
             Harmony.CodeInstruction vector2_constructor = null;
 
             // Remove line (2x)
@@ -132,6 +136,7 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Conv_R4,
                     OpCodes.Call
                 );
+                vector2_ldloca_S    = vec[0];
                 vector2_constructor = vec[5];
                 vec.Remove();
             }
@@ -139,7 +144,7 @@ namespace StardewHack.HarvestWithScythe
             // Add to begin of function
             // Vector2 vector = new Vector2 ((float)xTile*64., (float)yTile*64.);
             BeginCode().Append(
-                Instructions.Ldloca_S(3),
+                vector2_ldloca_S,
                 Instructions.Ldarg_1(),
                 Instructions.Conv_R4(),
                 Instructions.Ldc_R4(64),
@@ -361,7 +366,7 @@ namespace StardewHack.HarvestWithScythe
                 HarvestMethodCheck[1],
                 Instructions.Ldc_I4_1(),
                 Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
-                HarvestMethodCheck[5],
+                Instructions.Brfalse((Label)HarvestMethodCheck[5].operand),
                 
                 // crop.harvestMethod = 1
                 HarvestMethodCheck[0],
@@ -389,7 +394,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public bool DisableHandHarvesting() {
-            return config.HarvestPluckableCrops == HarvestMode.SCYTHE;
+            return config.HarvestMode.PluckableCrops == HarvestModeEnum.SCYTHE;
         }
         
         [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performUseAction", "DisableHandHarvesting")]
@@ -402,7 +407,7 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Brtrue
             );
             // Logic here depends on whether flowers can be harvested by scythe.
-            if (config.HarvestFlowers == HarvestMode.SCYTHE) {
+            if (config.HarvestMode.Flowers == HarvestModeEnum.SCYTHE) {
                 // Entirely remove logic related to harvesting by hand.
                 harvest_hand.Extend(
                     OpCodes.Ldarg_0,
@@ -440,11 +445,11 @@ namespace StardewHack.HarvestWithScythe
             }
         }
 
-        public bool HarvestForageEnabled() {
-            return config.HarvestForage != HarvestMode.HANDS;
+        public bool ScythableForageEnabled() {
+            return config.HarvestMode.Forage != HarvestModeEnum.HANDS;
         }
         
-        [BytecodePatch("StardewValley.Object::performToolAction", "HarvestForageEnabled")]
+        [BytecodePatch("StardewValley.Object::performToolAction", "ScythableForageEnabled")]
         void Object_performToolAction() {
             var code = BeginCode();
             Label begin = AttachLabel(code[0]);
