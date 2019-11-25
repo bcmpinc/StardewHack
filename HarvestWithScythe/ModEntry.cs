@@ -20,7 +20,7 @@ namespace StardewHack.HarvestWithScythe
             public HarvestModeEnum Flowers = HarvestModeEnum.BOTH;
             
             /** How should forage be harvested? 
-             * Any Object that `isForage()` is considered forage. */
+             * Any Object where `isForage() && isSpawnedObject && !questItem` evaluates to true is considered forage. */
             public HarvestModeEnum Forage = HarvestModeEnum.BOTH;
             
             /** How should spring onions be harvested?
@@ -58,9 +58,10 @@ namespace StardewHack.HarvestWithScythe
      * code. To support it, this mod provides a `CreateObject()` method as a proxy for spawning the
      * dropped crops/flowers.
      *
-     * Forage are plain Objects with `isForage()` returning true. Those are handled by
-     * Object.performUseAction() and Object.performToolAction(). As the game does not provide
-     * logic for scythe harvesting of forage, this is provided by this mod, see ScytheForage().
+     * Forage are plain Objects where `isForage() && isSpawnedObject && !questItem` evaluates to true.
+     * Those are handled by GameLocation.checkAction() and Object.performToolAction(). As the 
+     * game does not provide logic for scythe harvesting of forage, this is provided by this mod, 
+     * see ScytheForage().
      *
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
@@ -336,6 +337,7 @@ namespace StardewHack.HarvestWithScythe
             }
         }
 
+#region Patch HoeDirt
         [BytecodePatch("StardewValley.TerrainFeatures.HoeDirt::performToolAction")]
         void HoeDirt_performToolAction() {
             // Find the first (and only) harvestMethod==1 check.
@@ -462,7 +464,9 @@ namespace StardewHack.HarvestWithScythe
             HoeDirt_performUseAction_hand(var_temp_harvestMethod);
             HoeDirt_performUseAction_scythe(var_temp_harvestMethod);
         }
+#endregion
 
+#region Patch Object
         public bool ScythableForageEnabled() {
             return config.HarvestMode.Forage != HarvestModeEnum.HANDS;
         }
@@ -530,6 +534,7 @@ namespace StardewHack.HarvestWithScythe
                 return false;
             }
         }
+#endregion
     }
 }
 
