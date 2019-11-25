@@ -11,7 +11,7 @@ using StardewValley.Tools;
 namespace StardewHack.HarvestWithScythe
 {
     public enum HarvestModeEnum {
-        HANDS,
+        HAND,
         SCYTHE,
         BOTH, // I.e. determined by whether the scythe is equipped.
     }
@@ -83,13 +83,13 @@ namespace StardewHack.HarvestWithScythe
                 if (t is MeleeWeapon && (t as MeleeWeapon).BaseName.Equals("Scythe")) {
                     mode = HarvestModeEnum.SCYTHE;
                 } else {
-                    mode = HarvestModeEnum.HANDS;
+                    mode = HarvestModeEnum.HAND;
                 }
             }
             
             // Determine if the currently used harvesting method is currently allowed.
             if (method == HARVEST_PLUCKING) {
-                return mode == HarvestModeEnum.HANDS;
+                return mode == HarvestModeEnum.HAND;
             } else {
                 return mode == HarvestModeEnum.SCYTHE;
             }
@@ -471,7 +471,7 @@ namespace StardewHack.HarvestWithScythe
 
 #region Patch Object
         public bool ScythableForageEnabled() {
-            return config.HarvestMode.Forage != HarvestModeEnum.HANDS;
+            return config.HarvestMode.Forage != HarvestModeEnum.HAND;
         }
         
         [BytecodePatch("StardewValley.Object::performToolAction", "ScythableForageEnabled")]
