@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Netcode;
 using StardewValley;
 using StardewValley.TerrainFeatures;
+using StardewValley.Tools;
 
 namespace StardewHack.HarvestWithScythe
 {
@@ -79,7 +80,7 @@ namespace StardewHack.HarvestWithScythe
             // If mode is BOTH, then set mode depending on whether the scythe is currently equipped.
             if (mode == HarvestModeEnum.BOTH) {
                 var t = Game1.player.CurrentTool;
-                if (t is StardewValley.Tools.MeleeWeapon && (t as StardewValley.Tools.MeleeWeapon).BaseName.Equals("Scythe")) {
+                if (t is MeleeWeapon && (t as MeleeWeapon).BaseName.Equals("Scythe")) {
                     mode = HarvestModeEnum.SCYTHE;
                 } else {
                     mode = HarvestModeEnum.HANDS;
@@ -480,10 +481,10 @@ namespace StardewHack.HarvestWithScythe
             code.Prepend(
                 // Check if Tool is scythe.
                 Instructions.Ldarg_1(),
-                Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
+                Instructions.Isinst(typeof(MeleeWeapon)),
                 Instructions.Brfalse(begin),
                 Instructions.Ldarg_1(),
-                Instructions.Isinst(typeof(StardewValley.Tools.MeleeWeapon)),
+                Instructions.Isinst(typeof(MeleeWeapon)),
                 Instructions.Callvirt_get(typeof(Tool), nameof(Tool.BaseName)),
                 Instructions.Ldstr("Scythe"),
                 Instructions.Callvirt(typeof(string), nameof(string.Equals), typeof(string)),
@@ -551,28 +552,74 @@ namespace StardewHack.HarvestWithScythe
             var code = FindCode(
                 // if (who.couldInventoryAcceptThisItem (objects [vector])) {
                 OpCodes.Ldarg_0,
-                OpCodes.Ldfld,
+                OpCodes.Ldfld, // who
                 OpCodes.Ldarg_0,
-                OpCodes.Ldfld,
+                OpCodes.Ldfld, // objects
                 Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
                 OpCodes.Ldloc_1,
                 OpCodes.Callvirt,
                 // <- Insert is here.
-                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem)),
+                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
                 OpCodes.Brfalse
             );
             // Check whether harvesting forage by hand is allowed.
-            code.Insert(7,
+            code.Replace(
                 // var object = objects [vector];
+                code[0],
+                code[3], // objects
+                code[4],
+                code[5],
+                code[6],
                 Instructions.Stloc_S(var_object),
                 // if (ModEntry.CanHarvestObject(object, 0)) {
                 Instructions.Ldloc_S(var_object),
                 Instructions.Ldc_I4_0(),
                 Instructions.Call(typeof(ModEntry), nameof(CanHarvestObject), typeof(StardewValley.Object), typeof(int)),
                 Instructions.Brfalse((Label)code[8].operand),
-                // object
-                Instructions.Ldloc_S(var_object)
+                // if (who.couldInventoryAcceptThisItem (object)) {
+                code[2],
+                code[1], // who
+                Instructions.Ldloc_S(var_object),
+                code[7], // couldInventoryAcceptThisItem
+                code[8]
             );
+
+            // Move to this.objects [vector].Quality = quality;
+            code = code.FindNext(
+                OpCodes.Ldarg_0,
+                OpCodes.Ldfld,
+                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                OpCodes.Ldloc_1,
+                OpCodes.Callvirt,
+                OpCodes.Ldloc_S,
+                Instructions.Callvirt_set(typeof(StardewValley.Object), nameof(StardewValley.Object.Quality))
+            );
+            var label_dont_scythe = AttachLabel(code.End[0]);
+            // Append code to handle trigger harvest with scythe.
+            code.Append(
+                // if (ModEntry.CanHarvest(object, HARVEST_SCYTHING) {
+                Instructions.Ldloc_S(var_object),
+                Instructions.Ldc_I4_1(), // HARVEST_SCYTHING
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.CanHarvestObject), typeof(StardewValley.Object), typeof(int)),
+                Instructions.Brfalse(label_dont_scythe),
+                // ModEntry.TryScythe()
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.TryScythe))
+            );
+        }
+        
+        static void TryScythe() {
+            // Copied from HoeDirt.performUseAction()
+            if (Game1.player.CurrentTool != null && Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool as MeleeWeapon).InitialParentTileIndex == 47) {
+                Game1.player.CanMove = false;
+                Game1.player.UsingTool = true;
+                Game1.player.canReleaseTool = true;
+                Game1.player.Halt ();
+                try {
+                    Game1.player.CurrentTool.beginUsing (Game1.currentLocation, (int)Game1.player.lastClick.X, (int)Game1.player.lastClick.Y, Game1.player);
+                } catch (Exception) {
+                }
+                ((MeleeWeapon)Game1.player.CurrentTool).setFarmerAnimating (Game1.player);
+            } 
         }
 
 #endregion
