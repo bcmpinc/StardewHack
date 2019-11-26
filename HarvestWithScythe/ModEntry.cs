@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using Harmony;
 using Microsoft.Xna.Framework;
 using Netcode;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
@@ -549,19 +550,44 @@ namespace StardewHack.HarvestWithScythe
 
         void GameLocation_checkAction_Chain() {
             var var_object = generator.DeclareLocal(typeof(StardewValley.Object));
-            var code = FindCode(
-                // if (who.couldInventoryAcceptThisItem (objects [vector])) {
-                OpCodes.Ldarg_0,
-                OpCodes.Ldfld, // who
-                OpCodes.Ldarg_0,
-                OpCodes.Ldfld, // objects
-                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                null, // Either LdLoc_1 or LdLoc_S(8).
-                OpCodes.Callvirt,
-                // <- Insert is here.
-                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
-                OpCodes.Brfalse
-            );
+            InstructionRange code;
+            Label cant_harvest;
+            try {
+                code = FindCode(
+                    // if (who.couldInventoryAcceptThisItem (objects [vector])) {
+                    OpCodes.Ldarg_0,
+                    OpCodes.Ldfld, // who
+                    OpCodes.Ldarg_0,
+                    OpCodes.Ldfld, // objects
+                    Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                    null, // Either LdLoc_1 or LdLoc_S(8).
+                    OpCodes.Callvirt,
+                    // <- Insert is here.
+                    Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
+                    OpCodes.Brfalse,
+                    null // To make this InstructionRange have the same length as the one below for android.
+                );
+                cant_harvest = (Label)code[8].operand;
+            } catch (Exception err) {
+                LogException(err, LogLevel.Trace);
+                
+                // Android adds a boolean to the couldInventoryAcceptThisItem method.
+                code = FindCode(
+                    // if (who.couldInventoryAcceptThisItem (objects [vector], true)) {
+                    OpCodes.Ldarg_0,
+                    OpCodes.Ldfld, // who
+                    OpCodes.Ldarg_0,
+                    OpCodes.Ldfld, // objects
+                    Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                    null, // Either LdLoc_1 or LdLoc_S(8).
+                    OpCodes.Callvirt,
+                    // <- Insert is here.
+                    OpCodes.Ldc_I4_1,
+                    Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item), typeof(bool)),
+                    OpCodes.Brfalse
+                );
+                cant_harvest = (Label)code[9].operand;
+            }
             // Check whether harvesting forage by hand is allowed.
             code.Replace(
                 // var object = objects [vector];
@@ -575,13 +601,14 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldloc_S(var_object),
                 Instructions.Ldc_I4_0(),
                 Instructions.Call(typeof(ModEntry), nameof(CanHarvestObject), typeof(StardewValley.Object), typeof(int)),
-                Instructions.Brfalse((Label)code[8].operand),
+                Instructions.Brfalse(cant_harvest),
                 // if (who.couldInventoryAcceptThisItem (object)) {
                 code[2],
                 code[1], // who
                 Instructions.Ldloc_S(var_object),
-                code[7], // couldInventoryAcceptThisItem
-                code[8]
+                code[7], // true or couldInventoryAcceptThisItem
+                code[8],
+                code[9]
             );
 
             // Move to this.objects [vector].Quality = quality;
