@@ -59,7 +59,7 @@ namespace StardewHack.HarvestWithScythe
      * it afterwards.
      *
      * Flowers can have different colors, which is not supported by the original scythe harvesting 
-     * code. To support it, this mod provides a `CreateObject()` method as a proxy for spawning the
+     * code. To support it, this mod provides a `CreateDebris()` method as a proxy for spawning the
      * dropped crops/flowers.
      *
      * Forage are plain Objects where `isForage() && isSpawnedObject && !questItem` evaluates to true.
@@ -126,9 +126,9 @@ namespace StardewHack.HarvestWithScythe
 #region Patch Crop_harvest
         // Changes the vector to be pre-multiplied by 64, so it's easier to use for spawning debris.
         // Vector is stored in loc_3.
-        private void Crop_harvest_fix_vector() {
-            Harmony.CodeInstruction vector2_ldloca_S = null;
-            Harmony.CodeInstruction vector2_constructor = null;
+        private LocalBuilder Crop_harvest_fix_vector() {
+            CodeInstruction vector2_ldloca_S = null;
+            CodeInstruction vector2_constructor = null;
 
             // Remove line (2x)
             // Vector2 vector = new Vector2 ((float)xTile, (float)yTile);
@@ -145,6 +145,7 @@ namespace StardewHack.HarvestWithScythe
                 vector2_constructor = vec[5];
                 vec.Remove();
             }
+            var var_vector = (LocalBuilder)vector2_ldloca_S.operand;
             
             // Add to begin of function
             // Vector2 vector = new Vector2 ((float)xTile*64., (float)yTile*64.);
@@ -176,13 +177,16 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Mul,
                     OpCodes.Newobj
                 ).Replace(
-                    Instructions.Ldloc_3() // vector
+                    Instructions.Ldloc_S(var_vector)
                 );
             }
+            
+            // Return the location of the vector variable.
+            return var_vector;
         }
 
         // Support harvesting of spring onions with scythe
-        private void Crop_harvest_support_spring_onion() {
+        private void Crop_harvest_support_spring_onion(LocalBuilder var_vector) {
             if (config.HarvestMode.SpringOnion == HarvestModeEnum.HAND) return;
             
             // Note: the branch
@@ -208,7 +212,7 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
                 // Game1.createItemDebris (@object, vector, -1, null, -1)
                 Instructions.Ldloc_0(), // @object
-                Instructions.Ldloc_3(), // vector
+                Instructions.Ldloc_S(var_vector), // vector
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Ldnull(), // null
                 Instructions.Ldc_I4_M1(), // -1
@@ -227,7 +231,7 @@ namespace StardewHack.HarvestWithScythe
 
         // For colored flowers we need to call createItemDebris instead of createObjectDebris
         // Returns the local variable used for storing the quality of the crop.
-        private LocalBuilder Crop_harvest_colored_flowers() {
+        private LocalBuilder Crop_harvest_colored_flowers(LocalBuilder var_vector) {
             var code = FindCode(
                 // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
                 OpCodes.Ldarg_0,
@@ -243,16 +247,11 @@ namespace StardewHack.HarvestWithScythe
             );
             var var_quality = code[6].operand as LocalBuilder; // num3
             code.Replace(
-                // var tmp = CreateObject(this, num3);
+                // CreateDebris(this, num3);
                 Instructions.Ldarg_0(), // this
                 Instructions.Ldloc_S(var_quality), // num3
-                Instructions.Call(typeof(ModEntry), nameof(CreateObject), typeof(Crop), typeof(int)),
-                // Game1.createItemDebris(tmp, vector, -1, null, -1);
-                Instructions.Ldloc_3(), // vector
-                Instructions.Ldc_I4_M1(), // -1
-                Instructions.Ldnull(), // null
-                Instructions.Ldc_I4_M1(), // -1
-                Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int))
+                Instructions.Ldloc_S(var_vector), // vector
+                Instructions.Call(typeof(ModEntry), nameof(CreateDebris), typeof(Crop), typeof(int), typeof(Vector2))
             );
             return var_quality;
         }
@@ -324,22 +323,24 @@ namespace StardewHack.HarvestWithScythe
 
         [BytecodePatch("StardewValley.Crop::harvest")]
         void Crop_harvest() {
-            Crop_harvest_fix_vector();
-            Crop_harvest_support_spring_onion();
-            var var_quality = Crop_harvest_colored_flowers();
+            var var_vector = Crop_harvest_fix_vector();
+            Crop_harvest_support_spring_onion(var_vector);
+            var var_quality = Crop_harvest_colored_flowers(var_vector);
             Crop_harvest_sunflower_drops(var_quality);
         }
 #endregion
 
         // Proxy method for creating an object suitable for spawning as debris.
-        public static StardewValley.Object CreateObject(Crop crop, int quality) {
+        public static void CreateDebris(Crop crop, int quality, Vector2 vector) {
+            Item dropped_item;
             if (crop.programColored.Value) {
-                return new StardewValley.Objects.ColoredObject(crop.indexOfHarvest.Value, 1, crop.tintColor.Value) {
+                dropped_item = new StardewValley.Objects.ColoredObject(crop.indexOfHarvest.Value, 1, crop.tintColor.Value) {
                     Quality = quality
                 };
             } else {
-                return new StardewValley.Object(crop.indexOfHarvest.Value, 1, false, -1, quality);
+                dropped_item = new StardewValley.Object(crop.indexOfHarvest.Value, 1, false, -1, quality);
             }
+            Game1.createItemDebris(dropped_item, vector, -1, null, -1);
         }
 
 #region Patch HoeDirt
