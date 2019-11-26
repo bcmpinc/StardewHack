@@ -58,7 +58,7 @@ namespace StardewHack
         ///  - CodeInstruction: are the instruction's OpCode and Operand equal.
         ///  - null: always matches.
         /// </summary>
-        public InstructionRange FindCode(params Object[] contains) {
+        public InstructionRange FindCode(params InstructionMatcher[] contains) {
             return new InstructionRange(instructions, contains);
         }
 
@@ -66,7 +66,7 @@ namespace StardewHack
         /// Find the last occurance of the given sequence of instructions that follows this range.
         /// See FindCode() for how the matching is performed.
         /// </summary>
-        public InstructionRange FindCodeLast(params Object[] contains) {
+        public InstructionRange FindCodeLast(params InstructionMatcher[] contains) {
             return new InstructionRange(instructions, contains, instructions.Count, -1);
         }
 
