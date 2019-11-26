@@ -7,7 +7,8 @@ namespace StardewHack
     abstract public class InstructionMatcher
     {
         public abstract bool match(CodeInstruction instruction);
-        
+        public abstract override string ToString();
+
         public static implicit operator InstructionMatcher(CodeInstruction query) => new IM_CodeInstruction(query);
         public static implicit operator InstructionMatcher(OpCode query) => new IM_OpCode(query);
         
@@ -43,8 +44,12 @@ namespace StardewHack
                 return false;
             }
         }
+
+        public override string ToString() {
+            return query.ToString();
+        }
     }
-    
+
     // Matches based on OpCode
     internal class IM_OpCode : InstructionMatcher
     {
@@ -55,6 +60,10 @@ namespace StardewHack
 
         public override bool match(CodeInstruction instruction) {
             return instruction.opcode.Equals(query);
+        }
+
+        public override string ToString() {
+            return query.ToString();
         }
     }
 
@@ -67,10 +76,14 @@ namespace StardewHack
         }
 
         public override bool match(CodeInstruction instruction) {
-            foreach( var q in query) {
+            foreach(var q in query) {
                 if (q.match(instruction)) return true;
             }
             return false;
+        }
+
+        public override string ToString() {
+            return "<" + String.Join<InstructionMatcher>(" | ", query) + ">";
         }
     }
 }

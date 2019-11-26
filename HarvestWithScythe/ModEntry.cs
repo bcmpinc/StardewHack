@@ -197,7 +197,10 @@ namespace StardewHack.HarvestWithScythe
             var AddItem = FindCode(
                 // if (Game1.player.addItemToInventoryBool (@object, false)) {
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                OpCodes.Ldloc_0,
+                InstructionMatcher.AnyOf(
+                    OpCodes.Ldloc_0,
+                    OpCodes.Ldloc_1
+                ),
                 OpCodes.Ldc_I4_0,
                 Instructions.Callvirt(typeof(Farmer), nameof(Farmer.addItemToInventoryBool), typeof(Item), typeof(bool)),
                 OpCodes.Brfalse
