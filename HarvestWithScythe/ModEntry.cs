@@ -206,24 +206,18 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Brfalse
             );
             
+            var ldarg_0 = Instructions.Ldarg_0();
             var Ldloc_object = AddItem[1];
-            /*
-call class StardewValley.Farmer StardewValley.Game1::get_player()
-    IL_013c: callvirt instance class StardewValley.GameLocation StardewValley.Character::get_currentLocation()
-    IL_0141: ldstr "harvest"*/
-    
-            var sound_and_xp = AddItem.FindNext(
-                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                Instructions.Callvirt_get(typeof(Character), nameof(Character.currentLocation)),
-                Instructions.Ldstr("harvest"),
-                OpCodes.Ldc_I4_0,
-                OpCodes.Callvirt
-            );
+            var tail = AttachLabel(AddItem.FindNext(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(Crop), nameof(Crop.regrowAfterHarvest))
+            )[0]);
 
             // Insert check for harvesting with scythe and act accordingly.
+            AddItem.ReplaceJump(0, ldarg_0);
             AddItem.Prepend(
                 // if (this.harvestMethod != 0) {
-                Instructions.Ldarg_0(),
+                ldarg_0,
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
                 Instructions.Call_get(typeof(NetInt), nameof(NetInt.Value)),
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
@@ -235,13 +229,8 @@ call class StardewValley.Farmer StardewValley.Game1::get_player()
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int)),
                 Instructions.Pop(), // For SDV 1.4
-                // Jump to sound and experience code.
-                sound_and_xp[0],
-                sound_and_xp[1],
-                Instructions.Ldstr("daggerswipe"),
-                sound_and_xp[3],
-                sound_and_xp[4],
-                Instructions.Br(AttachLabel(sound_and_xp[5]))
+                // Jump to tail
+                Instructions.Br(tail)
             );
         }
 
