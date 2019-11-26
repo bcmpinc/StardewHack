@@ -10,6 +10,8 @@ namespace StardewHack
         
         public static implicit operator InstructionMatcher(CodeInstruction query) => new IM_CodeInstruction(query);
         public static implicit operator InstructionMatcher(OpCode query) => new IM_OpCode(query);
+        
+        public static InstructionMatcher AnyOf(params InstructionMatcher[] query) => new IM_AnyOf(query);
     }
     
     internal class IM_CodeInstruction : InstructionMatcher
@@ -28,21 +30,22 @@ namespace StardewHack
             
             // Check Operand
             if (instruction.operand == null) {
-                if (query.operand != null) return false;
-            } else if (!instruction.operand.Equals(query.operand)) {
-                if (query.operand==null) return false;
-
-                // In case the operand is an integer, but their boxing types don't match.
-                try {
-                    if (Convert.ToInt64(instruction.operand) != Convert.ToInt64(query.operand)) return false;
-                } catch {
-                    return false;
-                }
+                return query.operand == null;
+            } 
+            if (query.operand==null) return false;
+            if (instruction.operand.Equals(query.operand)) return true;
+            
+            // In case the operand is an integer, but their boxing types don't match.
+            try {
+                if (Convert.ToInt64(instruction.operand) != Convert.ToInt64(query.operand)) return false;
+                return true;
+            } catch {
+                return false;
             }
-            return true;
         }
     }
     
+    // Matches based on OpCode
     internal class IM_OpCode : InstructionMatcher
     {
         readonly OpCode query;
@@ -52,6 +55,22 @@ namespace StardewHack
 
         public override bool match(CodeInstruction instruction) {
             return instruction.opcode.Equals(query);
+        }
+    }
+
+    // Matches if any of the specified opcodes match.
+    internal class IM_AnyOf : InstructionMatcher
+    {
+        readonly InstructionMatcher[] query;
+        public IM_AnyOf(InstructionMatcher[] q) {
+            query = q;
+        }
+
+        public override bool match(CodeInstruction instruction) {
+            foreach( var q in query) {
+                if (q.match(instruction)) return true;
+            }
+            return false;
         }
     }
 }
