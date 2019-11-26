@@ -183,6 +183,8 @@ namespace StardewHack.HarvestWithScythe
 
         // Support harvesting of spring onions with scythe
         private void Crop_harvest_support_spring_onion() {
+            if (config.HarvestMode.SpringOnion == HarvestModeEnum.HAND) return;
+            
             // Note: the branch
             //   if (this.forageCrop)
             // refers mainly to the crop spring union.
@@ -197,7 +199,6 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Brfalse
             );
 
-            // Swap the lines (add '*64' to vector) &
             // Insert check for harvesting with scythe and act accordingly.
             AddItem.Prepend(
                 // if (this.harvestMethod != 0) {
@@ -226,7 +227,7 @@ namespace StardewHack.HarvestWithScythe
 
         // For colored flowers we need to call createItemDebris instead of createObjectDebris
         // Returns the local variable used for storing the quality of the crop.
-        private LocalBuilder Crop_harvest_colored_fowers() {
+        private LocalBuilder Crop_harvest_colored_flowers() {
             var code = FindCode(
                 // Game1.createObjectDebris (indexOfHarvest, xTile, yTile, -1, num3, 1f, null);
                 OpCodes.Ldarg_0,
@@ -325,7 +326,7 @@ namespace StardewHack.HarvestWithScythe
         void Crop_harvest() {
             Crop_harvest_fix_vector();
             Crop_harvest_support_spring_onion();
-            var var_quality = Crop_harvest_colored_fowers();
+            var var_quality = Crop_harvest_colored_flowers();
             Crop_harvest_sunflower_drops(var_quality);
         }
 #endregion
