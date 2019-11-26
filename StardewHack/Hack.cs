@@ -93,6 +93,7 @@ namespace StardewHack
         }
     }
 
+#pragma warning disable RECS0108 // Warns about static fields in generic types
     // I 'love' generics. :P
     // Used to have a separate static instance variable per type T.
     public abstract class Hack<T> : HackBase where T : Hack<T>
@@ -226,6 +227,7 @@ namespace StardewHack
             return instance;
         }
     }
+#pragma warning restore RECS0108 // Warns about static fields in generic types
 
     public abstract class HackWithConfig<T, C> : Hack<T> where T : HackWithConfig<T, C> where C : class, new()
     {
