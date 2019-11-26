@@ -197,13 +197,27 @@ namespace StardewHack.HarvestWithScythe
             var AddItem = FindCode(
                 // if (Game1.player.addItemToInventoryBool (@object, false)) {
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                InstructionMatcher.AnyOf(
+                InstructionMatcher.AnyOf( // @object
                     OpCodes.Ldloc_0,
                     OpCodes.Ldloc_1
                 ),
                 OpCodes.Ldc_I4_0,
                 Instructions.Callvirt(typeof(Farmer), nameof(Farmer.addItemToInventoryBool), typeof(Item), typeof(bool)),
                 OpCodes.Brfalse
+            );
+            
+            var Ldloc_object = AddItem[1];
+            /*
+call class StardewValley.Farmer StardewValley.Game1::get_player()
+    IL_013c: callvirt instance class StardewValley.GameLocation StardewValley.Character::get_currentLocation()
+    IL_0141: ldstr "harvest"*/
+    
+            var sound_and_xp = AddItem.FindNext(
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Callvirt_get(typeof(Character), nameof(Character.currentLocation)),
+                Instructions.Ldstr("harvest"),
+                OpCodes.Ldc_I4_0,
+                OpCodes.Callvirt
             );
 
             // Insert check for harvesting with scythe and act accordingly.
@@ -214,21 +228,20 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Call_get(typeof(NetInt), nameof(NetInt.Value)),
                 Instructions.Brfalse(AttachLabel(AddItem[0])),
                 // Game1.createItemDebris (@object, vector, -1, null, -1)
-                Instructions.Ldloc_0(), // @object
+                Ldloc_object, // @object
                 Instructions.Ldloc_S(var_vector), // vector
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Ldnull(), // null
                 Instructions.Ldc_I4_M1(), // -1
                 Instructions.Call(typeof(Game1), nameof(Game1.createItemDebris), typeof(Item), typeof(Vector2), typeof(int), typeof(GameLocation), typeof(int)),
-                // Game1.player.gainExperience (2, howMuch);
-                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                Instructions.Ldc_I4_2(),
-                Instructions.Ldloc_1(),
-                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.gainExperience), typeof(int), typeof(int)),
-                // return true
-                Instructions.Ldc_I4_1(),
-                Instructions.Ret()
-                // }
+                Instructions.Pop(), // For SDV 1.4
+                // Jump to sound and experience code.
+                sound_and_xp[0],
+                sound_and_xp[1],
+                Instructions.Ldstr("daggerswipe"),
+                sound_and_xp[3],
+                sound_and_xp[4],
+                Instructions.Br(AttachLabel(sound_and_xp[5]))
             );
         }
 
@@ -328,8 +341,8 @@ namespace StardewHack.HarvestWithScythe
         void Crop_harvest() {
             var var_vector = Crop_harvest_fix_vector();
             Crop_harvest_support_spring_onion(var_vector);
-            var var_quality = Crop_harvest_colored_flowers(var_vector);
-            Crop_harvest_sunflower_drops(var_quality);
+            //var var_quality = Crop_harvest_colored_flowers(var_vector);
+            //Crop_harvest_sunflower_drops(var_quality);
         }
 #endregion
 
@@ -538,6 +551,7 @@ namespace StardewHack.HarvestWithScythe
                     Game1.createObjectDebris(o.ParentSheetIndex, (int)vector.X, (int)vector.Y, -1, quality, 1, loc);
                     who.gainExperience(2, 7);
                 }
+                // TODO: add sound
                 return true;
             } else {
                 return false;
