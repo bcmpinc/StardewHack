@@ -112,11 +112,24 @@ namespace StardewHack
         /// This is necessary when dealing with delegates. 
         /// </summary>
         private static Stack<MethodBase> to_be_patched = new Stack<MethodBase>();
+
+        private bool broken = false;
         
         protected Hack() {
             instance = (T)this;
         }
 
+        void MarkAsBroken(Exception err) {
+            if (!broken) {
+                Monitor.Log("The patch failed to apply cleanly. Usually this means the mod needs to be updated.", LogLevel.Alert);
+                Monitor.Log("As a result, this mod does not function properly or at all.", LogLevel.Alert);
+                Monitor.Log("Please upload your log file at https://log.smapi.io/ and report this bug at "+getReportUrl()+".", LogLevel.Alert);
+                Library.ModEntry.broken_mods.Add(helper.ModRegistry.ModID);
+                broken = true;
+            }
+            LogException(err);
+        }
+        
         /// <summary>
         /// Applies the methods annotated with BytecodePatch defined in this class. 
         /// </summary>
@@ -127,13 +140,16 @@ namespace StardewHack
             // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
             var methods = typeof(T).GetMethods(AccessTools.all);
             var apply = AccessTools.Method(typeof(Hack<T>), nameof(ApplyPatch));
-            var broken = false;
             foreach (MethodInfo patch in methods) {
                 var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
                 foreach (var bp in bytecode_patches) {
                     if (bp.IsEnabled(this)) {
+                        try {
+                            ChainPatch(bp.GetMethod(), patch);
+                        } catch (Exception err) {
+                            MarkAsBroken(err);
+                        }
                         // Add the patch to the to_be_patched stack.
-                        ChainPatch(bp.GetMethod(), patch);
                     }
                 }
                 // Apply the patch to the method specified in the annotation.
@@ -142,14 +158,7 @@ namespace StardewHack
                     try {
                         harmony.Patch(method, null, null, new HarmonyMethod(apply));
                     } catch (Exception err) {
-                        if (!broken) {
-                            Monitor.Log("The patch failed to apply cleanly. Usually this means the mod needs to be updated.", LogLevel.Alert);
-                            Monitor.Log("As a result, this mod does not function properly or at all.", LogLevel.Alert);
-                            Monitor.Log("Please upload your log file at https://log.smapi.io/ and report this bug at "+getReportUrl()+".", LogLevel.Alert);
-                            StardewHack.Library.ModEntry.broken_mods.Add(helper.ModRegistry.ModID);
-                            broken = true;
-                        }
-                        LogException(err);
+                        MarkAsBroken(err);
                     }
                 }
             }
