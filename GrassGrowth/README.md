@@ -30,4 +30,4 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Added dependency on StardewHack.
 
 #### 2.0:
-* Updated to support Stardew Valley 1.4.
+* Updated for Stardew Valley 1.4

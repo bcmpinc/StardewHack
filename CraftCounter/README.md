@@ -3,6 +3,8 @@
 ## Description
 Adds a counter to the description of crafting & cooking recipes telling how often it has been crafted/cooked. Useful for obtaining the craft/cook everything achievements.
 
+Note: a similar feature has been added to Stardew Valley in version 1.4.
+
 ## Dependencies
 This mod requires the following mods to be installed:
 
@@ -22,3 +24,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 1.0:
 * Added dependency on StardewHack.
+
+#### 2.0:
+* Updated for Stardew Valley 1.4

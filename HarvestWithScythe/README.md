@@ -44,7 +44,8 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 #### 1.1:
 * Fix support for Stardew Valley 1.3.36 on MacOS.
 
-#### 1.2:
+#### 2.0:
+* Updated for Stardew Valley 1.4
 * Rewrote the mod, such that plucking is disallowed while the scythe is equipped. This should fix various issues with harvesting.
 * Generalized config, such that harvest mode is configurable separately for every kind of crop/forage.
 * The `AllHaveQuality` configuration parameter has been removed, the associated effect has been removed.
