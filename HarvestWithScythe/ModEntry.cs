@@ -524,23 +524,22 @@ namespace StardewHack.HarvestWithScythe
                         }
                     }
                 }
-                int quality = o.Quality;
                 Random random = new Random((int)Game1.uniqueIDForThisGame / 2 + (int)Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
                 if (who.professions.Contains(16)) {
-                    quality = 4;
+                    o.Quality = 4;
                 } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 30)) {
-                    quality = 2;
+                    o.Quality = 2;
                 } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 15)) {
-                    quality = 1;
+                    o.Quality = 1;
                 }
+                vector *= 64.0f;
                 who.gainExperience(2, 7);
-                Game1.createObjectDebris(o.ParentSheetIndex, (int)vector.X, (int)vector.Y, -1, quality, 1, loc);
+                Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
                 Game1.stats.ItemsForaged += 1;
                 if (who.professions.Contains(13) && random.NextDouble() < 0.2) {
-                    Game1.createObjectDebris(o.ParentSheetIndex, (int)vector.X, (int)vector.Y, -1, quality, 1, loc);
+                    Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
                     who.gainExperience(2, 7);
                 }
-                // TODO: add sound
                 return true;
             } else {
                 return false;
