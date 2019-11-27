@@ -224,8 +224,7 @@ namespace StardewHack
         }
         
         /// Returns the used instance of this class.
-        /// Only available after ModEntry has been called.
-        protected static T getInstance() {
+        public static T getInstance() {
             return instance;
         }
     }
