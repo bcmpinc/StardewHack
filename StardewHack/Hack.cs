@@ -148,6 +148,8 @@ namespace StardewHack
                         try {
                             ChainPatch(bp.GetMethod(), patch);
                         } catch (Exception err) {
+                            string info = $"Failed to find method {bp.GetSignature()}.";
+                            instance.Monitor.Log(info, LogLevel.Error);
                             MarkAsBroken(err);
                         }
                         // Add the patch to the to_be_patched stack.
