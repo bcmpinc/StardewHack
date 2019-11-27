@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using StardewValley.Menus;
 using StardewValley.Monsters;
+using System;
 
 namespace StardewHack.WearMoreRings
 {
@@ -336,42 +337,36 @@ namespace StardewHack.WearMoreRings
         }
         
         [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,System.Int32,System.Int32,System.Boolean,System.Single,System.Int32,System.Single,System.Single,System.Boolean,StardewValley.Farmer)")]
-        void GameLocation_damageMonster() { 
-            return; // TODO: Broken due to ring_onMonsterSlay signature change.
-            // Arg who = 10
+        void GameLocation_damageMonster() {
+            byte arg_who = (byte)(Array.Find(original.GetParameters(), info => info.Name == "who").Position+1);
+
             var code = FindCode(
-                Instructions.Ldarg_S(10), // who
+                // if (who != null && who.leftRing.Value != null) {
+                Instructions.Ldarg_S(arg_who), // who
                 OpCodes.Brfalse,
-                Instructions.Ldarg_S(10), // who
+                Instructions.Ldarg_S(arg_who), // who
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.leftRing)),
                 OpCodes.Callvirt,
                 OpCodes.Brfalse
             );
             code.Extend(
                 // who.rightRing.Value
-                Instructions.Ldarg_S(10), // who
+                Instructions.Ldarg_S(arg_who), // who
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.rightRing)),
                 OpCodes.Callvirt,
-                // (Monster)characters[i]
-                OpCodes.Ldarg_0,
-                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.characters)),
-                OpCodes.Ldloc_1,
-                OpCodes.Ldfld,
-                OpCodes.Callvirt,
-                OpCodes.Castclass,
-                // .onMonsterSlay(...)
-                Instructions.Callvirt(typeof(Ring), nameof(Ring.onMonsterSlay), typeof(Monster))
+                // .onMonsterSlay (monster, this, who);
+                OpCodes.Ldloc_S, // monster
+                OpCodes.Ldarg_0, // this
+                Instructions.Ldarg_S(arg_who), // who
+                Instructions.Callvirt(typeof(Ring), nameof(Ring.onMonsterSlay), typeof(Monster), typeof(GameLocation), typeof(Farmer))
             );
-            var monster = code.SubRange(code.length - 7, 6);
+            
+            var monster = code.SubRange(code.length - 4, 3);
             code.Replace(
-                Instructions.Ldarg_S(10), // who
-                // (Monster)characters[i]
+                // ModEntry.ring_onMonsterSlay(monster, this, who);
                 monster[0],
                 monster[1],
                 monster[2],
-                monster[3],
-                monster[4],
-                monster[5],
                 Instructions.Call(typeof(ModEntry), nameof(ring_onMonsterSlay), typeof(Monster), typeof(GameLocation), typeof(Farmer))
             );
         }
@@ -499,7 +494,7 @@ namespace StardewHack.WearMoreRings
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.InventoryPage::draw")]
+        [BytecodePatch("StardewValley.Menus.InventoryPage::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void InventoryPage_draw() {
             // Change the equipment slot drawing code to draw the 4 additional slots.
             InstructionRange range = null;
@@ -572,7 +567,7 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Ldloc_2,
                     Instructions.Ldstr("Hat")
                 );
-            } catch (System.Exception err) {
+            } catch (Exception err) {
                 LogException(err, LogLevel.Trace);
                 code = FindCode(
                     OpCodes.Ldloc_0,
@@ -697,7 +692,7 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Ldloc_3,
                     Instructions.Ldstr("Hat")
                 );
-            } catch (System.Exception err) {
+            } catch (Exception err) {
                 LogException(err, LogLevel.Trace);
                 code = FindCode(
                     OpCodes.Ldloc_0,
