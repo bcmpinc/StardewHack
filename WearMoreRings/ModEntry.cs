@@ -1,14 +1,14 @@
 ﻿using Netcode;
-using StardewValley;
-using StardewValley.Objects;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewValley;
+using StardewValley.Menus;
+using StardewValley.Monsters;
+using StardewValley.Objects;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using Microsoft.Xna.Framework;
-using StardewValley.Menus;
-using StardewValley.Monsters;
-using System;
 
 namespace StardewHack.WearMoreRings
 {
@@ -71,12 +71,12 @@ namespace StardewHack.WearMoreRings
     public class RingsImplementation : IWearMoreRingsAPI
     {
         public int CountEquippedRings(Farmer f, int which) {
-            if (f == null) throw new System.ArgumentNullException(nameof(f));
+            if (f == null) throw new ArgumentNullException(nameof(f));
             return ModEntry.CountWearingRing(f, which);
         }
 
         public IEnumerable<Ring> GetAllRings(Farmer f) {
-            if (f == null) throw new System.ArgumentNullException(nameof(f));
+            if (f == null) throw new ArgumentNullException(nameof(f));
             return ModEntry.ListRings(f);
         }
     }
@@ -84,7 +84,7 @@ namespace StardewHack.WearMoreRings
     public class ModEntry : Hack<ModEntry>
     {
         static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
-        public static readonly System.Random random = new System.Random();
+        public static readonly Random random = new Random();
         
         public override void Entry(IModHelper helper) {
             base.Entry(helper);
@@ -103,7 +103,7 @@ namespace StardewHack.WearMoreRings
         }
         
         static ActualRings FarmerNotFound(Farmer f) {
-            throw new System.Exception("ERROR: A Farmer object was not correctly registered with the 'WearMoreRings' mod.");
+            throw new Exception("ERROR: A Farmer object was not correctly registered with the 'WearMoreRings' mod.");
         }
         
         #region Events
@@ -336,7 +336,7 @@ namespace StardewHack.WearMoreRings
             ar.ring4.Value?.onMonsterSlay(target, location, who);
         }
         
-        [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,System.Int32,System.Int32,System.Boolean,System.Single,System.Int32,System.Single,System.Single,System.Boolean,StardewValley.Farmer)")]
+        [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,Int32,Int32,Boolean,Single,Int32,Single,Single,Boolean,StardewValley.Farmer)")]
         void GameLocation_damageMonster() {
             byte arg_who = (byte)(Array.Find(original.GetParameters(), info => info.Name == "who").Position+1);
 
@@ -426,7 +426,7 @@ namespace StardewHack.WearMoreRings
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(System.Int32,System.Int32,System.Int32,System.Int32)")]
+        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(Int32,Int32,Int32,Int32)")]
         void InventoryPage_ctor() {
             // Replace code for equipment icon creation with method calls to our AddEquipmentIcon method.
             var items = FindCode(
@@ -448,7 +448,7 @@ namespace StardewHack.WearMoreRings
                     Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.rightNeighborID)),
                     OpCodes.Callvirt
                 );
-            } catch (System.Exception err) {
+            } catch (Exception err) {
                 LogException(err, LogLevel.Trace);
                 items.Extend(
                     OpCodes.Stloc_0,
@@ -512,7 +512,7 @@ namespace StardewHack.WearMoreRings
                     // case "Hat":
                     Instructions.Ldstr("Hat")
                 );
-            } catch (System.Exception err) {
+            } catch (Exception err) {
                 LogException(err, LogLevel.Trace);
                 range = FindCode(
                     // switch (equipmentIcon.name) {
@@ -530,7 +530,7 @@ namespace StardewHack.WearMoreRings
                     Instructions.Ldstr("Hat")
                 );
             }
-            if (range.length != 8 && range.length != 10) throw new System.Exception($"Failed to properly match code. Length={range.length}");
+            if (range.length != 8 && range.length != 10) throw new Exception($"Failed to properly match code. Length={range.length}");
             
             range.Extend(range.Follow(-1));
             range.Replace(
@@ -719,7 +719,7 @@ namespace StardewHack.WearMoreRings
             
             // Handle a ring in inventory being shift+clicked.
             code = code.FindNext(
-                Instructions.Callvirt(typeof(InventoryPage), "checkHeldItem", typeof(System.Func<Item, bool>)),
+                Instructions.Callvirt(typeof(InventoryPage), "checkHeldItem", typeof(Func<Item, bool>)),
                 OpCodes.Brfalse,
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.leftRing)),
@@ -736,7 +736,7 @@ namespace StardewHack.WearMoreRings
         #endregion Patch InventoryPage
         
         #region Patch Ring
-        [BytecodePatch("StardewValley.Objects.Ring::.ctor(System.Int32)")]
+        [BytecodePatch("StardewValley.Objects.Ring::.ctor(Int32)")]
         void Ring_ctor() {
             var code = FindCode(
                 OpCodes.Ldarg_0,
@@ -755,7 +755,7 @@ namespace StardewHack.WearMoreRings
             code.Replace(
                 // ModEntry.random.Next()
                 Instructions.Ldsfld(typeof(ModEntry), nameof(random)),
-                Instructions.Call(typeof(System.Random), nameof(System.Random.Next))
+                Instructions.Call(typeof(Random), nameof(Random.Next))
             );
         }
         #endregion Patch Ring
