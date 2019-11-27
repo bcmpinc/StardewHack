@@ -30,3 +30,6 @@ To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console an
 #### 1.2:
 * Fixed `player_setbackpacksize` not working when empty inventory slots are being removed.
 * Add support for the community center.
+
+#### 2.0:
+* Updated for Stardew Valley 1.4

@@ -10,7 +10,7 @@ using StardewHack;
 
 namespace BiggerBackpack
 {
-    public class Mod : StardewHack.Hack<Mod>
+    public class Mod : Hack<Mod>
     {
         public static Mod instance;
 
@@ -105,7 +105,7 @@ namespace BiggerBackpack
                 check[4], // We'll create a new jump in check later.
                 // drawBiggerBackpack(b);
                 Instructions.Ldarg_1(),
-                Instructions.Call(GetType(), "drawBiggerBackpack", typeof(SpriteBatch))
+                Instructions.Call(typeof(Mod), nameof(Mod.drawBiggerBackpack), typeof(SpriteBatch))
                 // }
             );
             
@@ -142,7 +142,7 @@ namespace BiggerBackpack
                 Instructions.Bne_Un(AttachLabel(code[0])),
                 // return getBackpackSprite(position);
                 Instructions.Ldarg_1(),
-                Instructions.Call(GetType(), "getBackpackSprite", typeof(Vector2)),
+                Instructions.Call(typeof(Mod), nameof(Mod.getBackpackSprite), typeof(Vector2)),
                 Instructions.Ret()
                 // }
             );
@@ -180,7 +180,7 @@ namespace BiggerBackpack
                 code[2],
                 Instructions.Ldc_I4_S(48),
                 code[4],
-                Instructions.Call(GetType(), "clickBackpack"),
+                Instructions.Call(typeof(Mod), nameof(Mod.clickBackpack)),
                 Instructions.Br((Label)code[len-1].operand)
             );
             code[4] = Instructions.Bge(AttachLabel(code[len]));
@@ -218,7 +218,7 @@ namespace BiggerBackpack
                 Instructions.Ldc_I4(50000),
                 Instructions.Blt(AttachLabel(get_player)),
                 //   buyBackpack();
-                Instructions.Call(GetType(), "buyBackpack"),
+                Instructions.Call(typeof(Mod), nameof(Mod.buyBackpack)),
                 // }
                 // else if ((int)Game1.player.maxItems != 48) {
                 get_player,
@@ -267,7 +267,7 @@ namespace BiggerBackpack
                 // Shift icons down by `Game1.tileSize` pixels
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(InventoryPage), nameof(InventoryPage.equipmentIcons)),
-                Instructions.Call(GetType(), "shiftIconsDown", typeof(List<ClickableComponent>))
+                Instructions.Call(typeof(Mod), nameof(Mod.shiftIconsDown), typeof(List<ClickableComponent>))
             );
             
             try {
@@ -509,7 +509,7 @@ namespace BiggerBackpack
             );
             code[10] = Instructions.Ldc_I4_0();
             code.SubRange(1,2).Replace(
-                Instructions.Ldsfld(GetType(), "junimoNote")
+                Instructions.Ldsfld(typeof(Mod), nameof(Mod.junimoNote))
             );
         }
 #endregion
