@@ -517,7 +517,7 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_2,
                 Instructions.Ldstr("Hat")
             );
-            code.Extend(code.Follow(4)[-1]);
+            code.Extend(code.Follow(4));
             code.Replace(
                 // var item = EquipmentIcon.item
                 code[0],
@@ -556,6 +556,16 @@ namespace StardewHack.WearMoreRings
                         if (!(helditem is Hat)) return;
                         Game1.playSound ("grassyStep");
                         break;
+                    case "Shirt":
+                        if (!(helditem is Clothing)) return;
+                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.SHIRT) return;
+                        Game1.playSound ("sandyStep");
+                        break;
+                    case "Pants":
+                        if (!(helditem is Clothing)) return;
+                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.PANTS) return;
+                        Game1.playSound ("sandyStep");
+                        break;
                     case "Boots":
                         if (!(helditem is Boots)) return;
                         Game1.playSound ("sandyStep");
@@ -576,14 +586,16 @@ namespace StardewHack.WearMoreRings
             // Update inventory
             ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
             switch (icon.name) {
-            case "Hat":          Game1.player.hat.Set (helditem as Hat);         break;
-            case "Left Ring":    Game1.player.leftRing.Set (helditem as Ring);   break;
-            case "Right Ring":   Game1.player.rightRing.Set (helditem as Ring);  break;
-            case "Boots":        Game1.player.boots.Set (helditem as Boots);     break;
-            case "Extra Ring 1": ar.ring1.Set (helditem as Ring);                break;
-            case "Extra Ring 2": ar.ring2.Set (helditem as Ring);                break;
-            case "Extra Ring 3": ar.ring3.Set (helditem as Ring);                break;
-            case "Extra Ring 4": ar.ring4.Set (helditem as Ring);                break;
+            case "Hat":          Game1.player.hat.Set (helditem as Hat);            break;
+            case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing); break;
+            case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing); break;
+            case "Boots":        Game1.player.boots.Set (helditem as Boots);        break;
+            case "Left Ring":    Game1.player.leftRing.Set (helditem as Ring);      break;
+            case "Right Ring":   Game1.player.rightRing.Set (helditem as Ring);     break;
+            case "Extra Ring 1": ar.ring1.Set (helditem as Ring);                   break;
+            case "Extra Ring 2": ar.ring2.Set (helditem as Ring);                   break;
+            case "Extra Ring 3": ar.ring3.Set (helditem as Ring);                   break;
+            case "Extra Ring 4": ar.ring4.Set (helditem as Ring);                   break;
             default:
                 getInstance().Monitor.Log ($"ERROR: Trying to fit equipment item into invalid slot '{icon.name}'", LogLevel.Error);
                 return;
@@ -596,6 +608,7 @@ namespace StardewHack.WearMoreRings
             (helditem as Boots)?.onEquip();
             
             // Swap items
+            helditem = Utility.PerformSpecialItemGrabReplacement(helditem);
             Game1.player.CursorSlotItem = icon.item;
             icon.item = helditem;
         }
@@ -605,6 +618,8 @@ namespace StardewHack.WearMoreRings
             foreach (ClickableComponent icon in page.equipmentIcons) {
                 if (icon.item != null) continue;
                 if (icon.name == "Hat") continue;
+                if (icon.name == "Shirt") continue;
+                if (icon.name == "Pants") continue;
                 if (icon.name == "Boots") continue;
                 EquipmentClick(icon);
                 break;
@@ -614,35 +629,16 @@ namespace StardewHack.WearMoreRings
         [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
         void InventoryPage_receiveLeftClick() {
             // Handle a ring-inventory slot being clicked.
-            InstructionRange code;
-            try {
-                code = FindCode(
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_3,
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Hat")
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                code = FindCode(
-                    OpCodes.Ldloc_0,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_3,
-                    OpCodes.Ldloc_3,
-                    OpCodes.Brfalse,
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Hat")
-                );
-            }
-            code.Extend(
+            InstructionRange code = FindCode(
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_3,
                 OpCodes.Ldloc_3,
-                Instructions.Ldstr("Boots"),
-                OpCodes.Call,
-                OpCodes.Brtrue,
-                OpCodes.Br
+                OpCodes.Brfalse,
+                OpCodes.Ldloc_3,
+                Instructions.Ldstr("Hat")
             );
-            code.Extend(code.End.Follow(-1));
+            code.Extend(code.Follow(4));
             code.Replace(
                 code[0],
                 Instructions.Call(typeof(ModEntry), nameof(EquipmentClick), typeof(ClickableComponent))
@@ -658,8 +654,9 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Brtrue
             );
             code.Extend(code.Follow(1));
-            code = code.SubRange(2, code.length-2);
             code.Replace(
+                code[0],
+                code[1],
                 Instructions.Ldarg_0(),
                 Instructions.Call(typeof(ModEntry), nameof(AutoEquipment), typeof(InventoryPage))
             );
