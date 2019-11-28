@@ -543,7 +543,7 @@ namespace StardewHack.WearMoreRings
             );
         }
         
-        static public void EquipmentClick(ClickableComponent icon) {
+        static public bool EquipmentClick(ClickableComponent icon) {
             // Check that item type is compatible.
             // And play corresponding sound.
             var helditem = Game1.player.CursorSlotItem;
@@ -551,31 +551,31 @@ namespace StardewHack.WearMoreRings
             if (helditem is StardewValley.Tools.Pan) helditem = new Hat (71);
             if (helditem is StardewValley.Object && helditem.ParentSheetIndex == 71) helditem = new Clothing(15);
             if (helditem == null) {
-                if (icon.item == null) return;
+                if (icon.item == null) return false;
                 Game1.playSound("dwop");
             } else {
                 switch (icon.name) {
                     case "Hat":
-                        if (!(helditem is Hat)) return;
+                        if (!(helditem is Hat)) return false;
                         Game1.playSound ("grassyStep");
                         break;
                     case "Shirt":
-                        if (!(helditem is Clothing)) return;
-                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.SHIRT) return;
+                        if (!(helditem is Clothing)) return false;
+                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.SHIRT) return false;
                         Game1.playSound ("sandyStep");
                         break;
                     case "Pants":
-                        if (!(helditem is Clothing)) return;
-                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.PANTS) return;
+                        if (!(helditem is Clothing)) return false;
+                        if ((helditem as Clothing).clothesType.Value != (int)Clothing.ClothesType.PANTS) return false;
                         Game1.playSound ("sandyStep");
                         break;
                     case "Boots":
-                        if (!(helditem is Boots)) return;
+                        if (!(helditem is Boots)) return false;
                         Game1.playSound ("sandyStep");
                         DelayedAction.playSoundAfterDelay ("sandyStep", 150, null);
                         break;
                     default:
-                        if (!(helditem is Ring)) return;
+                        if (!(helditem is Ring)) return false;
                         Game1.playSound ("crit");
                         break;
                 }
@@ -601,7 +601,7 @@ namespace StardewHack.WearMoreRings
             case "Extra Ring 4": ar.ring4.Set (helditem as Ring);                   break;
             default:
                 getInstance().Monitor.Log ($"ERROR: Trying to fit equipment item into invalid slot '{icon.name}'", LogLevel.Error);
-                return;
+                return false;
             }
 
             // Equip/unequip
@@ -613,19 +613,17 @@ namespace StardewHack.WearMoreRings
             // Swap items
             Game1.player.CursorSlotItem = Utility.PerformSpecialItemGrabReplacement(icon.item);
             icon.item = helditem;
+            return true;
         }
         
-        static public void AutoEquipment(InventoryPage page) {
+        static public bool AutoEquipment(InventoryPage page) {
             var helditem = Game1.player.CursorSlotItem;
             foreach (ClickableComponent icon in page.equipmentIcons) {
-                if (icon.item != null) continue;
-                if (icon.name == "Hat") continue;
-                if (icon.name == "Shirt") continue;
-                if (icon.name == "Pants") continue;
-                if (icon.name == "Boots") continue;
-                EquipmentClick(icon);
-                break;
+                if (icon.item == null && EquipmentClick(icon)) {
+                    return true;
+                }
             }
+            return false;
         }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::receiveLeftClick")]
@@ -643,24 +641,48 @@ namespace StardewHack.WearMoreRings
             code.Extend(code.Follow(4));
             code.Replace(
                 code[0],
-                Instructions.Call(typeof(ModEntry), nameof(EquipmentClick), typeof(ClickableComponent))
+                Instructions.Call(typeof(ModEntry), nameof(EquipmentClick), typeof(ClickableComponent)),
+                Instructions.Pop()
             );
             
-            // Handle a ring in inventory being shift+clicked.
+            // Select code for equipping items through shift+click.
             code = code.FindNext(
+                // if (checkHeldItem ((Item i) => i is Ring))
+                OpCodes.Ldarg_0,
+                OpCodes.Ldsfld,
+                OpCodes.Dup,
+                OpCodes.Brtrue,
+                //
+                OpCodes.Pop,
+                OpCodes.Ldsfld,
+                OpCodes.Ldftn,
+                OpCodes.Newobj,
+                OpCodes.Dup,
+                OpCodes.Stsfld,
+                //
                 Instructions.Callvirt(typeof(InventoryPage), "checkHeldItem", typeof(Func<Item, bool>)),
                 OpCodes.Brfalse,
+                // if (Game1.player.leftRing.Value == null)
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.leftRing)),
                 OpCodes.Callvirt,
                 OpCodes.Brtrue
             );
-            code.Extend(code.Follow(1));
+            code.Extend(
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Ldfld(typeof(Farmer), nameof(Farmer.pantsItem)),
+                OpCodes.Callvirt,
+                OpCodes.Brtrue
+            );
+            Label equip_failed = (Label)code.End[-1].operand;
+            code.Extend(code.End.Follow(-1));
+            
             code.Replace(
-                code[0],
-                code[1],
                 Instructions.Ldarg_0(),
-                Instructions.Call(typeof(ModEntry), nameof(AutoEquipment), typeof(InventoryPage))
+                Instructions.Call(typeof(ModEntry), nameof(AutoEquipment), typeof(InventoryPage)),
+                // if (true) return;
+                Instructions.Brfalse(equip_failed),
+                Instructions.Ret()
             );
         }
         #endregion Patch InventoryPage
