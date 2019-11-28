@@ -469,8 +469,7 @@ namespace StardewHack.WearMoreRings
         [BytecodePatch("StardewValley.Menus.InventoryPage::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void InventoryPage_draw() {
             // Change the equipment slot drawing code to draw the 4 additional slots.
-            InstructionRange range = null;
-            range = FindCode(
+            InstructionRange range = FindCode(
                 // switch (equipmentIcon.name) {
                 OpCodes.Ldloca_S,
                 OpCodes.Call,
@@ -506,35 +505,19 @@ namespace StardewHack.WearMoreRings
         void InventoryPage_performHoverAction() {
             // Change code responsible for obtaining the tooltip information.
             var var_item = generator.DeclareLocal(typeof(Item));
-            InstructionRange code;
-            try {
-                code = FindCode(
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Hat")
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                code = FindCode(
-                    OpCodes.Ldloc_0,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    OpCodes.Ldloc_2,
-                    OpCodes.Brfalse,
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Hat")
-                );
-            }
-            code.Extend(
-                OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                Instructions.Ldfld(typeof(Farmer), nameof(Farmer.boots)),
-                OpCodes.Callvirt,
-                Instructions.Callvirt_get(typeof(Item), nameof(Item.DisplayName)),
-                Instructions.Stfld(typeof(InventoryPage), "hoverTitle")
+            InstructionRange code = FindCode(
+                // switch (equipmentIcon.name) {
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_2,
+                // case null: break;
+                OpCodes.Ldloc_2,
+                OpCodes.Brfalse,
+                // case "Hat":
+                OpCodes.Ldloc_2,
+                Instructions.Ldstr("Hat")
             );
+            code.Extend(code.Follow(4)[-1]);
             code.Replace(
                 // var item = EquipmentIcon.item
                 code[0],
