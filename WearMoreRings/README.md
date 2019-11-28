@@ -43,4 +43,8 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Change the network protocol version to prevent people with the mod from connecting to servers without the mod and vice-versa.
 
 #### 2.1:
-* Updated for Stardew Valley 1.4
+* Updated for Stardew Valley 1.4.
+
+#### 2.2:
+* Fix issue with shift-click equipping items not properly updating the GUI.
+* Fix startup issues on MacOS & Windows.
