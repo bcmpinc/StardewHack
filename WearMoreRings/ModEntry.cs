@@ -547,6 +547,9 @@ namespace StardewHack.WearMoreRings
             // Check that item type is compatible.
             // And play corresponding sound.
             var helditem = Game1.player.CursorSlotItem;
+            // Convert special items (such as copper pan & Lewis pants)
+            if (helditem is StardewValley.Tools.Pan) helditem = new Hat (71);
+            if (helditem is StardewValley.Object && helditem.ParentSheetIndex == 71) helditem = new Clothing(15);
             if (helditem == null) {
                 if (icon.item == null) return;
                 Game1.playSound("dwop");
@@ -608,8 +611,7 @@ namespace StardewHack.WearMoreRings
             (helditem as Boots)?.onEquip();
             
             // Swap items
-            helditem = Utility.PerformSpecialItemGrabReplacement(helditem);
-            Game1.player.CursorSlotItem = icon.item;
+            Game1.player.CursorSlotItem = Utility.PerformSpecialItemGrabReplacement(icon.item);
             icon.item = helditem;
         }
         
