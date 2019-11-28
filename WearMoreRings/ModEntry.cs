@@ -449,6 +449,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.fullyImmutable)),
                 OpCodes.Callvirt
             );
+            items.Remove();
         }
         
         static public void DrawEquipment(ClickableComponent icon, Microsoft.Xna.Framework.Graphics.SpriteBatch b) {
@@ -458,6 +459,8 @@ namespace StardewHack.WearMoreRings
             } else {
                 int tile = 41;
                 if (icon.name == "Hat") tile = 42;
+                if (icon.name == "Shirt") tile = 69;
+                if (icon.name == "Pants") tile = 68;
                 if (icon.name == "Boots") tile = 40;
                 b.Draw (Game1.menuTexture, icon.bounds, Game1.getSourceRectForStandardTileSheet (Game1.menuTexture, tile, -1, -1), Color.White);
             }
@@ -467,40 +470,22 @@ namespace StardewHack.WearMoreRings
         void InventoryPage_draw() {
             // Change the equipment slot drawing code to draw the 4 additional slots.
             InstructionRange range = null;
-            try {
-                // TODO: check whether this is still working properly.
-                range = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloca_S,
-                    OpCodes.Call,
-                    OpCodes.Stloc_S, // 4
-                    OpCodes.Ldloc_S, // 4
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_S, // 5
-                    OpCodes.Ldloc_S, // 5
-                    // case "Hat":
-                    Instructions.Ldstr("Hat")
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                range = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloca_S,
-                    OpCodes.Call,
-                    OpCodes.Stloc_0,
-                    OpCodes.Ldloc_0,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    OpCodes.Ldloc_2,
-                    // case null (shortcut)
-                    OpCodes.Brfalse,
-                    Instructions.Ldloc_2(),
-                    // case "Hat":
-                    Instructions.Ldstr("Hat")
-                );
-            }
-            if (range.length != 8 && range.length != 10) throw new Exception($"Failed to properly match code. Length={range.length}");
+            range = FindCode(
+                // switch (equipmentIcon.name) {
+                OpCodes.Ldloca_S,
+                OpCodes.Call,
+                OpCodes.Stloc_S, // 4
+                OpCodes.Ldloc_S, // 4
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_S, // 5
+                OpCodes.Ldloc_S, // 5
+                OpCodes.Brfalse,
+                // case "Hat":
+                OpCodes.Ldloc_S, // 5
+                Instructions.Ldstr("Hat")
+            );
             
+            // Select entire loop contents (i.e. switch block)
             range.Extend(range.Follow(-1));
             range.Replace(
                 range[0],
@@ -510,17 +495,11 @@ namespace StardewHack.WearMoreRings
             );
             
             // Move other stuff 32/64px to the right to eliminate overlap.
-            for (int i=0; i<11; i++) {
-                range = range.FindNext(
-                    OpCodes.Ldarg_0,
-                    Instructions.Ldfld(typeof(IClickableMenu), nameof(IClickableMenu.xPositionOnScreen)),
-                    OpCodes.Ldc_I4,
-                    OpCodes.Add
-                );
-                int val = (int)range[2].operand + 32;
-                if (val < 256) val = 256;
-                range[2].operand = val;
-            }
+            range = range.FindNext(
+                Instructions.Ldc_R4(32),
+                OpCodes.Stloc_0
+            );
+            range[0] = Instructions.Ldc_R4(64);
         }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::performHoverAction")]
