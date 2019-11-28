@@ -373,62 +373,44 @@ namespace StardewHack.WearMoreRings
         #endregion Patch GameLocation
         
         #region Patch InventoryPage
-        static string[] EquipmentIcons = {
-            "Hat",
-            "Left Ring",
-            "Right Ring",
-            "Boots",
-            "Extra Ring 1",
-            "Extra Ring 2",
-            "Extra Ring 3",
-            "Extra Ring 4",
-        };
+        static public void AddIcon(InventoryPage page, string name, int x, int y, int id, int up, int down, int left, int right, Item item) {
+            var rect = new Rectangle (
+                page.xPositionOnScreen + 48 + x*4, 
+                page.yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*4, 
+                64, 64
+            );
+            var component = new ClickableComponent(rect, name) {
+                myID = id,
+                downNeighborID = down,
+                upNeighborID = up,
+                rightNeighborID = right,
+                leftNeighborID = left,
+                item = item,
+                fullyImmutable = true
+            };
+            page.equipmentIcons.Add(component);
+        }
 
         static public void AddEquipmentIcons(InventoryPage page) {
-            for (int i=0; i<EquipmentIcons.Length; i++) {
-                int x = i/4;
-                int y = i%4;
-                string name = EquipmentIcons[i];
-                
-                var rect = new Rectangle (
-                    page.xPositionOnScreen + 48 + x*64, 
-                    page.yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 256 - 12 + y*64, 
-                    64, 64
-                );
-                
-                // Get the item that should be in this slot.
-                Item item = null;
-                if (x == 0) { 
-                    if (y == 0) item = Game1.player.hat.Value;
-                    if (y == 1) item = Game1.player.leftRing.Value;
-                    if (y == 2) item = Game1.player.rightRing.Value;
-                    if (y == 3) item = Game1.player.boots.Value;
-                } else {
-                    ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
-                    if (y == 0) item = ar.ring1.Value;
-                    if (y == 1) item = ar.ring2.Value;
-                    if (y == 2) item = ar.ring3.Value;
-                    if (y == 3) item = ar.ring4.Value;
-                }
-                
-                // Create the GUI element.
-                int id = 101+10*x+y;
-                var component = new ClickableComponent(rect, name) {
-                    myID = id,
-                    downNeighborID = y<3 ? id+1 : -1,
-                    upNeighborID = y==0 ? Game1.player.MaxItems - 12 + x : id-1,
-                    upNeighborImmutable = y==0,
-                    rightNeighborID = x==0 ? id+10 : 105,
-                    leftNeighborID = x==0 ? -1 : id-10,
-                    item = item
-                };
-                page.equipmentIcons.Add(component);
-            }
+            ActualRings ar = actualdata.GetValue(Game1.player, FarmerNotFound);
+            int inv = Game1.player.MaxItems - 12;
+            //             name            x   y   id   up   dn   lt   rt, item
+            AddIcon(page, "Hat",           0,  0, 102, inv, 103,  -1, 110, Game1.player.hat.Value);
+            AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, 111, Game1.player.shirtItem.Value);
+            AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, 112, Game1.player.pantsItem.Value);
+            AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, 112, Game1.player.boots.Value);
+            AddIcon(page, "Left Ring",    52,  0, 110, inv, 111, 102, 101, Game1.player.leftRing.Value);
+            AddIcon(page, "Right Ring",   68,  0, 101, inv, 121, 110, 105, Game1.player.rightRing.Value);
+            AddIcon(page, "Extra Ring 1", 52, 16, 111, 110, 112, 103, 121, ar.ring1.Value);
+            AddIcon(page, "Extra Ring 2", 68, 16, 121, 101, 122, 111, 105, ar.ring2.Value);
+            AddIcon(page, "Extra Ring 3", 52, 32, 112, 111,  -1, 104, 122, ar.ring3.Value);
+            AddIcon(page, "Extra Ring 4", 68, 32, 122, 121,  -1, 112, 105, ar.ring4.Value);
         }
         
         [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(Int32,Int32,Int32,Int32)")]
         void InventoryPage_ctor() {
             // Replace code for equipment icon creation with method calls to our AddEquipmentIcon method.
+            // Replace rings & boots
             var items = FindCode(
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(InventoryPage), nameof(InventoryPage.equipmentIcons)),
@@ -436,50 +418,37 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldfld(typeof(IClickableMenu), nameof(IClickableMenu.xPositionOnScreen)),
                 Instructions.Ldc_I4_S(48)
             );
-            // Differences in optimization might cause CIL to contain either ldloc or dup.
-            // Use EAFP to figure out which we're dealing with here.
-            try {
-                items.Extend(
-                    OpCodes.Dup,
-                    Instructions.Ldc_I4_S(104),
-                    Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.myID)),
-                    OpCodes.Dup,
-                    Instructions.Ldc_I4_S(105),
-                    Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.rightNeighborID)),
-                    OpCodes.Callvirt
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                items.Extend(
-                    OpCodes.Stloc_0,
-                    OpCodes.Ldloc_0,
-                    Instructions.Ldc_I4_S(104),
-                    Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.myID)),
-                    OpCodes.Ldloc_0,
-                    Instructions.Ldc_I4_S(105),
-                    Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.rightNeighborID)),
-                    OpCodes.Ldloc_0,
-                    OpCodes.Callvirt
-                );
-            }
+            items.Extend(
+                OpCodes.Dup,
+                Instructions.Ldc_I4_S(109),
+                Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.rightNeighborID)),
+                OpCodes.Dup,
+                OpCodes.Ldc_I4_1,
+                Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.fullyImmutable)),
+                OpCodes.Callvirt
+            );
             // Add our own equipment icons
             items.Replace(
                 Instructions.Ldarg_0(), // page
                 Instructions.Call(typeof(ModEntry), nameof(AddEquipmentIcons), typeof(InventoryPage))
             );
-            
-            // Move portrait 64px to the right.
-            // This only affects where the tooltip shows up.
-            FindCode(
+            // Remove hat, shirt & pants
+            items = items.FindNext(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(InventoryPage), nameof(InventoryPage.equipmentIcons)),
                 OpCodes.Ldarg_0,
                 Instructions.Ldfld(typeof(IClickableMenu), nameof(IClickableMenu.xPositionOnScreen)),
-                Instructions.Ldc_I4(192),
-                OpCodes.Add,
-                Instructions.Ldc_I4_S(64),
-                OpCodes.Sub,
-                Instructions.Ldc_I4_S(32),
-                OpCodes.Add
-            ).SubRange(4,2).Remove();
+                Instructions.Ldc_I4_S(48)
+            );
+            items.Extend(
+                OpCodes.Dup,
+                Instructions.Ldc_I4_S(104),
+                Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.leftNeighborID)),
+                OpCodes.Dup,
+                OpCodes.Ldc_I4_1,
+                Instructions.Stfld(typeof(ClickableComponent), nameof(ClickableComponent.fullyImmutable)),
+                OpCodes.Callvirt
+            );
         }
         
         static public void DrawEquipment(ClickableComponent icon, Microsoft.Xna.Framework.Graphics.SpriteBatch b) {
