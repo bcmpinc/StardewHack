@@ -336,7 +336,7 @@ namespace StardewHack.WearMoreRings
             ar.ring4.Value?.onMonsterSlay(target, location, who);
         }
         
-        [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,Int32,Int32,Boolean,Single,Int32,Single,Single,Boolean,StardewValley.Farmer)")]
+        [BytecodePatch("StardewValley.GameLocation::damageMonster(Microsoft.Xna.Framework.Rectangle,System.Int32,System.Int32,System.Boolean,System.Single,System.Int32,System.Single,System.Single,System.Boolean,StardewValley.Farmer)")]
         void GameLocation_damageMonster() {
             byte arg_who = (byte)(Array.Find(original.GetParameters(), info => info.Name == "who").Position+1);
 
@@ -407,7 +407,7 @@ namespace StardewHack.WearMoreRings
             AddIcon(page, "Extra Ring 4", 68, 32, 122, 121,  -1, 112, 105, ar.ring4.Value);
         }
         
-        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(Int32,Int32,Int32,Int32)")]
+        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor(System.Int32,System.Int32,System.Int32,System.Int32)")]
         void InventoryPage_ctor() {
             // Replace code for equipment icon creation with method calls to our AddEquipmentIcon method.
             // Replace rings & boots
@@ -688,7 +688,7 @@ namespace StardewHack.WearMoreRings
         #endregion Patch InventoryPage
         
         #region Patch Ring
-        [BytecodePatch("StardewValley.Objects.Ring::.ctor(Int32)")]
+        [BytecodePatch("StardewValley.Objects.Ring::.ctor(System.Int32)")]
         void Ring_ctor() {
             var code = FindCode(
                 OpCodes.Ldarg_0,
