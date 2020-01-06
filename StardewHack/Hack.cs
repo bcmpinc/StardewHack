@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -48,6 +49,8 @@ namespace StardewHack
             Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
             harmony = HarmonyInstance.Create(UniqueID);
         }
+        
+        public abstract void HackEntry(IModHelper helper);
 
         /// <summary>
         /// Find the first occurance of the given sequence of instructions that follows this range.
@@ -91,12 +94,30 @@ namespace StardewHack
         public string getReportUrl() {
             return "https://github.com/bcmpinc/StardewHack";
         }
+        
+        public void LogException(Exception err, LogLevel level = LogLevel.Error) {
+            while (err.InnerException != null) {
+                err = err.InnerException;
+            }
+            Monitor.Log(err.Message + Environment.NewLine + err.StackTrace, level);
+        }
+
+        internal MethodBase getMethodBase(LambdaExpression arg) {
+            switch (arg.Body) {
+                case MethodCallExpression m:
+                    return m.Method;
+                case NewExpression m:
+                    return m.Constructor;
+                default:
+                    throw new ArgumentException("Expression body has unexpected type: " + arg.Body.Type.Name);
+            }
+        }
     }
 
 #pragma warning disable RECS0108 // Warns about static fields in generic types
     // I 'love' generics. :P
-    // Used to have a separate static instance variable per type T.
-    public abstract class Hack<T> : HackBase where T : Hack<T>
+    // This pattern is used to have a separate static instance variable per type T.
+    public abstract class HackImpl<T> : HackBase where T : HackImpl<T>
     {
         /// <summary>
         /// A reference to this class's instance. 
@@ -116,7 +137,7 @@ namespace StardewHack
 
         private bool broken = false;
         
-        protected Hack() {
+        protected HackImpl() {
             instance = (T)this;
         }
 
@@ -137,10 +158,12 @@ namespace StardewHack
         public override void Entry(IModHelper helper) {
             if (typeof(T) != this.GetType()) throw new Exception($"The type of this ({this.GetType()}) must be the same as the generic argument T ({typeof(T)}).");
             base.Entry(helper);
+            
+            HackEntry(helper);
 
             // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
             var methods = typeof(T).GetMethods(AccessTools.all);
-            var apply = AccessTools.Method(typeof(Hack<T>), nameof(ApplyPatch));
+            var apply = AccessTools.Method(typeof(HackImpl<T>), nameof(ApplyPatch));
             foreach (MethodInfo patch in methods) {
                 var bytecode_patches = patch.GetCustomAttributes<BytecodePatch>();
                 foreach (var bp in bytecode_patches) {
@@ -167,12 +190,8 @@ namespace StardewHack
             }
         }
         
-        public void LogException(Exception err, LogLevel level = LogLevel.Error) {
-            while (err.InnerException != null) {
-                err = err.InnerException;
-            }
-            Monitor.Log(err.Message + System.Environment.NewLine + err.StackTrace, level);
-        }
+        public void Patch(Expression<Action> method, Action patch)       => ChainPatch(getMethodBase(method), patch.Method);
+        public void Patch<X>(Expression<Action<X>> method, Action patch) => ChainPatch(getMethodBase(method), patch.Method);
 
         /// <summary>
         /// Applies the given patch to the given method. 
@@ -230,11 +249,17 @@ namespace StardewHack
     }
 #pragma warning restore RECS0108 // Warns about static fields in generic types
 
-    public abstract class HackWithConfig<T, C> : Hack<T> where T : HackWithConfig<T, C> where C : class, new()
+    public abstract class Hack<T> : HackImpl<T> where T : Hack<T> {
+        public sealed override void Entry(IModHelper helper) {
+            base.Entry(helper);
+        }
+    }
+
+    public abstract class HackWithConfig<T, C> : HackImpl<T> where T : HackWithConfig<T, C> where C : class, new()
     {
         public C config;
 
-        public override void Entry(IModHelper helper) {
+        public sealed override void Entry(IModHelper helper) {
             config = helper.ReadConfig<C>();
             base.Entry(helper);
         }
