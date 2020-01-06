@@ -43,6 +43,9 @@
       <Private>False</Private>
       <IncludeInPackage>false</IncludeInPackage>
     </Reference>
+    <Reference Include="EntoaroxFramework">
+      <HintPath>..\Stardew Valley\AllMods\EntoaroxFramework\EntoaroxFramework.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
 
