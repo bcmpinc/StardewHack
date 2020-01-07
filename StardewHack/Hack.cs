@@ -156,9 +156,10 @@ namespace StardewHack
         /// Applies the methods annotated with BytecodePatch defined in this class. 
         /// </summary>
         public override void Entry(IModHelper helper) {
-            if (typeof(T) != this.GetType()) throw new Exception($"The type of this ({this.GetType()}) must be the same as the generic argument T ({typeof(T)}).");
+            if (typeof(T) != GetType()) throw new Exception($"The type of this ({GetType()}) must be the same as the generic argument T ({typeof(T)}).");
             base.Entry(helper);
             
+            // Let the mod register its patches.
             HackEntry(helper);
 
             // Iterate all methods in this class and search for those that have a BytecodePatch annotation.
