@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Objects;
 using StardewHack;
+using StardewValley.Locations;
 
 namespace BiggerBackpack
 {
@@ -25,6 +26,20 @@ namespace BiggerBackpack
             junimoNote  = Helper.Content.Load<Texture2D>("JunimoNote.png");
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
+            
+            Patch((SeedShop s)=>s.draw(null), SeedShop_draw);
+            Patch((SpecialItem si)=>si.getTemporarySpriteForHoldingUp(new Vector2()), SpecialItem_getTemporarySpriteForHoldingUp);
+            Patch((GameLocation gl)=>gl.performAction("", null, new xTile.Dimensions.Location()), GameLocation_performAction);
+            Patch((GameLocation gl)=>gl.answerDialogueAction("", null), GameLocation_answerDialogueAction);
+            Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
+            Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
+            Patch(()=>new CraftingPage(0,0,0,0,false,false,null), CraftingPage_ctor);
+            Patch(()=>new ShopMenu(new List<ISalable>(),0,"",null,null,""), ShopMenu_ctor);
+            Patch((ShopMenu m)=>m.draw(null), ShopMenu_draw);
+            Patch((ShopMenu m)=>m.drawCurrency(null), ShopMenu_drawCurrency);
+            Patch(()=>new MenuWithInventory(null,false,false,0,0,0), ShippingMenu_ctor);
+            Patch((JunimoNoteMenu m)=>m.setUpMenu(0,null), JunimoNoteMenu_setUpMenu);
+            Patch((JunimoNoteMenu m)=>m.draw(null), JunimoNoteMenu_draw);
         }
 
         private void command( string cmd, string[] args )
@@ -74,7 +89,6 @@ namespace BiggerBackpack
         }
 
         // Inject code for rendering the larger backpack in the shop.
-        [BytecodePatch("StardewValley.Locations.SeedShop::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void SeedShop_draw() {
             var check = FindCode(
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
@@ -121,7 +135,6 @@ namespace BiggerBackpack
         }
         
         // Inject code for rendering the larger backpack when picked up.
-        [BytecodePatch("StardewValley.Objects.SpecialItem::getTemporarySpriteForHoldingUp")]
         void SpecialItem_getTemporarySpriteForHoldingUp() {
             var code = FindCode(
                 Instructions.Ldstr("LooseSprites\\Cursors"),
@@ -158,7 +171,6 @@ namespace BiggerBackpack
         }
         
         // Inject code to show the buying dialogue when the premium backpack  is clicked.
-        [BytecodePatch("StardewValley.GameLocation::performAction")]
         void GameLocation_performAction() {
             var code = FindCode(
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
@@ -193,7 +205,6 @@ namespace BiggerBackpack
         }
         
         // Inject code for rendering the larger backpack when picked up.
-        [BytecodePatch("StardewValley.GameLocation::answerDialogueAction")]
         void GameLocation_answerDialogueAction() {
             var code = FindCode(
                 // else if ((int)Game1.player.maxItems != 36) {
@@ -250,7 +261,6 @@ namespace BiggerBackpack
             inv[1] = Instructions.Ldc_I4_4();
         }
         
-        [BytecodePatch("StardewValley.Menus.InventoryPage::.ctor")]
         void InventoryPage_ctor() {
             BeginCode().Prepend(
                 // height += Game1.tileSize;
@@ -293,7 +303,6 @@ namespace BiggerBackpack
             }
         }
 
-        [BytecodePatch("StardewValley.Menus.InventoryPage::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void InventoryPage_draw() {
             var code = BeginCode();
             
@@ -327,7 +336,6 @@ namespace BiggerBackpack
             }
         }
 
-        [BytecodePatch("StardewValley.Menus.CraftingPage::.ctor")]
         void CraftingPage_ctor() {
             // Make the crafting page a bit higher too, to accomodate the bigger inventory.
             BeginCode().Prepend(
@@ -341,10 +349,6 @@ namespace BiggerBackpack
             resize_inventory();
         }
         
-        [BytecodePatch("StardewValley.Menus.ShopMenu::.ctor(System.Collections.Generic.List<StardewValley.ISalable>,System.Int32,System.String,"+
-            "System.Func<StardewValley.ISalable,StardewValley.Farmer,System.Int32,System.Boolean>"+
-            "System.Func<StardewValley.ISalable,System.Boolean>"+
-            "System.String)")]
         void ShopMenu_ctor() {
             resize_inventory();
             
@@ -377,7 +381,6 @@ namespace BiggerBackpack
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.ShopMenu::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void ShopMenu_draw() {
             // Position the inventory background
             // Change `yPositionOnScreen + height - 256 + 40` to `yPositionOnScreen + 464`
@@ -428,7 +431,6 @@ namespace BiggerBackpack
             );
         }
 
-        [BytecodePatch("StardewValley.Menus.ShopMenu::drawCurrency(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void ShopMenu_drawCurrency() {
             FindCode(
                 Instructions.Ldc_I4_S(12),
@@ -439,7 +441,6 @@ namespace BiggerBackpack
             );
         }
         
-        [BytecodePatch("StardewValley.Menus.MenuWithInventory::.ctor")]
         void ShippingMenu_ctor() {
             resize_inventory();
             
@@ -456,7 +457,6 @@ namespace BiggerBackpack
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.JunimoNoteMenu::setUpMenu")]
         void JunimoNoteMenu_setUpMenu() {
             // Move the grid a few pixels
             var code = FindCode(
@@ -503,7 +503,6 @@ namespace BiggerBackpack
             }
         }
         
-        [BytecodePatch("StardewValley.Menus.JunimoNoteMenu::draw(Microsoft.Xna.Framework.Graphics.SpriteBatch)")]
         void JunimoNoteMenu_draw() {
             var code = FindCode(
                 OpCodes.Ldarg_1,
