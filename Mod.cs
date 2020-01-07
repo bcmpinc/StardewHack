@@ -19,9 +19,8 @@ namespace BiggerBackpack
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
-        public override void Entry(IModHelper helper)
+        public override void HackEntry(IModHelper helper)
         {
-            base.Entry(helper);
             bigBackpack = Helper.Content.Load<Texture2D>("backpack.png");
             junimoNote  = Helper.Content.Load<Texture2D>("JunimoNote.png");
 
