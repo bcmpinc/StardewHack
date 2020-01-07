@@ -105,7 +105,13 @@ namespace StardewHack
         internal MethodBase getMethodBase(LambdaExpression arg) {
             switch (arg.Body) {
                 case MethodCallExpression m:
-                    return m.Method;
+                    var r = m.Method;
+                    // The Expression gets the method defined in the base class. For subclasses we have to get the 
+                    // overriden definition of the method.
+                    if (r.IsVirtual && r.DeclaringType != m.Object.Type) {
+                        r = m.Object.Type.GetMethod(r.Name, r.GetParameters().Types());
+                    }
+                    return r;
                 case NewExpression m:
                     return m.Constructor;
                 default:
