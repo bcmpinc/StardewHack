@@ -86,9 +86,7 @@ namespace StardewHack.WearMoreRings
         static readonly ConditionalWeakTable<Farmer, ActualRings> actualdata = new ConditionalWeakTable<Farmer, ActualRings>();
         public static readonly Random random = new Random();
         
-        public override void Entry(IModHelper helper) {
-            base.Entry(helper);
-            
+        public override void HackEntry(IModHelper helper) {
             helper.Events.GameLoop.Saving += GameLoop_Saving;
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             

@@ -192,6 +192,14 @@ namespace StardewHack
         
         public void Patch(Expression<Action> method, Action patch)       => ChainPatch(getMethodBase(method), patch.Method);
         public void Patch<X>(Expression<Action<X>> method, Action patch) => ChainPatch(getMethodBase(method), patch.Method);
+        
+        public void Patch(Type type, String methodName, Action patch) {
+            var method = AccessTools.DeclaredMethod(type, methodName);
+            if (method == null) {
+                throw new Exception($"Failed to find method \"{methodName}\" in {type.FullName}.");
+            }
+            ChainPatch(method, patch.Method);
+        }
 
         /// <summary>
         /// Applies the given patch to the given method. 

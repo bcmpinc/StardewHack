@@ -70,6 +70,10 @@ namespace StardewHack.HarvestWithScythe
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
+    
+        public override void HackEntry(IModHelper helper) {
+        }
+    
 #region CanHarvest methods
         public const int HARVEST_PLUCKING = 0;
         public const int HARVEST_SCYTHING = 1;
