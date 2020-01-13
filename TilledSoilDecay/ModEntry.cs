@@ -1,5 +1,4 @@
 ﻿using StardewModdingAPI;
-using System;
 using System.Reflection.Emit;
 using Netcode;
 using StardewValley;
@@ -21,6 +20,9 @@ namespace StardewHack.TilledSoilDecay
 
         /** Number of days that the patch must have been without water, before it can disappear during the night at the end of the month. */
         public int DecayDelayFirstOfMonth = 1;
+        
+        /** Number of days that the patch must have been without water, before it disappears in the greenhouse and other non-farm locations. */
+        public int DecayDelayGreenhouse = 1; 
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
@@ -29,8 +31,13 @@ namespace StardewHack.TilledSoilDecay
             Patch((Farm f)=>f.DayUpdate(0), Farm_DayUpdate);
             
             // If the mod has any delay's conigured, apply the patch that keeps track of these delays.
-            if (config.DecayDelay > 0 || config.DecayDelayFirstOfMonth > 0) {
+            if (config.DecayDelay > 0 || config.DecayDelayFirstOfMonth > 0 || config.DecayDelayGreenhouse > 0) {
                 Patch((HoeDirt hd)=>hd.dayUpdate(null, new Vector2()), HoeDirt_dayUpdate);
+            }
+            
+            // If the mod has a delay conigured for the greenhouse, apply the necssary patch.
+            if (config.DecayDelayGreenhouse > 0) {
+                Patch((GameLocation gl)=>gl.DayUpdate(0), GameLocation_DayUpdate);
             }
         }
     
@@ -100,6 +107,21 @@ namespace StardewHack.TilledSoilDecay
                 Instructions.Ret()
                 // }
             );
+        }
+
+        void GameLocation_DayUpdate() {
+            var code = FindCode(
+                // terrainFeatures.Remove (collection.ElementAt (num4));
+                Instructions.Ldarg_0(),
+                Instructions.Callvirt_get(typeof(GameLocation), nameof(GameLocation.terrainFeatures)),
+                OpCodes.Ldloc_S,
+                OpCodes.Ldloc_S,
+                OpCodes.Call,
+                OpCodes.Callvirt,
+                OpCodes.Pop
+            );
+            // TODO check greenhouse & decay delay.
+            
         }
     }
 }
