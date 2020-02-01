@@ -19,14 +19,9 @@ This library is used by the following mods:
 * [Tree Spread](https://www.nexusmods.com/stardewvalley/mods/3183):                         Prevents trees from spreading on your farm.
 * [Wear More Rings](https://www.nexusmods.com/stardewvalley/mods/3214):                     Adds 4 additional ring slots to your inventory.
 
-## Installation notes
-If this mod fails to load with something like the error below, make sure that you have all of the mods listed above updated to at least version 1.0.
-
-    DLL couldn't be loaded: Could not load 'D:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\Mods\StardewHack\StardewHack.dll' because it was already loaded
-
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
-* StardewHack has been built on Linux and therefore needs rewriting to work on Windows. SMAPI does this automatically, however if during startup Stardew Valley hangs on `Loading StardewHack.dll (rewritten in memory)...`, this is probably due to your virusscanner preventing SMAPI from doing so.
+* StardewHack has been built on Linux and therefore needs rewriting to work on Windows. SMAPI does this automatically, however if during startup Stardew Valley hangs on `Loading StardewHack.dll (rewritten in memory)...`, this is probably due to your virus scanner preventing SMAPI from doing so.
 
 ## Changes
 #### 1.1:
