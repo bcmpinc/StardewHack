@@ -1,11 +1,11 @@
 ﻿{
    "Name": "Trace",
    "Author": "bcmpinc",
-   "Version": "2.4",
+   "Version": "2.5",
    "Description": "Prints a list of all currently loaded C# assemblies and the classes it contains.",
    "UniqueID": "bcmpinc.Trace",
    "EntryDll": "Trace.dll",
-   "MinimumApiVersion": "3.0.1",
+   "MinimumApiVersion": "3.1.0",
    "UpdateKeys": ["Nexus:2732"],
     "Dependencies": [
         { "UniqueID": "Alphablackwolf.CookingSkillPrestigeAdapter", "IsRequired": false }

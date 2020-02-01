@@ -110,7 +110,7 @@ namespace StardewHack.TilledSoilDecay
         }
 
         void GameLocation_DayUpdate() {
-            var code = FindCode(
+            /*var code = FindCode(
                 // terrainFeatures.Remove (collection.ElementAt (num4));
                 Instructions.Ldarg_0(),
                 Instructions.Callvirt_get(typeof(GameLocation), nameof(GameLocation.terrainFeatures)),
@@ -119,7 +119,7 @@ namespace StardewHack.TilledSoilDecay
                 OpCodes.Call,
                 OpCodes.Callvirt,
                 OpCodes.Pop
-            );
+            );*/
             // TODO check greenhouse & decay delay.
             
         }
