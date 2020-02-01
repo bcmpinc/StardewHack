@@ -49,5 +49,5 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Fix issue with shift-click equipping items not properly updating the GUI.
 * Fix startup issues on MacOS & Windows.
 
-#### 2.5:
+#### 3.0:
 * Updated for Stardew Valley 1.4.4.

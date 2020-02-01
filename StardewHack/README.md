@@ -39,5 +39,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Fix error message upon start for android.
 * Also warn when patch fails due to method not being found or being ambiguous.
 
-#### 2.5:
+#### 3.0:
+* Changed how StardewHack finds the methods it wants to patch.
 * Fix incompatibility with SkillPrestige.CookingSkill causing `Failed to find method` errors.
