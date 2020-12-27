@@ -52,3 +52,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 3.0:
 * Updated for Stardew Valley 1.4.4.
+
+#### 3.1:
+* Updated for Stardew Valley 1.5.
+* Added two extra ring slots.
+* Mod no longer modifies the network protocol.
+* Rings are now stored in a way that works for combined and modded rings.
