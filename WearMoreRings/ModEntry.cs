@@ -92,8 +92,8 @@ namespace StardewHack.WearMoreRings
             
             // Change the network protocol version.
             // I've tried doing this through SMAPI events, but stuff already breaks prior to those events being received and when scanning for local games.
-            var mp = Helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer");
-            //mp.GetValue().protocolVersion. += "+WearMoreRings";
+            //var mp = Helper.Reflection.GetField<string>(typeof(Multiplayer), nameof(Multiplayer.protocolVersion));
+            //mp.SetValue(mp.GetValue() + "+WearMoreRings");
             
             Patch(typeof(Farmer), "farmerInit", Farmer_farmerInit);
             Patch((Farmer f)=>f.isWearingRing(0), Farmer_isWearingRing);
@@ -359,20 +359,18 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.rightRing)),
                 OpCodes.Callvirt,
                 // .onMonsterSlay (monster, this, who);
-                OpCodes.Ldloc_2,
-                OpCodes.Ldfld, // monster
+                OpCodes.Ldloc_2, // monster
                 OpCodes.Ldarg_0, // this
                 Instructions.Ldarg_S(arg_who), // who
                 Instructions.Callvirt(typeof(Ring), nameof(Ring.onMonsterSlay), typeof(Monster), typeof(GameLocation), typeof(Farmer))
             );
             
-            var monster = code.SubRange(code.length - 5, 4);
+            var monster = code.SubRange(code.length - 4, 3);
             code.Replace(
                 // ModEntry.ring_onMonsterSlay(monster, this, who);
                 monster[0],
                 monster[1],
                 monster[2],
-                monster[3],
                 Instructions.Call(typeof(ModEntry), nameof(ring_onMonsterSlay), typeof(Monster), typeof(GameLocation), typeof(Farmer))
             );
         }
