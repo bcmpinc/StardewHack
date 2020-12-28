@@ -1,7 +1,7 @@
 # Wear More Rings
 
 ## Description
-Adds 4 additional ring slots to your inventory.
+Adds 6 additional ring slots to your inventory.
 
 ## Dependencies
 This mod requires the following mods to be installed:
