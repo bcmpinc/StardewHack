@@ -25,6 +25,7 @@ namespace StardewHack.WearMoreRings
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             
             Patch((Farmer f)=>f.isWearingRing(0), Farmer_isWearingRing);
+            Patch((Farmer f)=>f.GetEffectsOfRingMultiplier(0), Farmer_GetEffectsOfRingMultiplier);
             Patch(typeof(Farmer), "updateCommon", Farmer_updateCommon);
             Patch((GameLocation gl)=>gl.cleanupBeforePlayerExit(), GameLocation_cleanupBeforePlayerExit); 
             Patch(typeof(GameLocation), "resetLocalState", GameLocation_resetLocalState); 
@@ -48,13 +49,25 @@ namespace StardewHack.WearMoreRings
             if (f.rightRing.Value != null) visitor(f.rightRing.Value);
             foreach(Item item in ModEntry.GetRingInventory(f).items) {
                 var ring = item as Ring;
-                if (ring != null) visitor(ring);
+                if (ring != null) {
+                    if (ring is CombinedRing) {
+                        foreach (var cr in ((CombinedRing)ring).combinedRings) {
+                            visitor(ring);
+                        }
+                    } else {
+                        visitor(ring);
+                    }
+                }
             }
         }
 
         public int CountEquippedRings(Farmer f, int which) {
             int res = 0;
-            ForEachRing(f, r => {if (r.indexInTileSheet.Value == which) res++; });
+            ForEachRing(f, r => {
+                if (r.GetsEffectOfRing(which)) {
+                    res++;
+                }
+             });
             return res;
         }
 
@@ -124,6 +137,19 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ret()
             );
         }
+
+        void Farmer_GetEffectsOfRingMultiplier() {
+            AllCode().Replace(
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.getInstance)),
+                Instructions.Ldarg_0(),
+                Instructions.Ldarg_1(),
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.CountEquippedRings), typeof(Farmer), typeof(int)),
+                Instructions.Ret()
+            );
+        }
+
+
+
 
         public static void UpdateRings(GameTime time, GameLocation location, Farmer f) {
             void Update(Ring r) { 
