@@ -3,6 +3,9 @@
 ## Description
 Adds 6 additional ring slots to your inventory.
 
+## Console Commands
+* `player_resetmodifiers`: Clears buffs, then resets and reapplies the modifiers applied by boots & rings.
+
 ## Dependencies
 This mod requires the following mods to be installed:
 
@@ -59,3 +62,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 3.2:
 * Fixed issue with some effects of combined rings not being applied.
+
+#### 3.3:
+* Hide the chest in the [Chests Anywhere](https://www.nexusmods.com/stardewvalley/mods/518) mod.
+* Added the `player_resetmodifiers` command for people who added/removed rings from the hidden chest using Chests Anywhere to fix any issues this might have caused.

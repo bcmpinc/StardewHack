@@ -23,6 +23,7 @@ namespace StardewHack.WearMoreRings
         
         public override void HackEntry(IModHelper helper) {
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
+            helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", HandleActionReset);
             
             Patch((Farmer f)=>f.isWearingRing(0), Farmer_isWearingRing);
             Patch((Farmer f)=>f.GetEffectsOfRingMultiplier(0), Farmer_GetEffectsOfRingMultiplier);
@@ -93,6 +94,7 @@ namespace StardewHack.WearMoreRings
                 if (farm.objects.ContainsKey(getPositionFromId(id))) {
                     var existing_chest = farm.objects[getPositionFromId(id)];
                     if (existing_chest is Chest) {
+                        existing_chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
                         // Yes, return it.
                         return (Chest)existing_chest;
                     }
@@ -108,6 +110,7 @@ namespace StardewHack.WearMoreRings
             farm.objects[getPositionFromId(id)] = new_chest;
             farmer.modData[DATA_KEY] = id.ToString();
             getInstance().Monitor.Log($"Farmer {farmer.Name} has new chest {id}.");
+            new_chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
             return new_chest;
         }
         
@@ -125,9 +128,34 @@ namespace StardewHack.WearMoreRings
         void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e) {
             Migration.Import(Monitor, helper);
         }
+
+        /// <summary>
+        /// Attempts to fix save game corruption caused by inappropriate (un)equipping of rings.
+        /// </summary>
+        void HandleActionReset(string arg1, string[] arg2) {
+            var who = Game1.player;
+            Monitor.Log("Resetting modifiers for " + who.Name);
+            who.ClearBuffs();
+            ForEachRing(who, (r) => r.onUnequip(who, who.currentLocation));
+            who.boots.Value?.onUnequip();
+            who.MagneticRadius = 128;
+            who.knockbackModifier = 0;
+            who.weaponPrecisionModifier = 0;
+            who.critChanceModifier = 0;
+            who.critPowerModifier = 0;
+            who.weaponSpeedModifier = 0;
+            who.attackIncreaseModifier = 0;
+            who.resilience = 0;
+            who.addedLuckLevel.Value = 0;
+            who.immunity = 0;
+            who.boots.Value?.onEquip();
+            ForEachRing(who, (r) => r.onEquip(who, who.currentLocation));
+        }
+
+
         #endregion Events
 
-        
+
         void Farmer_isWearingRing() {
             AllCode().Replace(
                 Instructions.Call(typeof(ModEntry), nameof(ModEntry.getInstance)),
