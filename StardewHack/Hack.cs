@@ -1,5 +1,6 @@
 ﻿using Harmony;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -261,7 +262,19 @@ namespace StardewHack
         public sealed override void Entry(IModHelper helper) {
             config = helper.ReadConfig<C>();
             base.Entry(helper);
+            Helper.Events.GameLoop.GameLaunched += onLaunched;
         }
+
+        private void onLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            var api = Helper.ModRegistry.GetApi<GenericModConfigMenuAPI>("spacechase0.GenericModConfigMenu");
+            if (api != null) {
+                api.RegisterModConfig(ModManifest, () => config = new C(), () => Helper.WriteConfig(config));
+                InitializeApi(api);
+            }
+        }
+        
+        abstract protected void InitializeApi(GenericModConfigMenuAPI api);
     }
 }
 

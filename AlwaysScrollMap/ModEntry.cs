@@ -29,6 +29,13 @@ namespace StardewHack.AlwaysScrollMap
             
             Helper.Events.Input.ButtonPressed += ToggleScroll;
         }
+        
+        protected override void InitializeApi(GenericModConfigMenuAPI api)
+        {
+            api.RegisterSimpleOption(ModManifest, "Enabled indoors", "Always scroll map indoors", () => config.EnabledIndoors, (bool val) => config.EnabledIndoors = val);
+            api.RegisterSimpleOption(ModManifest, "Enabled outdoors", "Always scroll map outdoors", () => config.EnabledOutdoors, (bool val) => config.EnabledOutdoors = val);
+            api.RegisterSimpleOption(ModManifest, "Toggle", "Toggle scrolling in current location", () => config.ToggleScroll, (SButton val) => config.ToggleScroll = val);
+        }
 
         private void ToggleScroll(object sender, ButtonPressedEventArgs e) {
             if (e.Button.Equals(config.ToggleScroll)) {

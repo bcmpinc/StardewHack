@@ -10,9 +10,9 @@ namespace StardewHack.GrassGrowth
         /** Whether grass spreads almost everywhere. If false, grass spreading is limited to tillable tiles.*/
         public bool GrowEverywhere = true;
         /** The chance that grass grows or spreads.*/
-        public double GrowthChance = 0.65;
-        /** The chance for each neighbouring tile that the grass will spreads there.*/
-        public double SpreadChance = 0.25;
+        public float GrowthChance = 0.65f;
+        /** The chance for each neighbouring tile that the grass will spread there.*/
+        public float SpreadChance = 0.25f;
         /** The number of iterations that grass growth is applied per day (max=10).*/
         public int DailyGrowth = 1;
         /** Additional iterations that grass growth is applied at the start of each month (max=100).*/
@@ -39,7 +39,17 @@ namespace StardewHack.GrassGrowth
             
             Patch((GameLocation gl) => gl.growWeedGrass(0), GameLocation_growWeedGrass);
         }
-    
+
+        protected override void InitializeApi(GenericModConfigMenuAPI api)
+        {
+            api.RegisterSimpleOption(ModManifest, "Disable Growth", "Whether grass growth & spreading should be suppressed entirely.", () => config.DisableGrowth, (bool val) => config.DisableGrowth = val);
+            api.RegisterSimpleOption(ModManifest, "Grow Everywhere", "Whether grass spreads almost everywhere. If false, grass spreading is limited to tillable tiles.", () => config.GrowEverywhere, (bool val) => config.GrowEverywhere = val);
+            api.RegisterClampedOption(ModManifest, "Growth Chance", "The chance that grass grows or spreads.", () => config.GrowthChance, (float val) => config.GrowthChance = val, 0, 1);
+            api.RegisterClampedOption(ModManifest, "Spread Chance", "The chance for each neighbouring tile that the grass will spread there.", () => config.SpreadChance, (float val) => config.SpreadChance = val, 0, 1);
+            api.RegisterClampedOption(ModManifest, "Daily Growth", "The number of iterations that grass growth is applied per day", () => config.DailyGrowth, (int val) => config.DailyGrowth = val, 0, 10);
+            api.RegisterClampedOption(ModManifest, "Monthly Growth", "Additional iterations that grass growth is applied at the start of each month.", () => config.MonthlyGrowth, (int val) => config.MonthlyGrowth = val, 0, 100);
+        }
+
         // Change the rate at which new grass spawns during the night. 
         void Farm_DayUpdate() {
             var code = FindCode(
@@ -59,60 +69,61 @@ namespace StardewHack.GrassGrowth
             }
         }
         
+        static bool getDisableGrowth() => getInstance().config.DisableGrowth;
+        static bool getGrowEverywhere() => getInstance().config.GrowEverywhere;
+        static double getGrowthChance() => getInstance().config.GrowthChance;
+        static double getSpreadChance() => getInstance().config.SpreadChance;
+        
         // Change the behavior of the grass growth & spreading. 
         void GameLocation_growWeedGrass() {
             // Stop grass from growing & spreading.
-            if (config.DisableGrowth) {
-                AllCode().Replace(
-                    Instructions.Ret()
-                );
-                return;
-            } 
+            AllCode().Prepend(
+                Instructions.Call(GetType(), nameof(getDisableGrowth)),
+                Instructions.Brfalse(AttachLabel(AllCode()[0])),
+                Instructions.Ret()
+            );
             
             // Change grass growth to spread mostly everywhere.
-            if (config.GrowEverywhere) {
-                var growWeedGrass = BeginCode();
-                // For each of the 4 directions
-                for (int i=0; i<4; i++) {
-                    growWeedGrass = growWeedGrass.FindNext(
-                        OpCodes.Ldarg_0,
-                        null,
-                        null,
-                        null,
-                        null,
-                        Instructions.Ldstr("Diggable"),
-                        Instructions.Ldstr("Back"),
-                        InstructionMatcher.AnyOf(
-                            Instructions.Call    (typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty), typeof(int), typeof(int), typeof(string), typeof(string)),
-                            Instructions.Callvirt(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty), typeof(int), typeof(int), typeof(string), typeof(string))
-                        ),
-                        OpCodes.Brfalse
-                    );
-                    growWeedGrass.Remove();
-                }
+            var growWeedGrass = BeginCode();
+            // For each of the 4 directions
+            for (int i=0; i<4; i++) {
+                growWeedGrass = growWeedGrass.FindNext(
+                    OpCodes.Ldarg_0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Instructions.Ldstr("Diggable"),
+                    Instructions.Ldstr("Back"),
+                    InstructionMatcher.AnyOf(
+                        Instructions.Call    (typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty), typeof(int), typeof(int), typeof(string), typeof(string)),
+                        Instructions.Callvirt(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty), typeof(int), typeof(int), typeof(string), typeof(string))
+                    ),
+                    OpCodes.Brfalse
+                );
+                growWeedGrass.Prepend(
+                    Instructions.Call(GetType(), nameof(getDisableGrowth)),
+                    Instructions.Brtrue(AttachLabel(growWeedGrass.End[0]))
+                );
             }
             
             // Growth chance
-            if (Math.Abs(config.GrowthChance - 0.65) < 1e-6) {
-                FindCode(
-                    Instructions.Ldc_R8(0.65),
-                    OpCodes.Bge_Un,
-                    OpCodes.Ldloca_S
-                )[0].operand = config.GrowthChance;
-            }
+            FindCode(
+                Instructions.Ldc_R8(0.65),
+                OpCodes.Bge_Un,
+                OpCodes.Ldloca_S
+            )[0] = Instructions.Call(GetType(), nameof(getGrowthChance));
             
             // Spread
-            if (Math.Abs(config.SpreadChance - 0.25) < 1e-6) {
-                var spreadGrass = BeginCode();
-                // For each of the 4 directions
-                for (int i=0; i<4; i++) {
-                    spreadGrass = spreadGrass.FindNext(
-                        Instructions.Ldc_R8(0.25),
-                        OpCodes.Bge_Un,
-                        OpCodes.Ldarg_0
-                    );
-                    spreadGrass[0].operand = config.SpreadChance;
-                }
+            var spreadGrass = BeginCode();
+            // For each of the 4 directions
+            for (int i=0; i<4; i++) {
+                spreadGrass = spreadGrass.FindNext(
+                    Instructions.Ldc_R8(0.25),
+                    OpCodes.Bge_Un,
+                    OpCodes.Ldarg_0
+                );
+                spreadGrass[0] = Instructions.Call(GetType(), nameof(getSpreadChance));
             }
         }
     }
