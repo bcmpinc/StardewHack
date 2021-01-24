@@ -76,12 +76,13 @@ namespace StardewHack.HarvestWithScythe
     {
     
         public override void HackEntry(IModHelper helper) {
+            Patch((MeleeWeapon w)=>w.isScythe(-1), MeleeWeapon_isScythe);
             Patch((Crop c)=>c.harvest(0,0,null,null), Crop_harvest);
             Patch((HoeDirt hd)=>hd.performToolAction(null, 0, new Vector2(), null), HoeDirt_performToolAction);
             Patch((HoeDirt hd)=>hd.performUseAction(new Vector2(), null), HoeDirt_performUseAction);
 
             // If forage harvesting is configured to allow scythe.
-            if (config.HarvestMode.Forage != HarvestModeEnum.HAND) {
+            if (config.HarvestMode.Forage != HarvestModeEnum.HAND) { // TODO: Remove condition
                 Patch((StardewValley.Object o)=>o.performToolAction(null, null), Object_performToolAction);
                 Patch((GameLocation gl)=>gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
             }
@@ -121,19 +122,31 @@ namespace StardewHack.HarvestWithScythe
             api.RegisterChoiceOption(ModManifest, "PluckableCrops", "How crops that normally can only be harvested by hand can be harvested.", () => writeEnum(config.HarvestMode.PluckableCrops), (string val) => config.HarvestMode.PluckableCrops = parseEnum(val), options);
             api.RegisterChoiceOption(ModManifest, "ScythableCrops", "How crops that normally can only be harvested with a scythe can be harvested.", () => writeEnum(config.HarvestMode.ScythableCrops), (string val) => config.HarvestMode.ScythableCrops = parseEnum(val), options);
         }
-    
-#region CanHarvest methods
+
+        static bool getHarvestWithSword() {
+            return getInstance().config.HarvestWithSword;
+        }
+
+        void MeleeWeapon_isScythe() {
+            BeginCode().Append(
+                Instructions.Call(GetType(), nameof(getHarvestWithSword)),
+                Instructions.Brfalse(AttachLabel(BeginCode()[0])),
+                Instructions.Ldc_I4_1(),
+                Instructions.Ret()
+            );
+        }
+
+
+        #region CanHarvest methods
         public const int HARVEST_PLUCKING = Crop.grabHarvest;
         public const int HARVEST_SCYTHING = Crop.sickleHarvest;
 
-        /** Check whether the used harvest method is allowed for the given harvest mode. 
-         * Method: 0 = plucking, 1 = scything.
-         */
+        /** Check whether the used harvest method is allowed for the given harvest mode. */
         public static bool CanHarvest(HarvestModeEnum mode, int method) {
             // If mode is BOTH, then set mode depending on whether the scythe is currently equipped.
             if (mode == HarvestModeEnum.BOTH) {
                 var t = Game1.player.CurrentTool;
-                if (t is MeleeWeapon && ((t as MeleeWeapon).isScythe(-1) || getInstance().config.HarvestWithSword)) {
+                if (t is MeleeWeapon && ((t as MeleeWeapon).isScythe())) {
                     mode = HarvestModeEnum.SCYTHE;
                 } else {
                     mode = HarvestModeEnum.HAND;
