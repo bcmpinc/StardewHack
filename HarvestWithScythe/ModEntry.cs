@@ -15,9 +15,13 @@ namespace StardewHack.HarvestWithScythe
         HAND,
         SCYTHE,
         BOTH, // I.e. determined by whether the scythe is equipped.
+        GOLD, // I.e. hand, unless the golden scythe is equipped.
     }
 
     public class ModConfig {
+        /** Whether a sword can be used instead of a normal scythe. */
+        public bool HarvestWithSword = false;
+    
         public class HarvestModeClass {
             /** How should flowers be harvested? 
              * Any Crop that is `programColored` is considered a flower. */
@@ -83,6 +87,40 @@ namespace StardewHack.HarvestWithScythe
             }
 
         }
+        
+        static string writeEnum(HarvestModeEnum val) {
+            switch (val) {
+                case HarvestModeEnum.HAND: return "Hand";
+                case HarvestModeEnum.SCYTHE: return "Scythe";
+                case HarvestModeEnum.BOTH: return "Both";
+                case HarvestModeEnum.GOLD: return "Gold";
+                default: throw new Exception("Invalid HarvestModeEnum value");
+            }
+        }
+        
+        static HarvestModeEnum parseEnum(string val) {
+            HarvestModeEnum res;
+            Enum.TryParse<HarvestModeEnum>(val, true, out res);
+            return res;
+        }
+        
+        protected override void InitializeApi(GenericModConfigMenuAPI api)
+        {
+            api.RegisterSimpleOption(ModManifest, "Harvest With Sword", "Whether a sword can be used instead of a normal scythe.", () => config.HarvestWithSword, (bool val) => config.HarvestWithSword = val);
+        
+            string[] options = { "Hand", "Scythe", "Both", "Gold" };
+            string options_desc = "Valid values are:\n" +
+                " · Hand: only pluckable;\n" +
+                " · Scythe: only scythable;\n" +
+                " · Both: both pluckable and scythable;\n" +
+                " · Gold: like 'both', but requires the golden scythe.";
+            api.RegisterLabel(ModManifest, "HarvestMode", options_desc);
+            api.RegisterChoiceOption(ModManifest, "Flowers", "How flowers can be harvested.", () => writeEnum(config.HarvestMode.Flowers), (string val) => config.HarvestMode.Flowers = parseEnum(val), options);
+            api.RegisterChoiceOption(ModManifest, "Forage", "How forage can be harvested.", () => writeEnum(config.HarvestMode.Forage), (string val) => config.HarvestMode.Forage = parseEnum(val), options);
+            api.RegisterChoiceOption(ModManifest, "SpringOnion", "How spring onions can be harvested.", () => writeEnum(config.HarvestMode.SpringOnion), (string val) => config.HarvestMode.SpringOnion = parseEnum(val), options);
+            api.RegisterChoiceOption(ModManifest, "PluckableCrops", "How crops that normally can only be harvested by hand can be harvested.", () => writeEnum(config.HarvestMode.PluckableCrops), (string val) => config.HarvestMode.PluckableCrops = parseEnum(val), options);
+            api.RegisterChoiceOption(ModManifest, "ScythableCrops", "How crops that normally can only be harvested with a scythe can be harvested.", () => writeEnum(config.HarvestMode.ScythableCrops), (string val) => config.HarvestMode.ScythableCrops = parseEnum(val), options);
+        }
     
 #region CanHarvest methods
         public const int HARVEST_PLUCKING = Crop.grabHarvest;
@@ -95,7 +133,17 @@ namespace StardewHack.HarvestWithScythe
             // If mode is BOTH, then set mode depending on whether the scythe is currently equipped.
             if (mode == HarvestModeEnum.BOTH) {
                 var t = Game1.player.CurrentTool;
-                if (t is MeleeWeapon && (t as MeleeWeapon).isScythe(-1)) {
+                if (t is MeleeWeapon && ((t as MeleeWeapon).isScythe(-1) || getInstance().config.HarvestWithSword)) {
+                    mode = HarvestModeEnum.SCYTHE;
+                } else {
+                    mode = HarvestModeEnum.HAND;
+                }
+            }
+
+            // If mode is GOLD, then set mode depending on whether the golden scythe is currently equipped.
+            if (mode == HarvestModeEnum.GOLD) {
+                var t = Game1.player.CurrentTool;
+                if (t.initialParentTileIndex == MeleeWeapon.goldenScythe) {
                     mode = HarvestModeEnum.SCYTHE;
                 } else {
                     mode = HarvestModeEnum.HAND;
@@ -660,7 +708,7 @@ namespace StardewHack.HarvestWithScythe
             } 
         }
 
-#endregion
+        #endregion
     }
 }
 

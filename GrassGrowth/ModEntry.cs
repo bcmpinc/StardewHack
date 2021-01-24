@@ -43,8 +43,8 @@ namespace StardewHack.GrassGrowth
             api.RegisterClampedOption(ModManifest, "Monthly Growth", "Additional iterations that grass growth is applied at the start of each month.", () => config.MonthlyGrowth, (int val) => config.MonthlyGrowth = val, 0, 100);
         }
 
-        static double getMonthlyGrowth() => getInstance().config.MonthlyGrowth;
-        static double getDailyGrowth() => getInstance().config.DailyGrowth;
+        static int getMonthlyGrowth() => getInstance().config.MonthlyGrowth;
+        static int getDailyGrowth() => getInstance().config.DailyGrowth;
 
         // Change the rate at which new grass spawns during the night. 
         void Farm_DayUpdate() {
