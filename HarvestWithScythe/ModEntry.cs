@@ -82,11 +82,8 @@ namespace StardewHack.HarvestWithScythe
             Patch((HoeDirt hd)=>hd.performUseAction(new Vector2(), null), HoeDirt_performUseAction);
 
             // If forage harvesting is configured to allow scythe.
-            if (config.HarvestMode.Forage != HarvestModeEnum.HAND) { // TODO: Remove condition
-                Patch((StardewValley.Object o)=>o.performToolAction(null, null), Object_performToolAction);
-                Patch((GameLocation gl)=>gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
-            }
-
+            Patch((StardewValley.Object o)=>o.performToolAction(null, null), Object_performToolAction);
+            Patch((GameLocation gl)=>gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
         }
         
         static string writeEnum(HarvestModeEnum val) {
@@ -156,7 +153,7 @@ namespace StardewHack.HarvestWithScythe
             // If mode is GOLD, then set mode depending on whether the golden scythe is currently equipped.
             if (mode == HarvestModeEnum.GOLD) {
                 var t = Game1.player.CurrentTool;
-                if (t.initialParentTileIndex == MeleeWeapon.goldenScythe) {
+                if (t.InitialParentTileIndex == MeleeWeapon.goldenScythe) {
                     mode = HarvestModeEnum.SCYTHE;
                 } else {
                     mode = HarvestModeEnum.HAND;
@@ -554,15 +551,6 @@ namespace StardewHack.HarvestWithScythe
             var code = BeginCode();
             Label begin = AttachLabel(code[0]);
             code.Prepend(
-                // Check if Tool is scythe.
-                Instructions.Ldarg_1(),
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                Instructions.Brfalse(begin),
-                Instructions.Ldarg_1(),
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                Instructions.Ldc_I4_M1(),
-                Instructions.Callvirt(typeof(MeleeWeapon), nameof(MeleeWeapon.isScythe), typeof(int)),
-                Instructions.Brfalse(begin),
                 // Hook
                 Instructions.Ldarg_0(),
                 Instructions.Ldarg_1(),
@@ -575,41 +563,43 @@ namespace StardewHack.HarvestWithScythe
         }
 
         public static bool ScytheForage(StardewValley.Object o, Tool t, GameLocation loc) {
-            if (o.IsSpawnedObject && !o.questItem.Value && o.isForage(loc) && CanHarvestObject(o, HARVEST_SCYTHING)) {
-                var who = t.getLastFarmerToUse();
-                var vector = o.TileLocation;
-                // For objects stored in GameLocation.Objects, the TileLocation is not always set.
-                // So determine its location by looping trough all such objects.
+            if (t is MeleeWeapon && (t as MeleeWeapon).isScythe()) {
+                // TODO: Consider removing some of these checks.
+                if (o.IsSpawnedObject && !o.questItem.Value && o.isForage(loc) && CanHarvestObject(o, HARVEST_SCYTHING)) {
+                    var who = t.getLastFarmerToUse();
+                    var vector = o.TileLocation;
+                    // For objects stored in GameLocation.Objects, the TileLocation is not always set.
+                    // So determine its location by looping trough all such objects.
 #pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
-                if (vector.X==0 && vector.Y==0) {
+                    if (vector.X==0 && vector.Y==0) {
 #pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
-                    foreach (System.Collections.Generic.KeyValuePair<Vector2, StardewValley.Object> pair in loc.Objects.Pairs) {
-                        if (pair.Value.Equals(o)) {
-                            vector = pair.Key;
-                            break;
+                        foreach (System.Collections.Generic.KeyValuePair<Vector2, StardewValley.Object> pair in loc.Objects.Pairs) {
+                            if (pair.Value.Equals(o)) {
+                                vector = pair.Key;
+                                break;
+                            }
                         }
                     }
-                }
-                Random random = new Random((int)Game1.uniqueIDForThisGame / 2 + (int)Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
-                if (who.professions.Contains(16)) {
-                    o.Quality = 4;
-                } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 30)) {
-                    o.Quality = 2;
-                } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 15)) {
-                    o.Quality = 1;
-                }
-                vector *= 64.0f;
-                who.gainExperience(2, 7);
-                Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
-                Game1.stats.ItemsForaged += 1;
-                if (who.professions.Contains(13) && random.NextDouble() < 0.2) {
-                    Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+                    Random random = new Random((int)Game1.uniqueIDForThisGame / 2 + (int)Game1.stats.DaysPlayed + (int)vector.X + (int)vector.Y * 777);
+                    if (who.professions.Contains(16)) {
+                        o.Quality = 4;
+                    } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 30)) {
+                        o.Quality = 2;
+                    } else if (random.NextDouble() < (double)((float)who.ForagingLevel / 15)) {
+                        o.Quality = 1;
+                    }
+                    vector *= 64.0f;
                     who.gainExperience(2, 7);
+                    Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+                    Game1.stats.ItemsForaged += 1;
+                    if (who.professions.Contains(13) && random.NextDouble() < 0.2) {
+                        Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+                        who.gainExperience(2, 7);
+                    }
+                    return true;
                 }
-                return true;
-            } else {
-                return false;
-            }
+            } 
+            return false;
         }
 
         void GameLocation_checkAction() {
@@ -708,6 +698,7 @@ namespace StardewHack.HarvestWithScythe
         
         static void TryScythe() {
             // Copied from HoeDirt.performUseAction()
+            // TODO: Filter items that are not considered forage.
             if (Game1.player.CurrentTool != null && Game1.player.CurrentTool is MeleeWeapon && (Game1.player.CurrentTool as MeleeWeapon).isScythe()) {
                 Game1.player.CanMove = false;
                 Game1.player.UsingTool = true;
