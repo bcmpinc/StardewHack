@@ -5,15 +5,13 @@
     <RootNamespace>StardewHack.TilledSoilDecay</RootNamespace>
     <Version>1.0.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <Platforms>x86</Platforms>
-    <PlatformTarget>x86</PlatformTarget>
 
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
 
   <!-- required for MonoDevelop compatibility -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Any CPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Any CPU' " />
 
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.2.2" />
