@@ -20,15 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StardewHack\StardewHack.csproj">
-      <Private>false</Private>
-    </ProjectReference>
+    <ProjectReference Include="..\StardewHack\StardewHack.csproj" Private="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
