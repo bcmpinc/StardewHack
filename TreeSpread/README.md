@@ -9,6 +9,7 @@ Furthermore trees on your farm will retain their seed during the night (only if 
 
 * `SeedChance`: Chance that a tree will have a seed. Normally this is 0.05 (=5%). Default = 0.15 (=15%).
 * `OnlyPreventTapped`: Whether only tapped trees are prevented from dropping seeds. Default = false.
+* `RetainSeed`: Whether the tree should keep its seed during the night, to compensate for trees not spreading. Vanilla SDV removes seeds during the night. Default = true.
 
 ## Dependencies
 This mod requires the following mods to be installed:
@@ -32,3 +33,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 #### 3.1:
 * Updated for Stardew Valley 1.5
+
+#### 4.0:
+* Added integration for [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098).
+* Added retain seed config option.

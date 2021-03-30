@@ -99,6 +99,7 @@ namespace StardewHack
         /// Inserts the specified list of instructions before this range.
         /// </summary>
         public void Prepend(params CodeInstruction[] new_insts) {
+            // TODO: Consider adding a ReplaceJump.
             insts.InsertRange(start, new_insts);
             length += new_insts.Length;
         }
@@ -133,8 +134,13 @@ namespace StardewHack
         /// Access elements relative to the start of this range.
         /// </summary>
         public CodeInstruction this[int index] {
-            get { return insts[start+index]; }
-            set { insts[start+index] = value; }
+            get { 
+                return insts[start+index]; 
+            }
+            set {
+                ReplaceJump(index, value);
+                insts[start+index] = value; 
+            }
         }
 
         /// <summary>
