@@ -1,8 +1,8 @@
 # Tree Spread
 
 ## Description
-Prevents trees from dropping their seeds and spreading on your farm. To compensate, trees will have a higher chance of having a seed. 
-Furthermore trees on your farm will retain their seed during the night (only if `OnlyPreventTapped` is set to false).
+Prevents trees from automatically dropping their seeds and spreading on your farm. To compensate, trees will have a higher chance of having a seed. 
+Furthermore trees on your farm will retain their seed during the night.
 
 ## Config
 *Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.*
@@ -26,7 +26,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Added option to limit this mod tapped trees only.
 
 #### 1.1:
-* Fix: the option for tapped trees wasn't preventing seeds from being dropped at all.
+* Fix: the option for tapped trees wasn't preventing trees from spreading at all.
 
 #### 2.0:
 * Updated for Stardew Valley 1.4
