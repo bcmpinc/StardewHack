@@ -134,7 +134,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
 
-        #region CanHarvest methods
+#region CanHarvest methods
         public const int HARVEST_PLUCKING = Crop.grabHarvest;
         public const int HARVEST_SCYTHING = Crop.sickleHarvest;
 
