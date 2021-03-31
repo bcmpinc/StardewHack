@@ -99,7 +99,6 @@ namespace StardewHack
         /// Inserts the specified list of instructions before this range.
         /// </summary>
         public void Prepend(params CodeInstruction[] new_insts) {
-            // TODO: Consider adding a ReplaceJump.
             insts.InsertRange(start, new_insts);
             length += new_insts.Length;
         }
@@ -132,6 +131,7 @@ namespace StardewHack
 
         /// <summary>
         /// Access elements relative to the start of this range.
+        /// When setting an instruction, jumps to the old isntruction will be moved to the new instruction.
         /// </summary>
         public CodeInstruction this[int index] {
             get { 
@@ -179,7 +179,6 @@ namespace StardewHack
             length = start + length - ext.start;
             start = ext.start;
         }
-        
 
         /// <summary>
         /// Replaces the instructions within this range with the specified new instructions.
@@ -197,6 +196,16 @@ namespace StardewHack
                 length = new_insts.Length;
             }
         }
+
+        /// <summary>
+        /// Replaces the instructions within the specified sub-range with the specified new instructions.
+        /// Automatically fixes jumps to the start of this code range to point to the start of the new instructions.
+        /// </summary>
+        public void Splice(int start, int length, params CodeInstruction[] new_insts) {
+            SubRange(start, length).Replace(new_insts);
+            this.length += new_insts.Length - length;
+        }
+
 
         /// <summary>
         /// Get the jump target of the branch instruction at index i. 

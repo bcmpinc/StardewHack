@@ -259,6 +259,10 @@ namespace StardewHack
     {
         public C config;
 
+        public static C getConfig() {
+            return getInstance().config;
+        }
+
         public sealed override void Entry(IModHelper helper) {
             config = helper.ReadConfig<C>();
             base.Entry(helper);
