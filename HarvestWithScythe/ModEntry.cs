@@ -419,12 +419,18 @@ namespace StardewHack.HarvestWithScythe
             Game1.createItemDebris(dropped_item, vector, -1, null, -1);
         }
 
-#region Patch HoeDirt
+        #region Patch HoeDirt
+
+        static readonly InstructionMatcher HoeDirt_crop = InstructionMatcher.AnyOf(
+                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                Instructions.Callvirt_get(typeof(HoeDirt), nameof(HoeDirt.crop))
+        );
+
         void HoeDirt_performToolAction() {
             // Find the first (and only) harvestMethod==1 check.
             var HarvestMethodCheck = FindCode(
                 OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                HoeDirt_crop,
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
                 OpCodes.Call, // Netcode implicit conversion
                 OpCodes.Ldc_I4_1,
@@ -463,7 +469,7 @@ namespace StardewHack.HarvestWithScythe
             // after the following crop!=null check.
             HarvestMethodCheck.FindNext(
                 OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                HoeDirt_crop,
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.dead)),
                 OpCodes.Call, // Netcode
                 OpCodes.Brfalse
@@ -482,7 +488,7 @@ namespace StardewHack.HarvestWithScythe
             var harvest_hand = FindCode(
                 // if ((int)crop.harvestMethod == 0) {
                 OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                HoeDirt_crop,
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
                 OpCodes.Call, // NetCode implicit cast.
                 OpCodes.Brtrue
@@ -516,7 +522,7 @@ namespace StardewHack.HarvestWithScythe
             var harvest_scythe = FindCode(
                 // if ((int)crop.harvestMethod == 1) {
                 OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                HoeDirt_crop,
                 Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
                 OpCodes.Call, // NetCode implicit cast.
                 OpCodes.Ldc_I4_1,
