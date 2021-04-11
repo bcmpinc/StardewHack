@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>GrassGrowth</AssemblyName>
     <RootNamespace>StardewHack.GrassGrowth</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>4.0</Version>
     <TargetFramework>net452</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 
