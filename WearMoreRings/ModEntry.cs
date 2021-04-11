@@ -15,7 +15,7 @@ namespace StardewHack.WearMoreRings
     public class ModConfig
     {
         /** How many ring slots are available. */
-        public int Rings = 4;
+        public int Rings = 8;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
