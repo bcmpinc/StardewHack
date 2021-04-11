@@ -37,3 +37,4 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 #### 4.0:
 * Added integration for [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098).
 * Added retain seed config option.
+* Add 64-bit support
