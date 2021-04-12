@@ -274,6 +274,7 @@ namespace StardewHack
             var api = Helper.ModRegistry.GetApi<GenericModConfigMenuAPI>("spacechase0.GenericModConfigMenu");
             if (api != null) {
                 api.RegisterModConfig(ModManifest, () => config = new C(), () => Helper.WriteConfig(config));
+                api.SetDefaultIngameOptinValue(ModManifest, true);
                 InitializeApi(api);
             }
         }
