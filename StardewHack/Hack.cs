@@ -100,7 +100,7 @@ namespace StardewHack
             while (err.InnerException != null) {
                 err = err.InnerException;
             }
-            Monitor.Log(err.Message + Environment.NewLine + err.StackTrace, level);
+            Monitor.Log(err.ToString(), level);
         }
 
         internal MethodBase getMethodBase(LambdaExpression arg) {

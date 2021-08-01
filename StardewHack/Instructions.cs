@@ -65,7 +65,7 @@ namespace StardewHack
         public static CodeInstruction Ldc_I4_7() => new CodeInstruction(OpCodes.Ldc_I4_7);
         public static CodeInstruction Ldc_I4_8() => new CodeInstruction(OpCodes.Ldc_I4_8);
         public static CodeInstruction Ldc_I4_M1() => new CodeInstruction(OpCodes.Ldc_I4_M1);
-        public static CodeInstruction Ldc_I4_S(byte value) => new CodeInstruction(OpCodes.Ldc_I4_S, value);
+        public static CodeInstruction Ldc_I4_S(sbyte value) => new CodeInstruction(OpCodes.Ldc_I4_S, value);
         public static CodeInstruction Ldc_I4(int value) => new CodeInstruction(OpCodes.Ldc_I4, value);
         public static CodeInstruction Ldc_R4(float value) => new CodeInstruction(OpCodes.Ldc_R4, value);
         public static CodeInstruction Ldc_R8(double value) => new CodeInstruction(OpCodes.Ldc_R8, value);

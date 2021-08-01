@@ -56,7 +56,7 @@ namespace StardewHack.AlwaysScrollMap
                 // if (Game1.currentLocation.forceViewportPlayerFollow)
                 // (Note: currentLocation is a field on PC and a property on android).
                 Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.forceViewportPlayerFollow)),
-                OpCodes.Brfalse
+                InstructionMatcher.AnyOf(OpCodes.Brfalse, OpCodes.Brfalse_S)
             );
             // Encapsulate with if (!State.Enabled) {
             range.Prepend(
