@@ -112,6 +112,9 @@ namespace StardewHack
                     if (r.IsVirtual && r.DeclaringType != m.Object.Type) {
                         r = m.Object.Type.GetMethod(r.Name, r.GetParameters().Types());
                     }
+                    if (r.ContainsGenericParameters) {
+                        Monitor.Log("Method has generic parameters: " + m.ToString(), LogLevel.Warn);
+                    }
                     return r;
                 case NewExpression m:
                     return m.Constructor;

@@ -438,10 +438,7 @@ namespace StardewHack.HarvestWithScythe
 
         #region Patch HoeDirt
 
-        static readonly InstructionMatcher HoeDirt_crop = InstructionMatcher.AnyOf(
-            Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
-            Instructions.Callvirt_get(typeof(HoeDirt), nameof(HoeDirt.crop))
-        );
+        static readonly InstructionMatcher HoeDirt_crop = Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop));
 
         void HoeDirt_performToolAction() {
             // Find the first (and only) harvestMethod==1 check.

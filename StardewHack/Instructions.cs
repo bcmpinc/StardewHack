@@ -13,9 +13,13 @@ namespace StardewHack
         // B
         // Use Instructions.Br(AttachLabel(CodeInstruction)) to create branch to the given code instruction.
         public static CodeInstruction Bge    (Label target) => new CodeInstruction(OpCodes.Bge,     target);
+        public static CodeInstruction Bge_Un (Label target) => new CodeInstruction(OpCodes.Bge_Un,  target);
         public static CodeInstruction Bgt    (Label target) => new CodeInstruction(OpCodes.Bgt,     target);
+        public static CodeInstruction Bgt_Un (Label target) => new CodeInstruction(OpCodes.Bgt_Un,  target);
         public static CodeInstruction Ble    (Label target) => new CodeInstruction(OpCodes.Ble,     target);
+        public static CodeInstruction Ble_Un (Label target) => new CodeInstruction(OpCodes.Ble_Un,  target);
         public static CodeInstruction Blt    (Label target) => new CodeInstruction(OpCodes.Blt,     target);
+        public static CodeInstruction Blt_Un (Label target) => new CodeInstruction(OpCodes.Blt_Un,  target);
         public static CodeInstruction Beq    (Label target) => new CodeInstruction(OpCodes.Beq,     target);
         public static CodeInstruction Bne_Un (Label target) => new CodeInstruction(OpCodes.Bne_Un,  target);
         public static CodeInstruction Br     (Label target) => new CodeInstruction(OpCodes.Br,      target);
