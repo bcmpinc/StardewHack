@@ -1,5 +1,5 @@
 ﻿using StardewModdingAPI;
-using Harmony;
+using HarmonyLib;
 using System.Collections.Generic;
 
 namespace StardewHack.Library
@@ -13,7 +13,7 @@ namespace StardewHack.Library
     
         public override void Entry(IModHelper helper) {
             // Check versions
-            var harmony_version = typeof(HarmonyInstance).Assembly.GetName().Version;
+            var harmony_version = typeof(Harmony).Assembly.GetName().Version;
             Monitor.Log($"Loaded StardewHack library v{ModManifest.Version} using Harmony v{harmony_version}.", LogLevel.Info);
             if (harmony_version < new System.Version(1,2,0,1)) {
                 Monitor.Log($"Expected Harmony v1.2.0.1 or later. Mods that depend on StardewHack might not work correctly.", LogLevel.Warn);

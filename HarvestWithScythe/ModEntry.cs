@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Netcode;
 using StardewModdingAPI;

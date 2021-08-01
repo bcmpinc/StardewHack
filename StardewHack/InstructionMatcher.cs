@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 
 namespace StardewHack
 {

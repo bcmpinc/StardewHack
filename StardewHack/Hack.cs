@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using System;
@@ -22,7 +22,7 @@ namespace StardewHack
         /// <summary>
         /// The harmony instance used for patching. 
         /// </summary>
-        public HarmonyInstance harmony { get; private set; }
+        public Harmony harmony { get; private set; }
 
         /// <summary>
         /// The method being patched. 
@@ -48,7 +48,7 @@ namespace StardewHack
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
             Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
-            harmony = HarmonyInstance.Create(UniqueID);
+            harmony = new Harmony(UniqueID);
         }
         
         public abstract void HackEntry(IModHelper helper);
