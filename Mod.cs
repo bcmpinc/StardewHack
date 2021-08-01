@@ -178,7 +178,7 @@ namespace BiggerBackpack
             );
             code.Extend(
                 Instructions.Ldstr("Backpack"),
-                InstructionMatcher.AnyOf(OpCodes.Call, OpCodes.Callvirt),
+                OpCodes.Call,
                 OpCodes.Br
             );
             var len = code.length;
