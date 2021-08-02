@@ -46,3 +46,5 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Added integration for [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098).
 * Add 64-bit support
 
+#### 5.0
+* Updated to use Harmony 2.1 and support SMAPI 3.12
