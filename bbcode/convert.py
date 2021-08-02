@@ -10,6 +10,9 @@ for f in files:
     with open(f) as file:
         text = file.read()
 
+    # Merge whitespace
+    text = re.sub("  +", " ", text)
+
     # Convert links
     text = re.sub("\[(.+?)\]\((.+?)\)", "[url=\\2]\\1[/url]", text)
 
