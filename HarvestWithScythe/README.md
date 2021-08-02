@@ -6,7 +6,7 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 ## Config
 *Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.*
 
-* `HarvestMode`: Valid values are: `HAND` (only pluckable), `SCYTHE` (only scythable), `BOTH` (both pluckable and scythable).
+* `HarvestMode`: Valid values are: `HAND` (only pluckable), `SCYTHE` (only scythable), `BOTH` (both pluckable and scythable), `GOLD` (both pluckable and scythable, but only with the golden scythe).
   * `Flowers`: How flowers can be harvested. Default = BOTH.
   * `Forage`:  How forage can be harvested (Setting this to HAND disables all patches related to handling forage). Default = BOTH.
   * `SpringOnion`: How spring onions can be harvested. Default = BOTH.

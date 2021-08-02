@@ -10,9 +10,6 @@ for f in files:
     with open(f) as file:
         text = file.read()
 
-    # Merge whitespace
-    text = re.sub("  +", " ", text)
-
     # Convert links
     text = re.sub("\[(.+?)\]\((.+?)\)", "[url=\\2]\\1[/url]", text)
 
@@ -28,11 +25,16 @@ for f in files:
 
     # Convert lists
     text = re.sub("^[*](.+)", "[list]\n[*]\\1\n[/list]", text, flags=re.MULTILINE)
+    text = re.sub("^  [*](.+)", "[list]\n[list]\n[*]\\1\n[/list]\n[/list]", text, flags=re.MULTILINE)
+    text = re.sub("\[/list\]\n\[list\]\n", "", text)
     text = re.sub("\[/list\]\n\[list\]\n", "", text)
 
     # Remove extraneous line breaks
     text = re.sub("\n+\[list\]", "[list]", text)
     text = re.sub("\[/list\]\n+", "[/list]", text)
+
+    # Merge whitespace
+    text = re.sub("  +", " ", text)
 
     with open(name+".txt", "w") as file:
         file.write(text)
