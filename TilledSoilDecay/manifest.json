@@ -1,7 +1,7 @@
 ﻿{
    "Name": "Tilled Soil Decay",
    "Author": "bcmpinc",
-   "Version": "5.0",
+   "Version": "6.0",
    "Description": "Delays decay of watered tilled soil.",
    "UniqueID": "bcmpinc.TilledSoilDecay",
    "EntryDll": "TilledSoilDecay.dll",
@@ -9,6 +9,6 @@
    "UpdateKeys": ["Nexus:2738"],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",
-      "MinimumVersion": "4.0"
+      "MinimumVersion": "6.0"
    }]
 }
