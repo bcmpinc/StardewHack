@@ -37,7 +37,7 @@ namespace StardewHack.Library
         public void CheckIncompatible(IModHelper helper, string uniqueID, SemanticVersion version) {
             var mod = helper.ModRegistry.Get(uniqueID);
             if (mod != null && mod.Manifest.Version.IsOlderThan(version)) {
-                this.Monitor.Log($"Mod '{mod.Manifest.Name}' v{mod.Manifest.Version} is outdated. This will likely cause problems. Please update '{mod.Manifest.Name}' to at least v{version}.", LogLevel.Error);
+                Monitor.Log($"Mod '{mod.Manifest.Name}' v{mod.Manifest.Version} is outdated. This will likely cause problems. Please update '{mod.Manifest.Name}' to at least v{version}.", LogLevel.Error);
             }
         }
 
@@ -60,7 +60,8 @@ namespace StardewHack.Library
 
             // The message is a list containing a single string.
             var dialogue = new List<string>() {
-                "StardewHack failed to apply some bytecode patches. The following mods won't work correctly or at all: " +
+                "StardewHack v" + ModManifest.Version +
+                " failed to apply some bytecode patches. The following mods won't work correctly or at all: " +
                 mod_list.Join() +
                 ". Check your console or error log for further instructions."
             };
