@@ -271,13 +271,28 @@ namespace StardewHack.HarvestWithScythe
         // Support harvesting of spring onions with scythe
         private void Crop_harvest_support_spring_onion(LocalBuilder var_vector) {
             if (config.HarvestMode.SpringOnion == HarvestModeEnum.HAND) return;
-            
+
             // Note: the branch
             //   if (this.forageCrop)
             // refers mainly to the crop spring union.
-            
+
+            InstructionMatcher addItemToInventoryBool = Instructions.Callvirt(typeof(Farmer), nameof(Farmer.addItemToInventoryBool), typeof(Item), typeof(bool));
+
+            if (helper.ModRegistry.IsLoaded("spacechase0.MoreRings")) {
+                try {
+                    addItemToInventoryBool = InstructionMatcher.AnyOf(
+                        addItemToInventoryBool,
+                        Instructions.Callvirt(AccessTools.TypeByName("MoreRings.Patches.CropPatcher"), "Farmer_AddItemToInventoryBool", typeof(Farmer), typeof(Item), typeof(bool))
+                    );
+                } catch (Exception e) {
+                    Monitor.Log("The More Rings mod was loaded, but MoreRings.Patches.CropPatcher.Farmer_AddItemToInventoryBool(...) was not found.");
+                    LogException(e, LogLevel.Warn);
+                }
+            }
+
             // Find the lines:
-            var AddItem = FindCode(
+            InstructionRange AddItem;
+            AddItem = FindCode(
                 // if (Game1.player.addItemToInventoryBool (@object, false)) {
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 InstructionMatcher.AnyOf( // @object
@@ -285,7 +300,7 @@ namespace StardewHack.HarvestWithScythe
                     OpCodes.Ldloc_1
                 ),
                 OpCodes.Ldc_I4_0,
-                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.addItemToInventoryBool), typeof(Item), typeof(bool)),
+                addItemToInventoryBool,
                 OpCodes.Brfalse
             );
             
