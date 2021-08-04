@@ -47,4 +47,8 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Add 64-bit support
 
 #### 5.0
+* StardewHack 5.0 is cursed and does not exist.
+
+#### 5.1
 * Updated to use Harmony 2.1 and support SMAPI 3.12
+* Fixes the `System.InvalidOperationException: Late bound operations cannot be performed on types or methods for which ContainsGenericParameters is true.` issue.
