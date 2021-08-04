@@ -22,6 +22,8 @@ This mod requires the following mods to be installed:
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
+* You cannot get golden walnuts on Ginger Island by harvesting crops using the scythe. 
+
 ## Changes
 #### 0.3:
 * Removed dependecy on FixScytheExp. The bug patched by that mod has been fixed in StardewValley 1.3.25.
