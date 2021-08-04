@@ -55,6 +55,7 @@ namespace StardewHack
 
         private bool broken = false;
 
+        abstract internal MethodInfo getApplyPatchProxy(string UniqueID);
 
         /// <summary>
         /// Applies the methods annotated with BytecodePatch defined in this class. 
@@ -72,7 +73,7 @@ namespace StardewHack
 
             // Apply the registered patches.
             // Any patched that are added by calls to ChainPatch during patching will be applied as well.
-            var apply = AccessTools.Method(typeof(HackBase), nameof(ApplyPatch));
+            var apply = getApplyPatchProxy(UniqueID);
             while (to_be_patched.Count > 0) {
                 var method = to_be_patched.Pop();
                 try {
@@ -196,7 +197,7 @@ namespace StardewHack
         /// <summary>
         /// Called by harmony to apply a patch. 
         /// </summary> 
-        private IEnumerable<CodeInstruction> ApplyPatch(MethodBase original, ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
+        public IEnumerable<CodeInstruction> ApplyPatch(MethodBase original, ILGenerator generator, IEnumerable<CodeInstruction> instructions) {
             // Set the patch's references to this method's arguments.
             this.original = original;
             this.generator = generator;
@@ -230,10 +231,12 @@ namespace StardewHack
     // This pattern is used to have a separate static instance variable per type T.
     public abstract class HackImpl<T> : HackBase where T : HackImpl<T>
     {
+        internal readonly static ModuleBuilder ProxyModule = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("StardewHack.Proxies"), AssemblyBuilderAccess.Run).DefineDynamicModule("StardewHack.Proxies");
+
         /// <summary>
         /// A reference to this class's instance. 
         /// </summary>
-        static T instance;
+        internal static T instance;
 
         protected HackImpl() {
             instance = (T)this;
@@ -242,6 +245,28 @@ namespace StardewHack
         /// Returns the used instance of this class.
         public static T getInstance() {
             return instance;
+        }
+
+        internal override MethodInfo getApplyPatchProxy(string UniqueID) {
+            MethodInfo instance = AccessTools.Method(GetType(), nameof(getInstance));
+            MethodInfo apply = AccessTools.Method(typeof(HackBase), nameof(ApplyPatch));
+            string className = UniqueID.Replace('.', '_') + "_proxy";
+            string methodName = "ApplyPatch";
+
+            TypeBuilder typeBuilder = ProxyModule.DefineType(className);
+                MethodBuilder methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, apply.ReturnType, apply.GetParameters().Types());
+
+            if (apply.GetParameters().Length != 3) throw new InvalidOperationException("StardewHack cannot build patch proxy.");
+            ILGenerator il = methodBuilder.GetILGenerator();
+            il.Emit(OpCodes.Call, instance);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldarg_2);
+            il.Emit(OpCodes.Call, apply);
+            il.Emit(OpCodes.Ret);
+
+            Type t = typeBuilder.CreateType();
+            return AccessTools.Method(t, methodName);
         }
     }
 #pragma warning restore RECS0108 // Warns about static fields in generic types
