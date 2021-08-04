@@ -47,3 +47,4 @@ Thumbs.db
 /zip-files/*.zip
 /bbcode/*.txt
 
+*.lnk
