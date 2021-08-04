@@ -122,13 +122,13 @@ namespace StardewHack.HarvestWithScythe
                 " · Scythe: only scythable;\n" +
                 " · Both: both pluckable and scythable;\n" +
                 " · Gold: like 'both', but requires the golden scythe.";
+            api.RegisterLabel(ModManifest, "HarvestMode", null);
             api.RegisterParagraph(ModManifest, options_desc);
             api.RegisterChoiceOption(ModManifest, "Flowers", "How flowers can be harvested.", () => writeEnum(config.HarvestMode.Flowers), (string val) => config.HarvestMode.Flowers = parseEnum(val), options);
             api.RegisterChoiceOption(ModManifest, "Forage", "How forage can be harvested.", () => writeEnum(config.HarvestMode.Forage), (string val) => config.HarvestMode.Forage = parseEnum(val), options);
             api.RegisterChoiceOption(ModManifest, "SpringOnion", "How spring onions can be harvested.", () => writeEnum(config.HarvestMode.SpringOnion), (string val) => config.HarvestMode.SpringOnion = parseEnum(val), options);
             api.RegisterChoiceOption(ModManifest, "PluckableCrops", "How crops that normally can only be harvested by hand can be harvested.", () => writeEnum(config.HarvestMode.PluckableCrops), (string val) => config.HarvestMode.PluckableCrops = parseEnum(val), options);
             api.RegisterChoiceOption(ModManifest, "ScythableCrops", "How crops that normally can only be harvested with a scythe can be harvested.", () => writeEnum(config.HarvestMode.ScythableCrops), (string val) => config.HarvestMode.ScythableCrops = parseEnum(val), options);
-            api.RegisterLabel(ModManifest, "HarvestMode", null);
         }
 
         static bool getHarvestWithSword() {

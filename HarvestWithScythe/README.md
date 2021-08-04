@@ -63,3 +63,6 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Added option to allow harvesting with sword.
 * Add 64-bit support.
 * Fix issue with harvesting forage using the [Tractor Mod](https://www.nexusmods.com/stardewvalley/mods/1401).
+
+#### 5.1
+* Fix issue with swinging scythe when trying to pickup eggs.
