@@ -4,7 +4,7 @@
     <AssemblyName>HarvestWithScythe</AssemblyName>
     <RootNamespace>StardewHack.HarvestWithScythe</RootNamespace>
     <Version>4.0</Version>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 
     <EnableHarmony>true</EnableHarmony>
@@ -14,7 +14,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Any CPU' " />
 
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.4.0-beta.20210813" />
   </ItemGroup>
 
   <ItemGroup>
