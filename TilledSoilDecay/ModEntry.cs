@@ -22,10 +22,10 @@ namespace StardewHack.TilledSoilDecay
             Delay = 2
         };
 
-        /** Chance that tilled soil will disappear during the night before the first day of the month. Normally this is the same as on other days. */
+        /** How soil decays on the farm (and maps that have the `ClearEmptyDirtOnNewMonth` property) during nights between seasons. This is in addition to the normal decay. Normally this is 0.8 (=80%). */
         public DecayConfig EachSeason = new DecayConfig() {
-            DryingRate = 0.5,
-            Delay = 2
+            DryingRate = 1.0,
+            Delay = 1
         };
 
         /** Chance that tilled soil will disappear inside the greenhouse. Normally this is 1.0 (=100%). */
@@ -51,6 +51,7 @@ namespace StardewHack.TilledSoilDecay
     {
         public override void HackEntry(IModHelper helper) {
             Patch((Farm f) => f.DayUpdate(0), Farm_DayUpdate);
+            Patch((GameLocation gl) => gl.HandleGrassGrowth(1), GameLocation_HandleGrassGrowth);
             Patch((StardewValley.Locations.IslandWest iw) => iw.DayUpdate(0), IslandWest_DayUpdate);
             Patch((HoeDirt hd) => hd.dayUpdate(null, new Vector2()), HoeDirt_dayUpdate);
             Patch((GameLocation gl) => gl.DayUpdate(0), GameLocation_DayUpdate);
@@ -58,11 +59,11 @@ namespace StardewHack.TilledSoilDecay
 
         protected override void InitializeApi(GenericModConfigMenuAPI api)
         {
-            api.RegisterLabel(ModManifest, "Each night", "How soil decays every night, except the nights between seasons");
+            api.RegisterLabel(ModManifest, "Each night", "How soil decays every night");
             api.RegisterClampedOption(ModManifest, "Drying Rate", "Chance that tilled soil will disappear. Normally this is 0.1 (=10%).", () => (float)config.EachNight.DryingRate, (float val) => config.EachNight.DryingRate = val, 0.0f, 1.0f);
             api.RegisterClampedOption(ModManifest, "Delay", "Number of consecutive days that the patch must have been without water, before it can disappear during the night.", () => config.EachNight.Delay, (int val) => config.EachNight.Delay = val, 0, 4);
-            api.RegisterLabel(ModManifest, "Each Season", "How soil decays the night between seasons");
-            api.RegisterClampedOption(ModManifest, "Drying Rate", "Chance that tilled soil will disappear. Normally this is 0.1 (=10%).", () => (float)config.EachSeason.DryingRate, (float val) => config.EachSeason.DryingRate = val, 0.0f, 1.0f);
+            api.RegisterLabel(ModManifest, "Each Season", "How soil decays on the farm (and maps that have the `ClearEmptyDirtOnNewMonth` property) during nights between seasons");
+            api.RegisterClampedOption(ModManifest, "Drying Rate", "Chance that tilled soil will disappear. Normally this is 0.8 (=80%).", () => (float)config.EachSeason.DryingRate, (float val) => config.EachSeason.DryingRate = val, 0.0f, 1.0f);
             api.RegisterClampedOption(ModManifest, "Delay", "Number of consecutive days that the patch must have been without water, before it can disappear during the night.", () => config.EachSeason.Delay, (int val) => config.EachSeason.Delay = val, 0, 4);
             api.RegisterLabel(ModManifest, "Greenhouse", "How soil decays inside the greenhouse");
             api.RegisterClampedOption(ModManifest, "Drying Rate", "Chance that tilled soil will disappear. Normally this is 1.0 (=100%).", () => (float)config.Greenhouse.DryingRate, (float val) => config.Greenhouse.DryingRate = val, 0.0f, 1.0f);
@@ -75,17 +76,9 @@ namespace StardewHack.TilledSoilDecay
             api.RegisterClampedOption(ModManifest, "Delay", "Number of consecutive days that the patch must have been without water, before it can disappear during the night.", () => config.NonFarm.Delay, (int val) => config.NonFarm.Delay = val, 0, 4);
         }
 
-        public static ModConfig.DecayConfig getFarmConfig(int dayOfMonth) {
-            if (dayOfMonth == 1) {
-                return getConfig().EachSeason;
-            } else {
-                return getConfig().EachNight;
-            }
-        }
-
         void Farm_DayUpdate() {
-            // var hdv = generator.DeclareLocal(typeof(HoeDirt));
-            
+            var hdv = generator.DeclareLocal(typeof(HoeDirt));
+
             // Inject code to check if soil is sufficiently dried out.
             var DayUpdate = FindCode(
                 // if (!terrainFeatures[key] is HoeDirt)
@@ -97,23 +90,26 @@ namespace StardewHack.TilledSoilDecay
                 OpCodes.Brfalse
             );
 
-            DayUpdate.Append(
+            DayUpdate.Replace(
                 // if (terrainFeatures[key] as HoeDirt).state > -ModConfig.DecayConfig.getFarmConfig(dayOfMonth).DryingDelay
                 DayUpdate[0],
                 DayUpdate[1],
                 DayUpdate[2],
                 DayUpdate[3],
                 DayUpdate[4],
+                Instructions.Stloc_S(hdv),
+                Instructions.Ldloc_S(hdv),
+                DayUpdate[5],
 
+                Instructions.Ldloc_S(hdv),
                 Instructions.Ldfld(typeof(HoeDirt), nameof(HoeDirt.state)),
                 Instructions.Call_get(typeof(NetInt), nameof(NetInt.Value)),
-                Instructions.Ldarg_1(),
-                Instructions.Call(GetType(), nameof(getFarmConfig), typeof(int)),
+                Instructions.Call(GetType(), nameof(getConfig)),
+                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.EachNight)),
                 Instructions.Ldfld(typeof(ModConfig.DecayConfig), nameof(ModConfig.DecayConfig.Delay)),
                 Instructions.Neg(),
                 Instructions.Bgt((Label)DayUpdate[5].operand)
             );
-
 
             DayUpdate = DayUpdate.FindNext(
                 // Game1.random.NextDouble() <= 0.1
@@ -127,18 +123,58 @@ namespace StardewHack.TilledSoilDecay
                 DayUpdate[1],
 
                 // Set Decay Rate
-                Instructions.Ldarg_1(),
-                Instructions.Call(GetType(), nameof(getFarmConfig), typeof(int)),
+                Instructions.Call(GetType(), nameof(getConfig)),
+                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.EachNight)),
+                Instructions.Ldfld(typeof(ModConfig.DecayConfig), nameof(ModConfig.DecayConfig.DryingRate))
+            );
+        }
+
+        void GameLocation_HandleGrassGrowth() {
+            var hdv = generator.DeclareLocal(typeof(HoeDirt));
+            var DayUpdate = FindCode(
+                // is HoeDirt
+                Instructions.Isinst(typeof(HoeDirt)),
+                // .crop == null
+                Instructions.Callvirt_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                OpCodes.Brtrue,
+
+                // Game1.random.NextDouble() <= 0.8
+                Instructions.Ldsfld(typeof(Game1), nameof(Game1.random)),
+                OpCodes.Callvirt,
+                OpCodes.Ldc_R8
+            );
+            DayUpdate.Replace(
+                DayUpdate[0],
+                Instructions.Stloc_S(hdv),
+                Instructions.Ldloc_S(hdv),
+
+                // Inject && state <= -delay
+                Instructions.Ldfld(typeof(HoeDirt), nameof(HoeDirt.state)),
+                Instructions.Call_get(typeof(NetInt), nameof(NetInt.Value)),
+                Instructions.Call(GetType(), nameof(getConfig)),
+                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.EachSeason)),
+                Instructions.Ldfld(typeof(ModConfig.DecayConfig), nameof(ModConfig.DecayConfig.Delay)),
+                Instructions.Neg(),
+                Instructions.Bgt((Label)DayUpdate[2].operand),
+
+                Instructions.Ldloc_S(hdv),
+                DayUpdate[1],
+                DayUpdate[2],
+
+                // Game1.random.NextDouble() <= getConfig().EachSeason.DryingRate
+                DayUpdate[3],
+                DayUpdate[4],
+                // Set Decay Rate
+                Instructions.Call(GetType(), nameof(getConfig)),
+                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.EachSeason)),
                 Instructions.Ldfld(typeof(ModConfig.DecayConfig), nameof(ModConfig.DecayConfig.DryingRate))
             );
         }
 
         void IslandWest_DayUpdate() {
-            var DayUpdate = BeginCode();
-
             var hdv = generator.DeclareLocal(typeof(HoeDirt));
 
-            DayUpdate = DayUpdate.FindNext(
+            var DayUpdate = FindCode(
                 // is HoeDirt
                 Instructions.Isinst(typeof(HoeDirt)),
                 // .crop == null
