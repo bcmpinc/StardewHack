@@ -8,10 +8,11 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Objects;
 using StardewHack;
 using StardewValley.Locations;
+using StardewModdingAPI.Events;
 
 namespace BiggerBackpack
 {
-    public class Mod : Hack<Mod>, IAssetEditor, IAssetLoader
+    public class Mod : Hack<Mod>
     {
         public static Mod instance;
 
@@ -21,7 +22,8 @@ namespace BiggerBackpack
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void HackEntry(IModHelper helper)
         {
-            bigBackpack = Helper.Content.Load<Texture2D>("LooseSprites/BiggerBackpack", ContentSource.GameContent);
+            bigBackpack = Helper.ModContent.Load<Texture2D>("LooseSprites/BiggerBackpack");
+            helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
             
@@ -502,37 +504,17 @@ namespace BiggerBackpack
 #endregion
 
 #region Assets
-        bool IAssetEditor.CanEdit<T>(IAssetInfo asset)
+        private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (asset.AssetNameEquals("LooseSprites/JunimoNote")) {
-                return true;
+            if (e.Name.IsEquivalentTo("LooseSprites/JunimoNote"))
+            {
+                e.Edit(asset => {
+                    var editor = asset.AsImage();
+                    var junimoNote  = Helper.ModContent.Load<IRawTextureData>("JunimoNote.png");
+                    // 344,28 - 121x127
+                    editor.PatchImage(junimoNote, targetArea: new Rectangle(344, 28, 121, 127));
+                });
             }
-            return false;
-        }
-
-        void IAssetEditor.Edit<T>(IAssetData asset)
-        {
-            if (asset.AssetNameEquals("LooseSprites/JunimoNote")) {
-                var junimoNote  = Helper.Content.Load<Texture2D>("JunimoNote.png");
-                // 344,28 - 121x127
-                asset.AsImage().PatchImage(junimoNote, targetArea: new Rectangle(344, 28, 121, 127));
-            }
-        }
-
-        bool IAssetLoader.CanLoad<T>(IAssetInfo asset)
-        {
-            if (asset.AssetNameEquals("LooseSprites/BiggerBackpack")) {
-                return true;
-            }
-            return false;
-        }
-
-        T IAssetLoader.Load<T>(IAssetInfo asset)
-        {
-            if (asset.AssetNameEquals("LooseSprites/BiggerBackpack")) {
-                return Helper.Content.Load<T>("backpack.png", ContentSource.ModFolder);
-            }
-            throw new System.ArgumentException("BiggerBackpack cannot load asset for " + asset.AssetName);
         }
 #endregion
     }
