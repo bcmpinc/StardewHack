@@ -54,7 +54,18 @@ namespace StardewHack.WearMoreRings
         }
 
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
-            api.AddNumberOption(mod: ModManifest, name: () => "Rings", tooltip: () => "How many ring slots are available.", getValue: () => config.Rings, setValue: (int val) => {config.Rings = val; container.limitSize(val);}, min: 2, max: 20);
+            api.AddNumberOption(
+                mod: ModManifest, 
+                name: () => "Rings", 
+                tooltip: () => "How many ring slots are available.", 
+                getValue: () => config.Rings, 
+                setValue: (int val) => {
+                    config.Rings = val; 
+                    if (container != null) container.limitSize(val);
+                },
+                min: 2, 
+                max: 20
+            );
         }
 
         public void ResetModifiers() {
