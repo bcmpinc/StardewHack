@@ -9,10 +9,16 @@ using StardewValley.Objects;
 using StardewHack;
 using StardewValley.Locations;
 using StardewModdingAPI.Events;
+using GenericModConfigMenu;
 
 namespace BiggerBackpack
 {
-    public class Mod : Hack<Mod>
+    public class ModConfig {
+        /** How much you have to pay to buy this backpack in the shop. (default = 50000).*/
+        public int BackpackCost = 50000;
+    }
+    
+    public class Mod : HackWithConfig<Mod,ModConfig>
     {
         public static Mod instance;
 
@@ -163,7 +169,7 @@ namespace BiggerBackpack
 #region Buy Backpack
         static public void clickBackpack()
         {
-            Response yes = new Response("Purchase", "Purchase (50,000g)");
+            Response yes = new Response("Purchase", string.Format("Purchase ({0:N0}g)", getBackpackCost()));
             Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
             Response[] resps = new Response[] { yes, no };
             Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "Backpack");
@@ -197,11 +203,13 @@ namespace BiggerBackpack
         }
 
         static void buyBackpack() {
-            Game1.player.Money -= 50000;
+            Game1.player.Money -= getBackpackCost();
             Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = "Premium Pack" }, true);
             Game1.player.increaseBackpackSize(12);
             // Game1.multiplayer.globalChatInfoMessage ("BackpackDeluxe", Game1.player.Name);
         }
+
+        public static int getBackpackCost() => getInstance().config.BackpackCost;
         
         // Inject code for rendering the larger backpack when picked up.
         void GameLocation_answerDialogueAction() {
@@ -221,10 +229,10 @@ namespace BiggerBackpack
                 code[2],
                 Instructions.Ldc_I4_S(48),
                 Instructions.Bge(AttachLabel(get_player)),
-                //   && Game1.player.Money >= 50000) {
+                //   && Game1.player.Money >= Mod.getBackpackCost()) {
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.Money)),
-                Instructions.Ldc_I4(50000),
+                Instructions.Call(GetType(), nameof(getBackpackCost)),
                 Instructions.Blt(AttachLabel(get_player)),
                 //   buyBackpack();
                 Instructions.Call(typeof(Mod), nameof(Mod.buyBackpack)),
@@ -515,6 +523,19 @@ namespace BiggerBackpack
                     editor.PatchImage(junimoNote, targetArea: new Rectangle(344, 28, 121, 127));
                 });
             }
+        }
+#endregion
+
+#region Config
+        protected override void InitializeApi(IGenericModConfigMenuApi api) {
+            api.AddNumberOption(
+                mod: ModManifest, 
+                name: () => "Backpack cost", 
+                tooltip: () => "How much you have to pay to buy this backpack in the shop.", 
+                getValue: () => config.BackpackCost, 
+                setValue: (int val) => config.BackpackCost = val,
+                min: 0
+            );
         }
 #endregion
     }
