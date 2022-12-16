@@ -37,7 +37,7 @@ namespace StardewHack.WearMoreRings
             // Load data from mod's save file, if available.
             var savedata = helper.Data.ReadSaveData<OldSaveRingsDict>("extra-rings");
             if (savedata == null) {
-                monitor.Log("Old save data not available.");
+                monitor.Log("Deprecated save data not available.");
                 return;
             }
             
@@ -98,7 +98,7 @@ namespace StardewHack.WearMoreRings
             // Try to destroy the chest.
             if (DestroyChest(monitor, id)) return;
 
-            monitor.Log("Chest went missing!", LogLevel.Error);
+            monitor.Log("Chest went missing!", LogLevel.Warn);
         }
 
         public static void ResetModifiers(IMonitor monitor, Farmer who) {

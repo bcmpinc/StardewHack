@@ -19,18 +19,26 @@ namespace StardewHack.WearMoreRings
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public static readonly Random random = new Random();
+        public static RingMap container;
         
         public override void HackEntry(IModHelper helper) {
             if (config.Rings < 2) {
                 config.Rings = 2;
             }
-            if (config.Rings > 20) {
-                config.Rings = 20;
+            if (config.Rings > RingMap.MAX_RINGS) {
+                config.Rings = RingMap.MAX_RINGS;
                 getInstance().Monitor.Log("Rings limited to 20. You only have so many fingers... and toes.", LogLevel.Warn);
             }
         
             helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs e) => {
                 Migration.Import(Monitor, helper);
+                container = new RingMap(Game1.player);
+            };
+            helper.Events.GameLoop.Saving += (object sender, SavingEventArgs e) => {
+                container.Save();
+            };
+            helper.Events.GameLoop.ReturnedToTitle += (object sender, ReturnedToTitleEventArgs e) => {
+                container = null;
             };
             helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", (string arg1, string[] arg2) => {
                 Migration.ResetModifiers(Monitor, Game1.player);
@@ -70,8 +78,6 @@ namespace StardewHack.WearMoreRings
         }
 
         static public void AddEquipmentIcons(InventoryPage page) {
-            Chest chest = GetRingInventory(Game1.player);
-            
             int inv = Game1.player.MaxItems - 12;
             //             name            x   y   id   up   dn   lt   rt, item
             AddIcon(page, "Hat",           0,  0, 102, inv, 103,  -1, 110, Game1.player.hat.Value);
@@ -102,20 +108,8 @@ namespace StardewHack.WearMoreRings
             for (int i=0; i<max_rings; i++) {
                 String name;
                 Ring ring;
-                switch (i) {
-                    case 0:
-                        name = "Left Ring";
-                        ring = Game1.player.leftRing.Value;
-                        break;
-                    case 1:
-                        name = "Right Ring";
-                        ring = Game1.player.rightRing.Value;
-                        break;
-                    default:
-                        name = "Extra Ring " + (i-2);
-                        ring = chest.items[i-2] as Ring;
-                        break;
-                }
+                name = "Ring " + i;
+                ring = container[i];
                 var x = i/4;
                 var y = i%4;
                 AddIcon(page, name, 52+16*x, 16*y, slot_id(x,y), slot_id(x,y-1), slot_id(x,y+1), slot_id(x-1,y), slot_id(x+1,y, 105), ring);
@@ -342,23 +336,20 @@ namespace StardewHack.WearMoreRings
             }
             
             // Update inventory
-            Chest chest = GetRingInventory(Game1.player);
             switch (icon.name) {
-            case "Hat":          Game1.player.hat.Set (helditem as Hat);            break;
-            case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing); break;
-            case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing); break;
-            case "Boots":        Game1.player.boots.Set (helditem as Boots);        break;
-            case "Left Ring":    Game1.player.leftRing.Set (helditem as Ring);      break;
-            case "Right Ring":   Game1.player.rightRing.Set (helditem as Ring);     break;
-            default:
-                if (icon.name.StartsWith("Extra Ring ", StringComparison.Ordinal)) {
-                    int id = int.Parse(icon.name.Substring(11));
-                    chest.items[id] = helditem;
-                } else {
-                    getInstance().Monitor.Log ($"ERROR: Trying to fit equipment item into invalid slot '{icon.name}'", LogLevel.Error);
-                    return false;
-                }
-                break;
+                case "Hat":          Game1.player.hat.Set (helditem as Hat);            break;
+                case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing); break;
+                case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing); break;
+                case "Boots":        Game1.player.boots.Set (helditem as Boots);        break;
+                default:
+                    if (icon.name.StartsWith("Ring ", StringComparison.Ordinal)) {
+                        int id = int.Parse(icon.name.Substring(5));
+                        container[id] = helditem as Ring;
+                    } else {
+                        getInstance().Monitor.Log ($"ERROR: Trying to fit equipment item into invalid slot '{icon.name}'", LogLevel.Error);
+                        return false;
+                    }
+                    break;
             }
 
             // Equip/unequip
