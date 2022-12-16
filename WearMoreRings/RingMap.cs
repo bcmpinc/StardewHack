@@ -12,7 +12,7 @@ namespace StardewHack.WearMoreRings
         public static int MAX_RINGS = 20;
         readonly Farmer who;
         readonly int[] slot_map = new int[MAX_RINGS];
-        readonly CombinedRing container;
+        public readonly CombinedRing container;
 
         public RingMap(Farmer _who) {
             who = _who;

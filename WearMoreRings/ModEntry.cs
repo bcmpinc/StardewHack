@@ -7,6 +7,7 @@ using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace StardewHack.WearMoreRings
 {
@@ -16,7 +17,7 @@ namespace StardewHack.WearMoreRings
         public int Rings = 8;
     }
 
-    public class ModEntry : HackWithConfig<ModEntry, ModConfig>
+    public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
     {
         public static readonly Random random = new Random();
         public static RingMap container;
@@ -57,8 +58,41 @@ namespace StardewHack.WearMoreRings
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddNumberOption(mod: ModManifest, name: () => "Rings", tooltip: () => "How many ring slots are available.", getValue: () => config.Rings, setValue: (int val) => config.Rings = val, min: 2, max: 20);
         }
+
+#region API
+        public override object GetApi() {
+            return this;
+        }
         
-        #region Patch InventoryPage
+        public int CountEquippedRings(Farmer f, int which) {
+            int res = 0;
+            foreach (var r in GetAllRings(f)) {
+                if (r.GetsEffectOfRing(which)) {
+                    res++;
+                }
+            }
+            return res;
+        }
+
+        public IEnumerable<Ring> GetAllRings(Farmer f) {
+            if (f == null) throw new ArgumentNullException(nameof(f));
+            var stack = new Stack<Ring>();
+            stack.Push(f.leftRing.Value);
+            stack.Push(f.rightRing.Value);
+            while (stack.Count > 0) {
+                var ring = stack.Pop();
+                if (ring is CombinedRing) {
+                    foreach (var cr in ((CombinedRing)ring).combinedRings) {
+                        stack.Push(cr);
+                    }
+                } else {
+                    yield return ring;
+                }
+            }
+        }
+#endregion API
+        
+#region Patch InventoryPage
         static public void AddIcon(InventoryPage page, string name, int x, int y, int id, int up, int down, int left, int right, Item item) {
             var rect = new Rectangle (
                 page.xPositionOnScreen + 48 + x*4, 
@@ -459,9 +493,9 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ret()
             );
         }
-        #endregion Patch InventoryPage
+#endregion Patch InventoryPage
         
-        #region Patch Ring
+#region Patch Ring
         // Not sure how my mod uses this, but the code in the Ring constructor that generates a UniqueID seems seriously flawed.
         // It has a reasonably high probability of creating duplicates. So this patch replaces it with a number from a randomly seeded PRNG.
         void Ring_ctor() {
@@ -485,7 +519,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Call(typeof(Random), nameof(Random.Next))
             );
         }
-        #endregion Patch Ring
+#endregion Patch Ring
     }
 }
 

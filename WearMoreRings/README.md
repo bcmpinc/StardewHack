@@ -25,7 +25,13 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * This mod might be incompatible with [Multiplayer Time](https://www.nexusmods.com/stardewvalley/mods/2543). Using both will cause save game corruption. This can (hopefully) be fixed by uninstalling either of these mods. If you keep Multiplayer Time, the mod should resolve the issue automatically. If you use Wear More Rings you need to execute the `player_resetmodifiers` console command manually.
 * Ring Slots in the Inventory screen can overlap with other text in the UI, especially with a high `Rings` setting. This won't be fixed.
 
+## API
+Mods adding additional rings most should work out of the box. For backwards compatiblility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
+
 ## Changes
+#### 6.1:
+* Re-added the [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
+
 #### 6.0:
 * Rewrite most of the mod for better multiplayer support. It now uses Combined Rings rather than a hidden chest for ring storage. Note that after the update you have to manually re-equip your rings.
 * Update [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098) bindings.
