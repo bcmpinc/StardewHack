@@ -31,6 +31,7 @@ Mods adding additional rings most likely will not work, unless they use this mod
 
 ## Changes
 #### 6.0:
+* Update [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098) bindings.
 * Added `world_destroyringchests` command to recreate the rings chests and possibly recover lost rings.
 
 #### 4.0:

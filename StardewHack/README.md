@@ -25,7 +25,6 @@ This library is used by the following mods:
 
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
-* StardewHack has been built on Linux and therefore needs rewriting to work on Windows. SMAPI does this automatically, however if during startup Stardew Valley hangs on `Loading StardewHack.dll (rewritten in memory)...`, this is probably due to your virus scanner preventing SMAPI from doing so.
 
 ## Changes
 #### 6.0:
