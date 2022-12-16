@@ -28,7 +28,7 @@ namespace BiggerBackpack
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void HackEntry(IModHelper helper)
         {
-            bigBackpack = Helper.ModContent.Load<Texture2D>("LooseSprites/BiggerBackpack");
+            bigBackpack = Helper.ModContent.Load<Texture2D>("backpack.png");
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
