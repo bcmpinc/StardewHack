@@ -108,7 +108,7 @@ namespace StardewHack.WearMoreRings
                     foreach (var cr in ((CombinedRing)ring).combinedRings) {
                         stack.Push(cr);
                     }
-                } else {
+                } else if (ring != null) {
                     yield return ring;
                 }
             }
