@@ -34,7 +34,7 @@ namespace StardewHack.WearMoreRings
                     if (!Array.Exists(slot_map, val => val == i)) {
                         ModEntry.getInstance().Monitor.Log("Ring "+i+" missing from slot_map", StardewModdingAPI.LogLevel.Warn);
                         var new_pos = Array.FindIndex(slot_map, val => val < 0);
-                        if (i >= 0) {
+                        if (new_pos >= 0) {
                             slot_map[new_pos] = i;
                         } else {
                             ModEntry.getInstance().Monitor.Log("Failed to insert ring "+i, StardewModdingAPI.LogLevel.Error);
@@ -47,6 +47,20 @@ namespace StardewHack.WearMoreRings
                 this[1] = who.rightRing.Value;
                 who.leftRing.Value = container;
                 who.rightRing.Value = null;
+            }
+        }
+
+        /// <summary>
+        /// Drop all rings in slots numbered `capacity` or above.
+        /// </summary>
+        /// <param name="capacity"></param>
+        public void limitSize(int capacity) {
+            for (int i=capacity; i<slot_map.Length; i++) {
+                if (slot_map[i] >= 0) { 
+                    this[i].onUnequip(Game1.player, Game1.player.currentLocation);
+                    Utility.CollectOrDrop(this[i]);
+                    this[i] = null;
+                }
             }
         }
 
@@ -75,6 +89,13 @@ namespace StardewHack.WearMoreRings
                     }
                 }
             }
+        }
+
+        public bool AddRing(Ring r) {
+            var new_pos = Array.FindIndex(slot_map, val => val < 0);
+            if (new_pos < 0) return false;
+            this[new_pos] = r;
+            return true;
         }
 
         public bool Load() {

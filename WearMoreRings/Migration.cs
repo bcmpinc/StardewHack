@@ -20,6 +20,18 @@ namespace StardewHack.WearMoreRings
     }
     
     static class Migration {
+        static void MigrateRing(int index, Item item) {
+            if (item is Ring) {
+                var r = item as Ring;
+                if (index < ModEntry.getConfig().Rings && ModEntry.container[index] == null) {
+                    ModEntry.container[index] = r;
+                    return;
+                }
+                if (ModEntry.container.AddRing(r)) return;
+            }
+            Utility.CollectOrDrop(item);
+        }
+
 #region extra-rings-data
         static private Ring MakeRing(int which) {
             if (which < 0) return null;
@@ -46,10 +58,10 @@ namespace StardewHack.WearMoreRings
             foreach(Farmer f in Game1.getAllFarmers()) {
                 if (savedata.ContainsKey(f.UniqueMultiplayerID)) {
                     var data = savedata[f.UniqueMultiplayerID];
-                    Utility.CollectOrDrop(MakeRing(data.which1));
-                    Utility.CollectOrDrop(MakeRing(data.which2));
-                    Utility.CollectOrDrop(MakeRing(data.which3));
-                    Utility.CollectOrDrop(MakeRing(data.which4));
+                    MigrateRing(2, MakeRing(data.which1));
+                    MigrateRing(3, MakeRing(data.which2));
+                    MigrateRing(4, MakeRing(data.which3));
+                    MigrateRing(5, MakeRing(data.which4));
                 }
             }
             helper.Data.WriteSaveData<OldSaveRingsDict>("extra-rings", null);
@@ -76,7 +88,7 @@ namespace StardewHack.WearMoreRings
             var inv = (existing_chest as Chest).items;
                         
             for (var slot = 0; slot < inv.Count; slot++) {
-                Utility.CollectOrDrop(inv[slot]);
+                MigrateRing(slot + 2, inv[slot]);
                 inv[slot] = null;
             }
 
@@ -93,38 +105,11 @@ namespace StardewHack.WearMoreRings
             monitor.Log($"Farmer {farmer.Name} has old ring chest {id}.");
             farmer.modData.Remove(DATA_KEY);
 
-            ResetModifiers(monitor, farmer);
-
             // Try to destroy the chest.
             if (DestroyChest(monitor, id)) return;
 
             monitor.Log("Chest went missing!", LogLevel.Warn);
         }
-
-        public static void ResetModifiers(IMonitor monitor, Farmer who) {
-            monitor.Log("Resetting modifiers for " + who.Name);
-            who.ClearBuffs();
-
-            who.leftRing.Value?.onUnequip(who, who.currentLocation);
-            who.rightRing.Value?.onUnequip(who, who.currentLocation);
-            who.boots.Value?.onUnequip();
-            
-            who.MagneticRadius = 128;
-            who.knockbackModifier = 0;
-            who.weaponPrecisionModifier = 0;
-            who.critChanceModifier = 0;
-            who.critPowerModifier = 0;
-            who.weaponSpeedModifier = 0;
-            who.attackIncreaseModifier = 0;
-            who.resilience = 0;
-            who.addedLuckLevel.Value = 0;
-            who.immunity = 0;
-
-            who.leftRing.Value?.onEquip(who, who.currentLocation);
-            who.rightRing.Value?.onEquip(who, who.currentLocation);
-            who.boots.Value?.onEquip();
-        }
-
 
         public static void DestroyRemainingChests(IMonitor monitor) {
             int maxid = 100;

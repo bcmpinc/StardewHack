@@ -32,8 +32,10 @@ namespace StardewHack.WearMoreRings
             }
         
             helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs e) => {
-                Migration.Import(Monitor, helper);
                 container = new RingMap(Game1.player);
+                Migration.Import(Monitor, helper);
+                container.limitSize(config.Rings);
+                ResetModifiers();
             };
             helper.Events.GameLoop.Saving += (object sender, SavingEventArgs e) => {
                 container.Save();
@@ -41,12 +43,8 @@ namespace StardewHack.WearMoreRings
             helper.Events.GameLoop.ReturnedToTitle += (object sender, ReturnedToTitleEventArgs e) => {
                 container = null;
             };
-            helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", (string arg1, string[] arg2) => {
-                Migration.ResetModifiers(Monitor, Game1.player);
-            });
-            helper.ConsoleCommands.Add("world_destroyringchests", "Removes any remaining ring chests used for storing player's rings. Any items contained therein will be dropped at your feet.", (string arg1, string[] arg2) => {
-                Migration.DestroyRemainingChests(Monitor);
-            });
+            helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", (string arg1, string[] arg2) => { ResetModifiers(); });
+            helper.ConsoleCommands.Add("world_destroyringchests", "Removes any remaining ring chests used for storing player's rings. Any items contained therein will be dropped at your feet.", (string arg1, string[] arg2) => { Migration.DestroyRemainingChests(Monitor); });
             
             Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
@@ -56,7 +54,32 @@ namespace StardewHack.WearMoreRings
         }
 
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
-            api.AddNumberOption(mod: ModManifest, name: () => "Rings", tooltip: () => "How many ring slots are available.", getValue: () => config.Rings, setValue: (int val) => config.Rings = val, min: 2, max: 20);
+            api.AddNumberOption(mod: ModManifest, name: () => "Rings", tooltip: () => "How many ring slots are available.", getValue: () => config.Rings, setValue: (int val) => {config.Rings = val; container.limitSize(val);}, min: 2, max: 20);
+        }
+
+        public void ResetModifiers() {
+            var who = Game1.player;
+            Monitor.Log("Resetting modifiers for " + who.Name);
+            who.ClearBuffs();
+
+            who.leftRing.Value?.onUnequip(who, who.currentLocation);
+            who.rightRing.Value?.onUnequip(who, who.currentLocation);
+            who.boots.Value?.onUnequip();
+            
+            who.MagneticRadius = 128;
+            who.knockbackModifier = 0;
+            who.weaponPrecisionModifier = 0;
+            who.critChanceModifier = 0;
+            who.critPowerModifier = 0;
+            who.weaponSpeedModifier = 0;
+            who.attackIncreaseModifier = 0;
+            who.resilience = 0;
+            who.addedLuckLevel.Value = 0;
+            who.immunity = 0;
+
+            who.leftRing.Value?.onEquip(who, who.currentLocation);
+            who.rightRing.Value?.onEquip(who, who.currentLocation);
+            who.boots.Value?.onEquip();
         }
 
 #region API
