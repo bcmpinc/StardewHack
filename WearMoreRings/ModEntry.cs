@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using GenericModConfigMenu;
 
 namespace StardewHack.WearMoreRings
 {
@@ -27,8 +28,8 @@ namespace StardewHack.WearMoreRings
         public static readonly Random random = new Random();
         
         public override void HackEntry(IModHelper helper) {
-            if (config.Rings < 0) {
-                config.Rings = 0;
+            if (config.Rings < 2) {
+                config.Rings = 2;
             }
             if (config.Rings > 20) {
                 config.Rings = 20;
@@ -37,6 +38,7 @@ namespace StardewHack.WearMoreRings
         
             helper.Events.GameLoop.SaveLoaded += GameLoop_SaveLoaded;
             helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", HandleActionReset);
+            helper.ConsoleCommands.Add("world_destroyringchests", "Removes the chests used for storing player's rings. Any items contained therein will be dropped at your feet.", HandleDestroyChests);
             
             Patch((Farmer f)=>f.isWearingRing(0), Farmer_isWearingRing);
             Patch((Farmer f)=>f.GetEffectsOfRingMultiplier(0), Farmer_GetEffectsOfRingMultiplier);
@@ -51,8 +53,8 @@ namespace StardewHack.WearMoreRings
             Patch(()=>new Ring(0), Ring_ctor);
         }
 
-        protected override void InitializeApi(GenericModConfigMenuAPI api) {
-            api.RegisterClampedOption(ModManifest, "Rings", "How many ring slots are available.", () => config.Rings, (int val) => config.Rings = val, 0, 20);
+        protected override void InitializeApi(IGenericModConfigMenuApi api) {
+            api.AddNumberOption(mod: ModManifest, name: () => "Rings", tooltip: () => "How many ring slots are available.", getValue: () => config.Rings, setValue: (int val) => config.Rings = val, min: 2, max: 20);
         }
 
         #region API
@@ -169,6 +171,30 @@ namespace StardewHack.WearMoreRings
             ForEachRing(who, (r) => r.onEquip(who, who.currentLocation));
         }
 
+        void HandleDestroyChests(string arg1, string[] arg2) {
+            Farm farm = Game1.getFarm();
+            int maxid = 100;
+            for (int id=0; id < maxid; id++) {
+                if (farm.objects.ContainsKey(getPositionFromId(id))) {
+                    var existing_chest = farm.objects[getPositionFromId(id)];
+                    if (existing_chest is Chest) {
+                        getInstance().Monitor.Log(string.Format("Destroying ring chest with id {0}.", id), LogLevel.Trace);
+                        var inv = (existing_chest as Chest).items;
+                        maxid = id + 100;
+                        
+                        for (var slot = 0; slot < inv.Count; slot++) {
+
+                            //createItemDebris
+                        }
+
+                        farm.objects.Remove(getPositionFromId(id));
+                    }
+                }
+            }
+
+            getInstance().Monitor.Log("Ring chests destroyed. Expect one or more 'Chest went missing!' errors. These can be ignored.", LogLevel.Info);
+            ring_inventory.Clear();
+        }
 
         #endregion Events
 

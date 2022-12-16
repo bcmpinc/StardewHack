@@ -119,14 +119,14 @@ namespace GenericModConfigMenu
         /// <param name="pageId">The unique page ID.</param>
         /// <param name="pageTitle">The page title shown in its UI, or <c>null</c> to show the <paramref name="pageId"/> value.</param>
         /// <remarks>You must also call <see cref="AddPageLink"/> to make the page accessible. This is only needed to set up a multi-page config UI. If you don't call this method, all options will be part of the mod's main config UI instead.</remarks>
-        void AddPage(IManifest mod, string pageId, Func<string> pageTitle = null);
+        //void AddPage(IManifest mod, string pageId, Func<string> pageTitle = null);
 
         /// <summary>Add a link to a page added via <see cref="AddPage"/> at the current position in the form.</summary>
         /// <param name="mod">The mod's manifest.</param>
         /// <param name="pageId">The unique ID of the page to open when the link is clicked.</param>
         /// <param name="text">The link text shown in the form.</param>
         /// <param name="tooltip">The tooltip text shown when the cursor hovers on the link, or <c>null</c> to disable the tooltip.</param>
-        void AddPageLink(IManifest mod, string pageId, Func<string> text, Func<string> tooltip = null);
+        //void AddPageLink(IManifest mod, string pageId, Func<string> text, Func<string> tooltip = null);
 
 
         /****
@@ -146,32 +146,32 @@ namespace GenericModConfigMenu
         /// <param name="height">The pixel height to allocate for the option in the form, or <c>null</c> for a standard input-sized option. This is called and cached each time the form is opened.</param>
         /// <param name="fieldId">The unique field ID for use with <see cref="OnFieldChanged"/>, or <c>null</c> to auto-generate a randomized ID.</param>
         /// <remarks>The custom logic represented by the callback parameters is responsible for managing its own state if needed. For example, you can store state in a static field or use closures to use a state variable.</remarks>
-        void AddComplexOption(IManifest mod, Func<string> name, Action<SpriteBatch, Vector2> draw, Func<string> tooltip = null, Action beforeMenuOpened = null, Action beforeSave = null, Action afterSave = null, Action beforeReset = null, Action afterReset = null, Action beforeMenuClosed = null, Func<int> height = null, string fieldId = null);
+        //void AddComplexOption(IManifest mod, Func<string> name, Action<SpriteBatch, Vector2> draw, Func<string> tooltip = null, Action beforeMenuOpened = null, Action beforeSave = null, Action afterSave = null, Action beforeReset = null, Action afterReset = null, Action beforeMenuClosed = null, Func<int> height = null, string fieldId = null);
 
         /// <summary>Set whether the options registered after this point can only be edited from the title screen.</summary>
         /// <param name="mod">The mod's manifest.</param>
         /// <param name="titleScreenOnly">Whether the options can only be edited from the title screen.</param>
         /// <remarks>This lets you have different values per-field. Most mods should just set it once in <see cref="Register"/>.</remarks>
-        void SetTitleScreenOnlyForNextOptions(IManifest mod, bool titleScreenOnly);
+        //void SetTitleScreenOnlyForNextOptions(IManifest mod, bool titleScreenOnly);
 
         /// <summary>Register a method to notify when any option registered by this mod is edited through the config UI.</summary>
         /// <param name="mod">The mod's manifest.</param>
         /// <param name="onChange">The method to call with the option's unique field ID and new value.</param>
         /// <remarks>Options use a randomized ID by default; you'll likely want to specify the <c>fieldId</c> argument when adding options if you use this.</remarks>
-        void OnFieldChanged(IManifest mod, Action<string, object> onChange);
+        //void OnFieldChanged(IManifest mod, Action<string, object> onChange);
 
         /// <summary>Open the config UI for a specific mod.</summary>
         /// <param name="mod">The mod's manifest.</param>
-        void OpenModMenu(IManifest mod);
+        //void OpenModMenu(IManifest mod);
 
         /// <summary>Get the currently-displayed mod config menu, if any.</summary>
         /// <param name="mod">The manifest of the mod whose config menu is being shown, or <c>null</c> if not applicable.</param>
         /// <param name="page">The page ID being shown for the current config menu, or <c>null</c> if not applicable. This may be <c>null</c> even if a mod config menu is shown (e.g. because the mod doesn't have pages).</param>
         /// <returns>Returns whether a mod config menu is being shown.</returns>
-        bool TryGetCurrentMenu(out IManifest mod, out string page);
+        //bool TryGetCurrentMenu(out IManifest mod, out string page);
 
         /// <summary>Remove a mod from the config UI and delete all its options and pages.</summary>
         /// <param name="mod">The mod's manifest.</param>
-        void Unregister(IManifest mod);
+        //void Unregister(IManifest mod);
     }
 }
