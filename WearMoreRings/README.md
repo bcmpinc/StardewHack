@@ -26,7 +26,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Ring Slots in the Inventory screen can overlap with other text in the UI, especially with a high `Rings` setting. This won't be fixed.
 
 ## API
-Mods adding additional rings most should work out of the box. For backwards compatiblility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
+Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
 #### 6.1:
