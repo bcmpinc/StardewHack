@@ -22,17 +22,15 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 * This mod does not support android / mobile.
-* While rings from the [Giant Crop Ring](https://www.nexusmods.com/stardewvalley/mods/1182) mod can be equipped in the additional slots, their effects won't be applied. Rings from the [MoreRings](https://www.nexusmods.com/stardewvalley/mods/2054) mod, v1.0.3+ should work though.
-* This mod is incompatible with [Multiplayer Time](https://www.nexusmods.com/stardewvalley/mods/2543). Using both will cause save game corruption. This can (hopefully) be fixed by uninstalling either of these mods. If you keep Multiplayer Time, the mod should resolve the issue automatically. If you use Wear More Rings you need to execute the `player_resetmodifiers` console command manually.
-* Rings UI can overlap with other text in the UI, especially with a high `Rings` setting. This won't be fixed.
-
-## API
-Mods adding additional rings most likely will not work, unless they use this mod's provided API: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
+* This mod might be incompatible with [Multiplayer Time](https://www.nexusmods.com/stardewvalley/mods/2543). Using both will cause save game corruption. This can (hopefully) be fixed by uninstalling either of these mods. If you keep Multiplayer Time, the mod should resolve the issue automatically. If you use Wear More Rings you need to execute the `player_resetmodifiers` console command manually.
+* Ring Slots in the Inventory screen can overlap with other text in the UI, especially with a high `Rings` setting. This won't be fixed.
 
 ## Changes
 #### 6.0:
+* Rewrite most of the mod for better multiplayer support. It now uses Combined Rings rather than a hidden chest for ring storage. Note that after the update you have to manually re-equip your rings.
 * Update [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098) bindings.
-* Added `world_destroyringchests` command to recreate the rings chests and possibly recover lost rings.
+* Added `world_destroyringchests` command to destroy any remaining old rings chests.
+* Removed the API as it's no longer needed.
 
 #### 4.0:
 * Added integration for [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098).
