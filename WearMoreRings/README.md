@@ -31,6 +31,8 @@ Mods adding additional rings most should work out of the box. For backwards comp
 ## Changes
 #### 6.1:
 * Re-added the [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
+* Rings no longer drop during migration.
+* If the player has rings in slots that are not accessible due to a lower ring capacity, these rings are dropped.
 
 #### 6.0:
 * Rewrite most of the mod for better multiplayer support. It now uses Combined Rings rather than a hidden chest for ring storage. Note that after the update you have to manually re-equip your rings.
