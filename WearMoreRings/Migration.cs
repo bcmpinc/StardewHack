@@ -119,6 +119,23 @@ namespace StardewHack.WearMoreRings
                 }
             }
         }
+        #endregion
+
+#region NestedRings
+        static public void DismantleNestedRings(IMonitor monitor) {
+            var c = ModEntry.container;
+            for (int i=0; i<RingMap.MAX_RINGS; i++) {
+                if (c[i] is CombinedRing) {
+                    var cr = c[i] as CombinedRing;
+                    if (cr.combinedRings.Count != 2 || cr.combinedRings[0] is CombinedRing || cr.combinedRings[1] is CombinedRing) {
+                        c[i] = null;
+                        foreach (var ring in cr.combinedRings) {
+                            MigrateRing(i, ring);
+                        }
+                    }
+                }
+            }
+        }
 #endregion
 
         /// <summary>
@@ -127,6 +144,7 @@ namespace StardewHack.WearMoreRings
         static public void Import(IMonitor monitor, IModHelper helper) {
             ImportExtraRingsData(monitor, helper);
             ImportRingChest(monitor);
+            DismantleNestedRings(monitor);
         }
     }
 }

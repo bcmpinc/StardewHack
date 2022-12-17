@@ -21,7 +21,7 @@ namespace StardewHack.WearMoreRings
     {
         public static readonly Random random = new Random();
         public static RingMap container;
-        
+
         public override void HackEntry(IModHelper helper) {
             if (config.Rings < 2) {
                 config.Rings = 2;
@@ -52,7 +52,7 @@ namespace StardewHack.WearMoreRings
             Patch((InventoryPage ip)=>ip.receiveLeftClick(0,0,false), InventoryPage_receiveLeftClick);
             Patch(()=>new Ring(0), Ring_ctor);
         }
-
+        
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddNumberOption(
                 mod: ModManifest, 
