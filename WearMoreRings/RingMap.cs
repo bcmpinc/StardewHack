@@ -48,6 +48,7 @@ namespace StardewHack.WearMoreRings
                 who.leftRing.Value = container;
                 who.rightRing.Value = null;
             }
+            Save();
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace StardewHack.WearMoreRings
             set {
                 var pos = slot_map[index];
                 if (pos < 0) {
-                    if (value == null) return;
+                    if (value == null) return; // Nothing changed.
                     slot_map[index] = container.combinedRings.Count;
                     container.combinedRings.Add(value);
                 } else {
@@ -88,6 +89,7 @@ namespace StardewHack.WearMoreRings
                         container.combinedRings[pos] = value;
                     }
                 }
+                Save();
             }
         }
 
