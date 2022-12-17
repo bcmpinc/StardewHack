@@ -20,14 +20,11 @@ namespace StardewHack.WearMoreRings
     }
     
     static class Migration {
-        static void MigrateRing(int index, Item item) {
+        static void MigrateRing(int slot_hint, Item item) {
             if (item is Ring) {
-                var r = item as Ring;
-                if (index < ModEntry.getConfig().Rings && ModEntry.container[index] == null) {
-                    ModEntry.container[index] = r;
+                if (ModEntry.container.AddRing(slot_hint, item as Ring)) {
                     return;
                 }
-                if (ModEntry.container.AddRing(r)) return;
             }
             Utility.CollectOrDrop(item);
         }

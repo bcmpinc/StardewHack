@@ -93,9 +93,14 @@ namespace StardewHack.WearMoreRings
             }
         }
 
-        public bool AddRing(Ring r) {
-            var new_pos = Array.FindIndex(slot_map, val => val < 0);
-            if (new_pos < 0) return false;
+        public bool AddRing(int slot_hint, Ring r) {
+            var new_pos = slot_hint;
+            if (slot_map[slot_hint] >= 0) {
+                // Hint already occupied, find empty slot.
+                new_pos = Array.FindIndex(slot_map, val => val < 0);
+            }
+            if (new_pos < 0 || new_pos >= ModEntry.getConfig().Rings) return false;
+            r.onEquip(Game1.player, Game1.player.currentLocation);
             this[new_pos] = r;
             return true;
         }
