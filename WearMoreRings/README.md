@@ -9,9 +9,9 @@ Configure the amount of ring slots in your inventory. By default adds 6 addition
 * `Rings`: Number of ring slots available. Normally this is 2, this mod increases it to 8. Max = 20.
 
 ## Console Commands
-* `player_resetmodifiers`: Clears buffs, then resets and reapplies the modifiers applied by boots & rings.
+* `player_dismantle_nested`: Dismantles any non-vanilla combined rings you have equipped.
+* `player_resetmodifiers`:   Clears buffs, then resets and reapplies the modifiers applied by boots & rings.
 * `world_destroyringchests`: Removes the chests used for storing player's rings. Any items contained therein will be dropped at your feet.
-
 ## Dependencies
 This mod requires the following mods to be installed:
 
@@ -29,6 +29,10 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 6.2:
+* Added `player_dismantle_nested` command to get rid of nested combined rings, prior to accessing the forge.
+* Fixed issue with re-joining in multiplayer creating nested combined rings.
+
 #### 6.1:
 * Re-added the [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 * Rings no longer drop during migration.

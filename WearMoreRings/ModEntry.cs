@@ -45,7 +45,7 @@ namespace StardewHack.WearMoreRings
             };
             helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", (string arg1, string[] arg2) => { ResetModifiers(); });
             helper.ConsoleCommands.Add("world_destroyringchests", "Removes any remaining ring chests used for storing player's rings. Any items contained therein will be dropped at your feet.", (string arg1, string[] arg2) => { Migration.DestroyRemainingChests(Monitor); });
-            helper.ConsoleCommands.Add("player_dismantle_nested", "Dismantles any non-vanilla combined rings you have equipped .", (string arg1, string[] arg2) => { Migration.DismantleNestedRings(Monitor); });
+            helper.ConsoleCommands.Add("player_dismantle_nested", "Dismantles any non-vanilla combined rings you have equipped.", (string arg1, string[] arg2) => { Migration.DismantleNestedRings(Monitor); });
             
             Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
