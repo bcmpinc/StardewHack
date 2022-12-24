@@ -9,7 +9,7 @@ Configure the amount of ring slots in your inventory. By default adds 6 addition
 * `Rings`: Number of ring slots available. Normally this is 2, this mod increases it to 8. Max = 20.
 
 ## Console Commands
-* `player_dismantle_nested`: Dismantles any non-vanilla combined rings you have equipped.
+* `player_openforge`:        Opens the forge menu.
 * `player_resetmodifiers`:   Clears buffs, then resets and reapplies the modifiers applied by boots & rings.
 * `world_destroyringchests`: Removes the chests used for storing player's rings. Any items contained therein will be dropped at your feet.
 ## Dependencies
