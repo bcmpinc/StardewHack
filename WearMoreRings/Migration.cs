@@ -22,7 +22,7 @@ namespace StardewHack.WearMoreRings
     static class Migration {
         static void MigrateRing(int slot_hint, Item item) {
             if (item is Ring) {
-                if (ModEntry.container.AddRing(slot_hint, item as Ring)) {
+                if (ModEntry.container.Value.AddRing(slot_hint, item as Ring)) {
                     return;
                 }
             }
@@ -120,7 +120,7 @@ namespace StardewHack.WearMoreRings
 
 #region NestedRings
         static public void DismantleNestedRings(IMonitor monitor) {
-            var c = ModEntry.container;
+            var c = ModEntry.container.Value;
             int counter = 0;
             for (int i=0; i<RingMap.MAX_RINGS; i++) {
                 if (c[i] is CombinedRing) {
