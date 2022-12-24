@@ -8,7 +8,7 @@ namespace StardewHack.WearMoreRings
     /// CombinedRing Wrapper which allows it to be used as a container that accepts empty slots (= null values).
     /// </summary>
     public class RingMap {
-        public const string RING_NAME = "Wear More Rings container ring";
+        public const string RING_NAME = "Wear More Rings container ring (do not touch!)";
         public const string DATA_KEY = "bcmpinc.WearMoreRings/slot-map";
         public static int MAX_RINGS = 20;
         readonly Farmer who;
@@ -78,7 +78,7 @@ namespace StardewHack.WearMoreRings
             set {
                 // Prevent recursion.
                 if (value == container || value.DisplayName == RING_NAME) {
-                    ModEntry.getInstance().Monitor.Log("Don't touch the WMR container ring please!", StardewModdingAPI.LogLevel.Warn);
+                    ModEntry.getInstance().Monitor.Log("Really, don't touch the WMR container ring please!", StardewModdingAPI.LogLevel.Warn);
                     if (who.leftRing.Value != container) {
                         Utility.CollectOrDrop(who.leftRing.Value);
                         who.leftRing.Value = value;
