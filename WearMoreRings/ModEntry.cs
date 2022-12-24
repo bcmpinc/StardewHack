@@ -95,7 +95,8 @@ namespace StardewHack.WearMoreRings
         }
 
 #region API
-        public override object GetApi() {
+        public override object GetApi(IModInfo info) {
+            Monitor.Log($"Mod {info.Manifest.Name} requested the deprecated Wear More Rings API. Since version 5.0 mods should be compatible with WMR without custom support.", LogLevel.Warn);
             return this;
         }
         
