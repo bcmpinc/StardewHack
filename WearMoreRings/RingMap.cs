@@ -8,6 +8,7 @@ namespace StardewHack.WearMoreRings
     /// CombinedRing Wrapper which allows it to be used as a container that accepts empty slots (= null values).
     /// </summary>
     public class RingMap {
+        public const string RING_NAME = "Wear More Rings container ring";
         public const string DATA_KEY = "bcmpinc.WearMoreRings/slot-map";
         public static int MAX_RINGS = 20;
         readonly Farmer who;
@@ -42,12 +43,14 @@ namespace StardewHack.WearMoreRings
                     }
                 }
             } else {
+                // Create a new combined ring for storage.
                 container = new CombinedRing(880);
                 this[0] = who.leftRing.Value;
                 this[1] = who.rightRing.Value;
                 who.leftRing.Value = container;
                 who.rightRing.Value = null;
             }
+            container.DisplayName = RING_NAME;
             Save();
         }
 
@@ -58,7 +61,7 @@ namespace StardewHack.WearMoreRings
         public void limitSize(int capacity) {
             for (int i=capacity; i<slot_map.Length; i++) {
                 if (slot_map[i] >= 0) { 
-                    this[i].onUnequip(Game1.player, Game1.player.currentLocation);
+                    this[i].onUnequip(who, who.currentLocation);
                     Utility.CollectOrDrop(this[i]);
                     this[i] = null;
                 }
@@ -73,6 +76,17 @@ namespace StardewHack.WearMoreRings
                 return container.combinedRings[pos];
             }
             set {
+                // Prevent recursion.
+                if (value == container || value.DisplayName == RING_NAME) {
+                    ModEntry.getInstance().Monitor.Log("Don't touch the WMR container ring please!", StardewModdingAPI.LogLevel.Warn);
+                    if (who.leftRing.Value != container) {
+                        Utility.CollectOrDrop(who.leftRing.Value);
+                        who.leftRing.Value = value;
+                    }
+                    return;
+                }
+
+                // Equip the ring
                 var pos = slot_map[index];
                 if (pos < 0) {
                     if (value == null) return; // Nothing changed.
@@ -100,7 +114,7 @@ namespace StardewHack.WearMoreRings
                 new_pos = Array.FindIndex(slot_map, val => val < 0);
             }
             if (new_pos < 0 || new_pos >= ModEntry.getConfig().Rings) return false;
-            r.onEquip(Game1.player, Game1.player.currentLocation);
+            r.onEquip(who, who.currentLocation);
             this[new_pos] = r;
             return true;
         }
