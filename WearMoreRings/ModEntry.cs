@@ -18,7 +18,9 @@ namespace StardewHack.WearMoreRings
         public int Rings = 8;
     }
 
+#pragma warning disable CS0618 // Type or member is obsolete
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         public static readonly Random random = new Random();
         public static readonly PerScreen<RingMap> container = new PerScreen<RingMap>();
