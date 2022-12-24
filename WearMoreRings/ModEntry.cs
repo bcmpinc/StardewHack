@@ -1,4 +1,5 @@
 ﻿using GenericModConfigMenu;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -6,8 +7,8 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
-using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace StardewHack.WearMoreRings
 {
@@ -20,7 +21,10 @@ namespace StardewHack.WearMoreRings
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
     {
         public static readonly Random random = new Random();
-        public static RingMap container;
+        public static RingMap container { 
+            get => RingMap.player_ringmap;
+            set { RingMap.player_ringmap = value; }
+        }
 
         public override void HackEntry(IModHelper helper) {
             if (config.Rings < 2) {
@@ -32,6 +36,7 @@ namespace StardewHack.WearMoreRings
             }
         
             helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs e) => {
+                getInstance().Monitor.Log($"Save loaded for {Game1.player.displayName}.", LogLevel.Alert);
                 container = new RingMap(Game1.player);
                 Migration.Import(Monitor, helper);
                 container.limitSize(config.Rings);

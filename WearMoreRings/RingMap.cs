@@ -1,6 +1,7 @@
 ﻿using StardewValley;
 using StardewValley.Objects;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace StardewHack.WearMoreRings
 {
@@ -8,6 +9,19 @@ namespace StardewHack.WearMoreRings
     /// CombinedRing Wrapper which allows it to be used as a container that accepts empty slots (= null values).
     /// </summary>
     public class RingMap {
+        private static readonly ConditionalWeakTable<Farmer,RingMap> player_table = new ConditionalWeakTable<Farmer, RingMap>();
+        public static RingMap player_ringmap {
+            get { 
+                RingMap who = null;
+                player_table.TryGetValue(Game1.player, out who);
+                return who;                
+            }
+            set { 
+                player_table.Add(Game1.player, value); 
+            }
+        }
+
+
         public const string RING_NAME = "Wear More Rings container ring (do not touch!)";
         public const string DATA_KEY = "bcmpinc.WearMoreRings/slot-map";
         public static int MAX_RINGS = 20;
