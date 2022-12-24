@@ -1,4 +1,5 @@
 ﻿using GenericModConfigMenu;
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -22,6 +23,7 @@ namespace StardewHack.WearMoreRings
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
 #pragma warning restore CS0618 // Type or member is obsolete
     {
+        private Type forge_menu_class = typeof(ForgeMenu);
         public static readonly Random random = new Random();
         public static readonly PerScreen<RingMap> container = new PerScreen<RingMap>();
 
@@ -52,8 +54,13 @@ namespace StardewHack.WearMoreRings
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
             Patch((InventoryPage ip)=>ip.performHoverAction(0,0), InventoryPage_performHoverAction);
             Patch((InventoryPage ip)=>ip.receiveLeftClick(0,0,false), InventoryPage_receiveLeftClick);
-            Patch(typeof(ForgeMenu), "_CreateButtons", ForgeMenu_CreateButtons);
             Patch(()=>new Ring(0), Ring_ctor);
+
+            if (helper.ModRegistry.IsLoaded("spacechase0.SpaceCore")) {
+                Monitor.Log("Found SpaceCore mod, trying to patch its NewForgeMenu class instead.", LogLevel.Warn);
+                forge_menu_class = AccessTools.TypeByName("SpaceCore.Interface.NewForgeMenu");
+            }
+            Patch(forge_menu_class, "_CreateButtons", ForgeMenu_CreateButtons);
         }
         
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
@@ -538,7 +545,7 @@ namespace StardewHack.WearMoreRings
             // Remove vanilla ring buttons.
             var code = FindCode(
                 OpCodes.Ldarg_0,
-                Instructions.Ldfld(typeof(ForgeMenu), nameof(ForgeMenu.equipmentIcons))
+                Instructions.Ldfld(forge_menu_class, nameof(ForgeMenu.equipmentIcons))
             );
             code.Extend(
                 Instructions.Ldstr("Ring2")
@@ -549,10 +556,8 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Stfld,
                 Instructions.Callvirt(typeof(List<ClickableComponent>), nameof(List<ClickableComponent>.Add), typeof(ClickableComponent))
             );
-            code.Remove();
+            code.Replace(Instructions.Ret());
         }
-
-
 #endregion
 
 #region Patch Ring
