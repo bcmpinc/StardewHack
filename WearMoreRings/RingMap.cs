@@ -9,7 +9,7 @@ namespace StardewHack.WearMoreRings
     /// CombinedRing Wrapper which allows it to be used as a container that accepts empty slots (= null values).
     /// </summary>
     public class RingMap {
-        public const string RING_NAME = "Wear More Rings container ring (do not touch!)";
+        public const string RING_NAME = "Wear More Rings container ring for {0} (do not touch!)";
         public const string DATA_KEY = "bcmpinc.WearMoreRings/slot-map";
         public static int MAX_RINGS = 20;
         readonly Farmer who;
@@ -51,7 +51,6 @@ namespace StardewHack.WearMoreRings
                 who.leftRing.Value = container;
                 who.rightRing.Value = null;
             }
-            container.DisplayName = RING_NAME;
             Save();
         }
 
@@ -69,9 +68,21 @@ namespace StardewHack.WearMoreRings
             }
         }
 
+        int get_pos(int index) {
+            var pos = slot_map[index];
+            if (pos < 0)
+                return -1;
+            if (pos >= container.combinedRings.Count) {
+                ModEntry.getInstance().Monitor.Log($"Ring {index} was unequipped outside of WMR", StardewModdingAPI.LogLevel.Error);
+                slot_map[index] = -1;
+                return -1;
+            }
+            return pos;
+        }
+
         public Ring this[int index] {
             get {
-                var pos = slot_map[index];
+                var pos = get_pos(index);
                 if (pos < 0)
                     return null;
                 return container.combinedRings[pos];
@@ -83,7 +94,7 @@ namespace StardewHack.WearMoreRings
                 }
 
                 // Equip the ring
-                var pos = slot_map[index];
+                var pos = get_pos(index);
                 if (pos < 0) {
                     if (value == null) return; // Nothing changed.
                     slot_map[index] = container.combinedRings.Count;
@@ -99,6 +110,7 @@ namespace StardewHack.WearMoreRings
                         container.combinedRings[pos] = value;
                     }
                 }
+                //container.
                 Save();
             }
         }
@@ -128,6 +140,18 @@ namespace StardewHack.WearMoreRings
         }
 
         public void Save() {
+            // Ensure the combined ring stays in place!
+            if (who.leftRing.Value != container) {
+                Utility.CollectOrDrop(who.leftRing.Value);
+                who.leftRing.Value = container;
+                ModEntry.getInstance().Monitor.Log($"The container ring got unequipped. Trying to fix that.", StardewModdingAPI.LogLevel.Error);
+            }
+
+            // Mark the combined ring for its purpose.
+            container.UpdateDescription();
+            container.DisplayName = String.Format(RING_NAME, who.displayName);
+
+            // Save ring position data.
             who.modData[DATA_KEY] = string.Join(",", slot_map);
         }
     }
