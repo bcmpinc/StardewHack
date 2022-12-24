@@ -149,7 +149,7 @@ namespace StardewHack.WearMoreRings
 
             // Mark the combined ring for its purpose.
             container.UpdateDescription();
-            container.DisplayName = String.Format(RING_NAME, who.displayName);
+            container.DisplayName = string.Format(RING_NAME, who.displayName);
 
             // Save ring position data.
             who.modData[DATA_KEY] = string.Join(",", slot_map);

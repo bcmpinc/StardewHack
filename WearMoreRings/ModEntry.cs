@@ -52,6 +52,7 @@ namespace StardewHack.WearMoreRings
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
             Patch((InventoryPage ip)=>ip.performHoverAction(0,0), InventoryPage_performHoverAction);
             Patch((InventoryPage ip)=>ip.receiveLeftClick(0,0,false), InventoryPage_receiveLeftClick);
+            Patch(typeof(ForgeMenu), "_CreateButtons", ForgeMenu_CreateButtons);
             Patch(()=>new Ring(0), Ring_ctor);
         }
         
@@ -249,6 +250,21 @@ namespace StardewHack.WearMoreRings
             // Change the equipment slot drawing code to draw the 4 additional slots.
             InstructionRange range;
             try {
+                // Windows
+                range  = FindCode(
+                    // switch (equipmentIcon.name) {
+                    OpCodes.Ldloca_S,
+                    OpCodes.Call,
+                    OpCodes.Stloc_S, // 4
+                    OpCodes.Ldloc_S, // 4
+                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                    OpCodes.Stloc_S, // 5
+                    // case "Hat":
+                    OpCodes.Ldloc_S, // 5
+                    Instructions.Ldstr("Hat")
+                );
+            } catch (Exception err) {
+                LogException(err, LogLevel.Trace);
                 // Linux & MacOS
                 range  = FindCode(
                     // switch (equipmentIcon.name) {
@@ -260,21 +276,6 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Stloc_S, // 5
                     OpCodes.Ldloc_S, // 5
                     OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_S, // 5
-                    Instructions.Ldstr("Hat")
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                // Windows
-                range  = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloca_S,
-                    OpCodes.Call,
-                    OpCodes.Stloc_S, // 4
-                    OpCodes.Ldloc_S, // 4
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_S, // 5
                     // case "Hat":
                     OpCodes.Ldloc_S, // 5
                     Instructions.Ldstr("Hat")
@@ -303,22 +304,6 @@ namespace StardewHack.WearMoreRings
             var var_item = generator.DeclareLocal(typeof(Item));
             InstructionRange code;
             try {
-                // Linux & MacOS
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    // case null: break;
-                    OpCodes.Ldloc_2,
-                    OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(code.Follow(4));
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
                 // Windows
                 code = FindCode(
                     // switch (equipmentIcon.name) {
@@ -337,6 +322,22 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Br
                 );
                 code.Extend(code.End.Follow(-1));
+            } catch (Exception err) {
+                LogException(err, LogLevel.Trace);
+                // Linux & MacOS
+                code = FindCode(
+                    // switch (equipmentIcon.name) {
+                    OpCodes.Ldloc_1,
+                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                    OpCodes.Stloc_2,
+                    // case null: break;
+                    OpCodes.Ldloc_2,
+                    OpCodes.Brfalse,
+                    // case "Hat":
+                    OpCodes.Ldloc_2,
+                    Instructions.Ldstr("Hat")
+                );
+                code.Extend(code.Follow(4));
             }
             code.Replace(
                 // var item = EquipmentIcon.item
@@ -449,22 +450,6 @@ namespace StardewHack.WearMoreRings
             // Handle a ring-inventory slot being clicked.
             InstructionRange code;
             try {
-                // Linux & MacOS
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_3,
-                    // case null: break;
-                    OpCodes.Ldloc_3,
-                    OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(code.Follow(4));
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
                 // Windows
                 code = FindCode(
                     // switch (equipmentIcon.name) {
@@ -483,6 +468,22 @@ namespace StardewHack.WearMoreRings
                     OpCodes.Br
                 );
                 code.Extend(code.End.Follow(-1));
+            } catch (Exception err) {
+                LogException(err, LogLevel.Trace);
+                // Linux & MacOS
+                code = FindCode(
+                    // switch (equipmentIcon.name) {
+                    OpCodes.Ldloc_1,
+                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                    OpCodes.Stloc_3,
+                    // case null: break;
+                    OpCodes.Ldloc_3,
+                    OpCodes.Brfalse,
+                    // case "Hat":
+                    OpCodes.Ldloc_3,
+                    Instructions.Ldstr("Hat")
+                );
+                code.Extend(code.Follow(4));
             }
             code.Replace(
                 code[0],
@@ -530,8 +531,30 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ret()
             );
         }
-#endregion Patch InventoryPage
-        
+        #endregion Patch InventoryPage
+
+#region Patch ForgeMenu
+        void ForgeMenu_CreateButtons() {
+            // Remove vanilla ring buttons.
+            var code = FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(ForgeMenu), nameof(ForgeMenu.equipmentIcons))
+            );
+            code.Extend(
+                Instructions.Ldstr("Ring2")
+            );
+            code.Extend(
+                OpCodes.Dup,
+                Instructions.Ldc_I4(-99998),
+                OpCodes.Stfld,
+                Instructions.Callvirt(typeof(List<ClickableComponent>), nameof(List<ClickableComponent>.Add), typeof(ClickableComponent))
+            );
+            code.Remove();
+        }
+
+
+#endregion
+
 #region Patch Ring
         // Not sure how my mod uses this, but the code in the Ring constructor that generates a UniqueID seems seriously flawed.
         // It has a reasonably high probability of creating duplicates. So this patch replaces it with a number from a randomly seeded PRNG.
