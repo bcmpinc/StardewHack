@@ -91,13 +91,8 @@ namespace StardewHack.WearMoreRings
             }
             set {
                 // Prevent recursion.
-                if (value == container || value.DisplayName == RING_NAME) {
-                    ModEntry.getInstance().Monitor.Log("Really, don't touch the WMR container ring please!", StardewModdingAPI.LogLevel.Warn);
-                    if (who.leftRing.Value != container) {
-                        Utility.CollectOrDrop(who.leftRing.Value);
-                        who.leftRing.Value = value;
-                    }
-                    return;
+                if (value == container) {
+                    throw new Exception("Really, don't touch the WMR container ring please!");
                 }
 
                 // Equip the ring
