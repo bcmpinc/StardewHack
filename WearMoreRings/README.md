@@ -30,6 +30,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 6.4:
+* Fixed null pointer error when saving in generic mod config menu.
+
 #### 6.3:
 * Name the combined ring used for ring storage to clearly communicate its purpose. 
 * Prevent crash caused by equipping the combined ring inside of itself.
