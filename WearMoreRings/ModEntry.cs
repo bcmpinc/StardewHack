@@ -20,7 +20,7 @@ namespace StardewHack.WearMoreRings
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-    public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI
+    public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI, IWearMoreRingsAPI_2
 #pragma warning restore CS0618 // Type or member is obsolete
     {
         private Type forge_menu_class = typeof(ForgeMenu);
@@ -105,7 +105,7 @@ namespace StardewHack.WearMoreRings
 
 #region API
         public override object GetApi(IModInfo info) {
-            Monitor.Log($"Mod {info.Manifest.Name} requested the deprecated Wear More Rings API. Since version 5.0 mods should be compatible with WMR without custom support.", LogLevel.Warn);
+            Monitor.Log($"Mod {info.Manifest.Name} requested the Wear More Rings API. Since version 5.0 mods should be compatible with WMR without custom support.", LogLevel.Warn);
             return this;
         }
         
@@ -133,6 +133,24 @@ namespace StardewHack.WearMoreRings
                 } else if (ring != null) {
                     yield return ring;
                 }
+            }
+        }
+
+        public int RingSlotCount() {
+            return config.Rings;
+        }
+
+        public Ring GetRing(int slot) {
+            if (slot < 0 || config.Rings <= slot) throw new ArgumentOutOfRangeException();
+            return container.Value[slot];
+        }
+
+        public void SetRing(int slot, Ring ring) {
+            if (slot < 0 || config.Rings <= slot) throw new ArgumentOutOfRangeException();
+            if (container.Value[slot] != ring) { 
+                container.Value[slot]?.onUnequip(Game1.player, Game1.currentLocation);
+                container.Value[slot] = ring;
+                container.Value[slot]?.onEquip  (Game1.player, Game1.currentLocation);
             }
         }
 #endregion API
@@ -584,7 +602,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Call(typeof(Random), nameof(Random.Next))
             );
         }
-#endregion Patch Ring
+        #endregion Patch Ring
     }
 }
 
