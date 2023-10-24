@@ -6,7 +6,7 @@
     <Version>4.0</Version>
     <TargetFramework>net5.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
 
@@ -27,8 +27,5 @@
     <None Update="README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <PropertyGroup>
-	<TranslationClassBuilder_CreateBackup>true</TranslationClassBuilder_CreateBackup>
-  </PropertyGroup>
 </Project>
 
