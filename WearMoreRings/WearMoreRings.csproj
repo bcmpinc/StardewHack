@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>WearMoreRings</AssemblyName>
-    <RootNamespace>WearMoreRings</RootNamespace>
+    <RootNamespace>StardewHack.WearMoreRings</RootNamespace>
     <Version>4.0</Version>
     <TargetFramework>net5.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>

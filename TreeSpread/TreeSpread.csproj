@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>TreeSpread</AssemblyName>
-    <RootNamespace>TreeSpread</RootNamespace>
+    <RootNamespace>StardewHack.TreeSpread</RootNamespace>
     <Version>4.0</Version>
     <TargetFramework>net5.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -27,5 +27,8 @@
     <None Update="README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <PropertyGroup>
+	<TranslationClassBuilder_CreateBackup>true</TranslationClassBuilder_CreateBackup>
+  </PropertyGroup>
 </Project>
 

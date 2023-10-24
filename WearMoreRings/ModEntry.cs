@@ -48,9 +48,9 @@ namespace StardewHack.WearMoreRings
             helper.Events.GameLoop.Saving += (object sender, SavingEventArgs e) => {
                 container.Value.Save();
             };
-            helper.ConsoleCommands.Add("player_resetmodifiers", "Clears buffs, then resets and reapplies the modifiers applied by boots & rings.", (string arg1, string[] arg2) => { ResetModifiers(); });
-            helper.ConsoleCommands.Add("world_destroyringchests", "Removes any remaining ring chests used for storing player's rings. Any items contained therein will be dropped at your feet.", (string arg1, string[] arg2) => { Migration.DestroyRemainingChests(Monitor); });
-            helper.ConsoleCommands.Add("player_openforge", "Opens the forge menu.", (string arg1, string[] arg2) => { Game1.activeClickableMenu = new ForgeMenu(); });
+            helper.ConsoleCommands.Add("player_resetmodifiers",   I18n.ResetModifiersCommand(),    (string arg1, string[] arg2) => { ResetModifiers(); });
+            helper.ConsoleCommands.Add("world_destroyringchests", I18n.DestroyRingChestsCommand(), (string arg1, string[] arg2) => { Migration.DestroyRemainingChests(Monitor); });
+            helper.ConsoleCommands.Add("player_openforge",        I18n.OpenForgeCommand(),         (string arg1, string[] arg2) => { Game1.activeClickableMenu = new ForgeMenu(); });
             
             Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
@@ -68,8 +68,8 @@ namespace StardewHack.WearMoreRings
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddNumberOption(
                 mod: ModManifest, 
-                name: () => "Rings", 
-                tooltip: () => "How many ring slots are available.", 
+                name: I18n.RingsName, 
+                tooltip: I18n.RingsTooltip,
                 getValue: () => config.Rings, 
                 setValue: (int val) => {
                     config.Rings = val; 
