@@ -35,22 +35,22 @@ namespace StardewHack.AlwaysScrollMap
         {
             api.AddBoolOption(
                 mod: ModManifest, 
-                name: () => I18n.EnabledIndoorsName(),
-                tooltip: () => I18n.EnabledIndoorsTooltip(),
+                name: I18n.EnabledIndoorsName,
+                tooltip: I18n.EnabledIndoorsTooltip,
                 getValue: () => config.EnabledIndoors, 
                 setValue: (bool val) => config.EnabledIndoors = val
             );
             api.AddBoolOption(
                 mod: ModManifest, 
-                name: () => I18n.EnabledOutdoorsName(), 
-                tooltip: () => I18n.EnabledOutdoorsTooltip(),
+                name: I18n.EnabledOutdoorsName, 
+                tooltip: I18n.EnabledOutdoorsTooltip,
                 getValue: () => config.EnabledOutdoors, 
                 setValue: (bool val) => config.EnabledOutdoors = val
             );
             api.AddKeybind(
                 mod: ModManifest, 
-                name: () => I18n.ToggleScrollName(),
-                tooltip: () => I18n.ToggleScrollTooltip(),
+                name: I18n.ToggleScrollName,
+                tooltip: I18n.ToggleScrollTooltip,
                 getValue: () => config.ToggleScroll, 
                 setValue: (SButton val) => config.ToggleScroll = val
             );

@@ -32,7 +32,7 @@ namespace BiggerBackpack
             bigBackpack = Helper.ModContent.Load<Texture2D>("backpack.png");
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
-            Helper.ConsoleCommands.Add("player_setbackpacksize", "Set the size of the player's backpack. This must be 12, 24, 36 or 48", command);
+            Helper.ConsoleCommands.Add("player_setbackpacksize", I18n.SetBackpackSizeCommand(), command);
             
             Patch((SeedShop s)=>s.draw(null), SeedShop_draw);
             Patch((SpecialItem si)=>si.getTemporarySpriteForHoldingUp(new Vector2()), SpecialItem_getTemporarySpriteForHoldingUp);
@@ -170,10 +170,10 @@ namespace BiggerBackpack
 #region Buy Backpack
         static public void clickBackpack()
         {
-            Response yes = new Response("Purchase", string.Format("Purchase ({0:N0}g)", getBackpackCost()));
+            Response yes = new Response("Purchase", I18n.Purchase(getBackpackCost()));
             Response no = new Response("Not", Game1.content.LoadString("Strings\\Locations:SeedShop_BuyBackpack_ResponseNo"));
             Response[] resps = new Response[] { yes, no };
-            Game1.currentLocation.createQuestionDialogue("Backpack Upgrade -- 48 slots", resps, "Backpack");
+            Game1.currentLocation.createQuestionDialogue(I18n.BackpackUpgrade(), resps, "Backpack");
         }
         
         // Inject code to show the buying dialogue when the premium backpack  is clicked.
@@ -205,7 +205,7 @@ namespace BiggerBackpack
 
         static void buyBackpack() {
             Game1.player.Money -= getBackpackCost();
-            Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = "Premium Pack" }, true);
+            Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = I18n.PremiumPack() }, true);
             Game1.player.increaseBackpackSize(12);
             // Game1.multiplayer.globalChatInfoMessage ("BackpackDeluxe", Game1.player.Name);
         }
@@ -531,8 +531,8 @@ namespace BiggerBackpack
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddNumberOption(
                 mod: ModManifest, 
-                name: () => "Backpack cost", 
-                tooltip: () => "How much you have to pay to buy this backpack in the shop.", 
+                name: () => I18n.BackpackCostName(), 
+                tooltip: () => I18n.BackpackCostTooltip(),
                 getValue: () => config.BackpackCost, 
                 setValue: (int val) => config.BackpackCost = val,
                 min: 0
