@@ -26,6 +26,9 @@ Please report bugs on [GitHub](https://github.com/spacechase0/BiggerBackpack/iss
 To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console and safe your game. 
 
 ## Changes
+#### 7.0:
+* Localization support.
+
 #### 6.0:
 * Compatibility with upcoming SMAPI 4.0.
 * Added setting `BackpackCost` to modify the cost of the bigger backpack.

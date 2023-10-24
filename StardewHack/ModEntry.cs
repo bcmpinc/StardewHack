@@ -22,15 +22,15 @@ namespace StardewHack.Library
             I18n.Init(helper.Translation);
 
             // Check incompatible mods.
-            CheckIncompatible(helper, "bcmpinc.AlwaysScrollMap",    new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.FixAnimalTools",     new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.GrassGrowth",        new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.HarvestWithScythe",  new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.MovementSpeed",      new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.TilledSoilDecay",    new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.TreeSpread",         new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "bcmpinc.WearMoreRings",      new SemanticVersion(6,0,0));
-            CheckIncompatible(helper, "spacechase0.BiggerBackpack", new SemanticVersion(6,0,0));
+            CheckIncompatible(helper, "bcmpinc.AlwaysScrollMap",    new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.FixAnimalTools",     new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.GrassGrowth",        new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.HarvestWithScythe",  new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.MovementSpeed",      new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.TilledSoilDecay",    new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.TreeSpread",         new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "bcmpinc.WearMoreRings",      new SemanticVersion(7,0,0));
+            CheckIncompatible(helper, "spacechase0.BiggerBackpack", new SemanticVersion(7,0,0));
             
             // Register event to show warning in case some mod's patches failed to apply cleanly.
             Helper.Events.GameLoop.OneSecondUpdateTicked += GameLoop_OneSecondUpdateTicked;
