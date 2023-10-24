@@ -18,9 +18,9 @@ namespace BiggerBackpack
         public int BackpackCost = 50000;
     }
     
-    public class Mod : HackWithConfig<Mod,ModConfig>
+    public class ModEntry : HackWithConfig<ModEntry,ModConfig>
     {
-        public static Mod instance;
+        public static ModEntry instance;
 
         private static Texture2D bigBackpack;
 
@@ -123,7 +123,7 @@ namespace BiggerBackpack
                 check[4], // We'll create a new jump in check later.
                 // drawBiggerBackpack(b);
                 Instructions.Ldarg_1(),
-                Instructions.Call(typeof(Mod), nameof(Mod.drawBiggerBackpack), typeof(SpriteBatch))
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.drawBiggerBackpack), typeof(SpriteBatch))
                 // }
             );
             
@@ -159,7 +159,7 @@ namespace BiggerBackpack
                 Instructions.Bne_Un(AttachLabel(code[0])),
                 // return getBackpackSprite(position);
                 Instructions.Ldarg_1(),
-                Instructions.Call(typeof(Mod), nameof(Mod.getBackpackSprite), typeof(Vector2)),
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.getBackpackSprite), typeof(Vector2)),
                 Instructions.Ret()
                 // }
             );
@@ -196,7 +196,7 @@ namespace BiggerBackpack
                 code[2],
                 Instructions.Ldc_I4_S(48),
                 code[4],
-                Instructions.Call(typeof(Mod), nameof(Mod.clickBackpack)),
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.clickBackpack)),
                 Instructions.Br((Label)code[len-1].operand)
             );
             code[4] = Instructions.Bge(AttachLabel(code[len]));
@@ -235,7 +235,7 @@ namespace BiggerBackpack
                 Instructions.Call(GetType(), nameof(getBackpackCost)),
                 Instructions.Blt(AttachLabel(get_player)),
                 //   buyBackpack();
-                Instructions.Call(typeof(Mod), nameof(Mod.buyBackpack)),
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.buyBackpack)),
                 // }
                 // else if ((int)Game1.player.maxItems != 48) {
                 get_player,
@@ -283,7 +283,7 @@ namespace BiggerBackpack
                 // Shift icons down by `Game1.tileSize` pixels
                 Instructions.Ldarg_0(),
                 Instructions.Ldfld(typeof(InventoryPage), nameof(InventoryPage.equipmentIcons)),
-                Instructions.Call(typeof(Mod), nameof(Mod.shiftIconsDown), typeof(List<ClickableComponent>))
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.shiftIconsDown), typeof(List<ClickableComponent>))
             );
             EndCode().ReplaceJump(-1, EndCode()[-4]);
             
