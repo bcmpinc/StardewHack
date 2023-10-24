@@ -28,6 +28,7 @@ namespace BiggerBackpack
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void HackEntry(IModHelper helper)
         {
+            I18n.Init(helper.Translation);
             bigBackpack = Helper.ModContent.Load<Texture2D>("backpack.png");
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 

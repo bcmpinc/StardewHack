@@ -51,6 +51,8 @@ namespace StardewHack.TilledSoilDecay
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public override void HackEntry(IModHelper helper) {
+            I18n.Init(helper.Translation);
+
             Patch((Farm f) => f.DayUpdate(0), Farm_DayUpdate);
             Patch((GameLocation gl) => gl.HandleGrassGrowth(1), GameLocation_HandleGrassGrowth);
             Patch((StardewValley.Locations.IslandWest iw) => iw.DayUpdate(0), IslandWest_DayUpdate);

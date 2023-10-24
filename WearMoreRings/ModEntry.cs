@@ -28,6 +28,8 @@ namespace StardewHack.WearMoreRings
         public static readonly PerScreen<RingMap> container = new PerScreen<RingMap>();
 
         public override void HackEntry(IModHelper helper) {
+            I18n.Init(helper.Translation);
+
             if (config.Rings < 2) {
                 config.Rings = 2;
             }

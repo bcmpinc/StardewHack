@@ -19,6 +19,8 @@ namespace StardewHack.MovementSpeed
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public override void HackEntry(IModHelper helper) {
+            I18n.Init(helper.Translation);
+
             Patch((Farmer f)=>f.getMovementSpeed(), Farmer_getMovementSpeed);
             Patch(typeof(Game1), "UpdateControlInput", Game1_UpdateControlInput);
         }

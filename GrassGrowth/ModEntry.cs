@@ -23,6 +23,8 @@ namespace StardewHack.GrassGrowth
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public override void HackEntry(StardewModdingAPI.IModHelper helper) {
+            I18n.Init(helper.Translation);
+
             // Sanitize config.
             if (config.GrowthChance < 1e-6 || (config.DailyGrowth==0 && config.MonthlyGrowth==0)) {
                 config.DisableGrowth = true;

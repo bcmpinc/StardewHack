@@ -1,3 +1,3 @@
 {
-
+  "failed-bytecode-patches": "StardewHack {{version}} failed to apply some bytecode patches. The following mods won't work correctly or at all: {{mods}}. Check your console or error log for further instructions.",
 }

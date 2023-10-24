@@ -20,6 +20,7 @@ namespace StardewHack.TreeSpread
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public override void HackEntry(IModHelper helper) {
+            I18n.Init(helper.Translation);
             Patch((Tree t) => t.dayUpdate(null, new Microsoft.Xna.Framework.Vector2()), Tree_DayUpdate);
         }
 

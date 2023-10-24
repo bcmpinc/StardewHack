@@ -76,6 +76,8 @@ namespace StardewHack.HarvestWithScythe
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig> {
         public override void HackEntry(IModHelper helper) {
+            I18n.Init(helper.Translation);
+
             Patch((Crop c) => c.harvest(0, 0, null, null), Crop_harvest);
             Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2(), null), HoeDirt_performToolAction);
             Patch((HoeDirt hd) => hd.performUseAction(new Vector2(), null), HoeDirt_performUseAction);
