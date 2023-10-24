@@ -27,8 +27,8 @@ namespace StardewHack.MovementSpeed
 
         protected override void InitializeApi(IGenericModConfigMenuApi api)
         {
-            api.AddNumberOption(mod: ModManifest, name: () => "Movement Speed Multiplier", tooltip: () => "The movement speed is multiplied by this amount. The mod's default is 1.5, meaning 50% faster movement. Set this to 1 to disable the increase in movement speed.", getValue: () => config.MovementSpeedMultiplier, setValue: (float val) => config.MovementSpeedMultiplier = val, min: 0, max: 5);
-            api.AddNumberOption(mod: ModManifest, name: () => "Tool Charge Delay",         tooltip: () => "Time required for charging the hoe or watering can in ms. Normally this is 600ms. The default is 600/1.5 = 400, meaning 50% faster charging. Set this to 600 to disable faster tool charging.", getValue: () => config.ToolChargeDelay, setValue: (int val) => config.ToolChargeDelay = val, min: 100, max: 600);
+            api.AddNumberOption(mod: ModManifest, name: I18n.MovementSpeedMultiplierName, tooltip: I18n.MovementSpeedMultiplierTooltip, getValue: () => config.MovementSpeedMultiplier, setValue: (float val) => config.MovementSpeedMultiplier = val, min:   0, max:   5);
+            api.AddNumberOption(mod: ModManifest, name: I18n.ToolChargeDelayName,         tooltip: I18n.ToolChargeDelayTooltip,         getValue: () => config.ToolChargeDelay,         setValue: (int val)   => config.ToolChargeDelay         = val, min: 100, max: 600);
         }
 
         static float getMovementSpeedMultiplier() => getInstance().config.MovementSpeedMultiplier;

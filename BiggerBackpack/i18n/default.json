@@ -3,6 +3,5 @@
 	Purchase: "Purchase ({{cost}}g)",
 	BackpackUpgrade: "Backpack Upgrade -- 48 slots",
 	PremiumPack: "Premium Pack",
-	BackpackCostName: "Backpack cost",
-	BackpackCostTooltip: "How much you have to pay to buy this backpack in the shop.",
+	BackpackCostName: "Backpack cost", BackpackCostTooltip: "How much you have to pay to buy this backpack in the shop.",
 }
