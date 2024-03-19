@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>PressurePlate</AssemblyName>
     <RootNamespace>StardewHack.PressurePlate</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>7.0.0</Version>
     <TargetFramework>net5.0</TargetFramework>
 
     <EnableHarmony>true</EnableHarmony>

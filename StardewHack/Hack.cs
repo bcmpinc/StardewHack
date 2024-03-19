@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using StardewHack.Library;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using System;
@@ -63,6 +64,9 @@ namespace StardewHack
         public override void Entry(IModHelper helper) {
             this.helper = helper;
 
+            ModChecks.validateAssemblyVersion(this);
+            ModChecks.checkIncompatible(this);
+
             // Use the Mod's UniqueID to create the harmony instance.
             string UniqueID = helper.ModRegistry.ModID;
             Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
@@ -83,7 +87,6 @@ namespace StardewHack
                 }
             }
         }
-
 
         public abstract void HackEntry(IModHelper helper);
 
@@ -159,7 +162,7 @@ namespace StardewHack
                 Monitor.Log("The patch failed to apply cleanly. Usually this means the mod needs to be updated.", LogLevel.Alert);
                 Monitor.Log("As a result, this mod does not function properly or at all.", LogLevel.Alert);
                 Monitor.Log("Please upload your log file at https://log.smapi.io/ and report this bug at " + getReportUrl() + ".", LogLevel.Alert);
-                Library.ModEntry.broken_mods.Add(helper.ModRegistry.ModID);
+                ModChecks.failedPatches(this);
                 broken = true;
             }
             LogException(err);
@@ -254,7 +257,7 @@ namespace StardewHack
             string methodName = "ApplyPatch";
 
             TypeBuilder typeBuilder = ProxyModule.DefineType(className);
-                MethodBuilder methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, apply.ReturnType, apply.GetParameters().Types());
+            MethodBuilder methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, apply.ReturnType, apply.GetParameters().Types());
 
             if (apply.GetParameters().Length != 3) throw new InvalidOperationException("StardewHack cannot build patch proxy.");
             ILGenerator il = methodBuilder.GetILGenerator();

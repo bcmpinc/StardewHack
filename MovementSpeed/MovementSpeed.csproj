@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>MovementSpeed</AssemblyName>
     <RootNamespace>StardewHack.MovementSpeed</RootNamespace>
-    <Version>4.0</Version>
+    <Version>7.0</Version>
     <TargetFramework>net5.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
