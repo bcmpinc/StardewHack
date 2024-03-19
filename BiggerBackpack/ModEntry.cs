@@ -515,7 +515,7 @@ namespace BiggerBackpack
 #region Assets
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.Name.IsEquivalentTo("LooseSprites/JunimoNote"))
+            if (e.NameWithoutLocale.IsEquivalentTo("LooseSprites/JunimoNote"))
             {
                 e.Edit(asset => {
                     var editor = asset.AsImage();
