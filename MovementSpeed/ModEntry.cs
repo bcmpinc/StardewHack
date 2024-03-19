@@ -67,13 +67,13 @@ namespace StardewHack.MovementSpeed
         void Game1_UpdateControlInput_Chain() {
             // Game1.player.toolHold = (int)(600f * num4);
             FindCode(
-                Instructions.Call_get(typeof(Game1), nameof(StardewValley.Game1.player)),
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 OpCodes.Ldfld,
                 Instructions.Ldc_R4(600f),
                 OpCodes.Ldloc_S,
                 OpCodes.Mul,
                 OpCodes.Conv_I4,
-                Instructions.Stfld(typeof(Farmer), nameof(Farmer.toolHold))
+                OpCodes.Callvirt
             )[2] = Instructions.Call(GetType(), nameof(getToolChargeDelay));
         }
     }
