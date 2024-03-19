@@ -28,7 +28,8 @@ To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console an
 ## Changes
 #### 7.0:
 * Localization support.
-* Russian & Ukrainian translation
+* Russian & Ukrainian translation.
+* Fix community center UI for non-English users.
 
 #### 6.0:
 * Compatibility with upcoming SMAPI 4.0.
