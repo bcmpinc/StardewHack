@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework;
 using GenericModConfigMenu;
 using System.Reflection;
 using HarmonyLib;
+using StardewValley.Extensions;
+using System.Collections.Generic;
 
 namespace StardewHack.TilledSoilDecay
 {
@@ -106,6 +108,21 @@ namespace StardewHack.TilledSoilDecay
             var method = (MethodInfo)code[3].operand;
             ChainPatch(method, AccessTools.Method(typeof(ModEntry), nameof(GameLocation_DayUpdate_Chain)));
         }
+
+        static bool does_soil_decay(GameLocation loc, HoeDirt hoedirt)
+        {
+            var chance = loc.GetDirtDecayChance(Vector2.Zero); // Tile argument is unused.
+            if (chance < 1)
+            {
+                if (-hoedirt.state.Value < getConfig().Delay)
+                {
+                    return false;
+                }
+            }
+            chance *= getConfig().DryingRateMultiplier;
+            return Game1.random.NextBool(chance);
+        }
+
         void GameLocation_DayUpdate_Chain() {
             var code = FindCode(
                 // return Game1.random.NextBool(this.GetDirtDecayChance(pair.Key));
@@ -117,28 +134,11 @@ namespace StardewHack.TilledSoilDecay
                 OpCodes.Call,
                 OpCodes.Ret
             );
-            // Apply rate multiplier
-            code.Insert(5,
-                Instructions.Call(typeof(ModEntry), nameof(getConfig)),
-                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.DryingRateMultiplier)),
-                Instructions.Mul()
-            );
-
-            var first = Instructions.Ldloc_0();
-            code.ReplaceJump(0, first);
-
-            // Add decay delay
-            code.Prepend(
-                // if (-hoedirt.state.Value < getConfig().Delay)
-                first,
-                Instructions.Ldfld(typeof(HoeDirt), nameof(HoeDirt.state)),
-                Instructions.Callvirt_get(typeof(NetInt), nameof(NetInt.Value)),
-                Instructions.Neg(),
-                Instructions.Call(typeof(ModEntry), nameof(getConfig)),
-                Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.Delay)),
-                Instructions.Bge(AttachLabel(code[0])),
-                //   return false;
-                Instructions.Ldc_I4_0(),
+            code.Replace(
+                // return ModEntry.does_soil_decay(this, dirt);
+                Instructions.Ldarg_0(),
+                Instructions.Ldloc_0(),
+                Instructions.Call(typeof(ModEntry), nameof(does_soil_decay), typeof(GameLocation), typeof(HoeDirt)),
                 Instructions.Ret()
             );
         }

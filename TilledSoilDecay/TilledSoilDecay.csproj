@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>TilledSoilDecay</AssemblyName>
     <RootNamespace>StardewHack.TilledSoilDecay</RootNamespace>
-    <Version>7.1</Version>
+    <Version>7.2</Version>
     <TargetFramework>net6.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
