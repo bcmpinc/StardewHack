@@ -13,15 +13,15 @@ namespace StardewHack.Library
         static public List<ModError> errors = new List<ModError>();
 
         static private Dictionary<string, SemanticVersion> version_checks = new Dictionary<string, SemanticVersion>() {
-            {"bcmpinc.AlwaysScrollMap"   , new SemanticVersion(7,0,0)},
-            {"bcmpinc.FixAnimalTools"    , new SemanticVersion(7,0,0)},
-            {"bcmpinc.GrassGrowth"       , new SemanticVersion(7,0,0)},
-            {"bcmpinc.HarvestWithScythe" , new SemanticVersion(7,0,0)},
-            {"bcmpinc.MovementSpeed"     , new SemanticVersion(7,0,0)},
-            {"bcmpinc.TilledSoilDecay"   , new SemanticVersion(7,0,0)},
-            {"bcmpinc.TreeSpread"        , new SemanticVersion(7,0,0)},
-            {"bcmpinc.WearMoreRings"     , new SemanticVersion(7,0,0)},
-            {"spacechase0.BiggerBackpack", new SemanticVersion(7,0,0)},
+            {"bcmpinc.AlwaysScrollMap"   , new SemanticVersion(7,1,0)},
+            {"bcmpinc.FixAnimalTools"    , new SemanticVersion(7,1,0)},
+            {"bcmpinc.GrassGrowth"       , new SemanticVersion(7,1,0)},
+            {"bcmpinc.HarvestWithScythe" , new SemanticVersion(7,1,0)},
+            {"bcmpinc.MovementSpeed"     , new SemanticVersion(7,1,0)},
+            {"bcmpinc.TilledSoilDecay"   , new SemanticVersion(7,1,0)},
+            {"bcmpinc.TreeSpread"        , new SemanticVersion(7,1,0)},
+            {"bcmpinc.WearMoreRings"     , new SemanticVersion(7,1,0)},
+            {"spacechase0.BiggerBackpack", new SemanticVersion(7,1,0)},
         };
 
         public static void validateAssemblyVersion(this Mod mod)
