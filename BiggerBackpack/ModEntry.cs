@@ -41,10 +41,10 @@ namespace BiggerBackpack
             Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
             Patch(()=>new CraftingPage(0,0,0,0,false,false,null), CraftingPage_ctor);
-            Patch(()=>new ShopMenu(new List<ISalable>(),0,"",null,null,""), ShopMenu_ctor);
+            //Patch(()=>new ShopMenu("",null,null), ShopMenu_ctor);
             Patch((ShopMenu m)=>m.draw(null), ShopMenu_draw);
             Patch((ShopMenu m)=>m.drawCurrency(null), ShopMenu_drawCurrency);
-            Patch(()=>new MenuWithInventory(null,false,false,0,0,0), ShippingMenu_ctor);
+            //Patch(()=>new MenuWithInventory(null,false,false,0,0,0), ShippingMenu_ctor);
             Patch((JunimoNoteMenu m)=>m.setUpMenu(0,null), JunimoNoteMenu_setUpMenu);
         }
 
@@ -205,10 +205,13 @@ namespace BiggerBackpack
 
         static void buyBackpack() {
             Game1.player.Money -= getBackpackCost();
-            Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack") { DisplayName = I18n.PremiumPack() }, true);
+            Game1.player.holdUpItemThenMessage((Item)new SpecialItem(99, "Premium Pack"), true);
             Game1.player.increaseBackpackSize(12);
             // Game1.multiplayer.globalChatInfoMessage ("BackpackDeluxe", Game1.player.Name);
         }
+
+        // TODO: Fix name
+        // displayName = I18n.PremiumPack()
 
         public static int getBackpackCost() => getInstance().config.BackpackCost;
         

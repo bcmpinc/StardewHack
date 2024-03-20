@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Netcode;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.GameData.Crops;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 
@@ -80,15 +81,15 @@ namespace StardewHack.HarvestWithScythe
         public override void HackEntry(IModHelper helper) {
             I18n.Init(helper.Translation);
 
-            Patch((Crop c) => c.harvest(0, 0, null, null), Crop_harvest);
-            Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2(), null), HoeDirt_performToolAction);
-            Patch((HoeDirt hd) => hd.performUseAction(new Vector2(), null), HoeDirt_performUseAction);
+            Patch((Crop c) => c.harvest(0, 0, null, null, false), Crop_harvest);
+            Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2()), HoeDirt_performToolAction);
+            Patch((HoeDirt hd) => hd.performUseAction(new Vector2()), HoeDirt_performUseAction);
 
             // If forage harvesting is configured to allow scythe.
-            Patch((StardewValley.Object o) => o.performToolAction(null, null), Object_performToolAction);
+            Patch((StardewValley.Object o) => o.performToolAction(null), Object_performToolAction);
             Patch((GameLocation gl) => gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
 
-            Patch((Grass g) => g.performToolAction(null, 0, new Vector2(), null), Grass_performToolAction);
+            Patch((Grass g) => g.performToolAction(null, 0, new Vector2()), Grass_performToolAction);
 
             helper.Events.GameLoop.UpdateTicking += GameLoop_UpdateTicking;
         }
@@ -130,8 +131,6 @@ namespace StardewHack.HarvestWithScythe
 #endregion 
 
 #region CanHarvest methods
-        public const int HARVEST_PLUCKING = Crop.grabHarvest;
-        public const int HARVEST_SCYTHING = Crop.sickleHarvest;
         public const int SUNFLOWER = 421;
 
         static public bool IsScythe(Tool t) {
@@ -142,7 +141,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         /** Check whether the used harvest method is allowed for the given harvest mode. */
-        public static bool CanHarvest(HarvestModeEnum mode, int method) {
+        public static bool CanHarvest(HarvestModeEnum mode, HarvestMethod method) {
             var t = Game1.player.CurrentTool;
             if (IsScythe(t)) {
                 if (mode == HarvestModeEnum.BOTH) {
@@ -155,7 +154,7 @@ namespace StardewHack.HarvestWithScythe
             }
 
             // Determine if the currently used harvesting method is currently allowed.
-            if (method == HARVEST_PLUCKING) {
+            if (method == HarvestMethod.Grab) {
                 return mode != HarvestModeEnum.SCYTHE;
             } else {
                 return mode == HarvestModeEnum.SCYTHE;
