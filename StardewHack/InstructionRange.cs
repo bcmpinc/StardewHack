@@ -71,9 +71,9 @@ namespace StardewHack
         }
 
         /// <summary>
-        /// An empty InstructionRange pointing to the start of this range.
+        /// An empty InstructionRange pointing to the beginning of this range.
         /// </summary>
-        public InstructionRange Start { get { return new InstructionRange(insts, start, 0); } }
+        public InstructionRange Begin { get { return new InstructionRange(insts, start, 0); } }
 
         /// <summary>
         /// An empty InstructionRange pointing to the end of this range.
