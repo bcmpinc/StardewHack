@@ -118,16 +118,19 @@ namespace StardewHack.TilledSoilDecay
                 OpCodes.Ret
             );
             // Apply rate multiplier
-            code.Insert(5, 
+            code.Insert(5,
                 Instructions.Call(typeof(ModEntry), nameof(getConfig)),
                 Instructions.Ldfld(typeof(ModConfig), nameof(ModConfig.DryingRateMultiplier)),
                 Instructions.Mul()
             );
 
+            var first = Instructions.Ldloc_0();
+            code.ReplaceJump(0, first);
+
             // Add decay delay
             code.Prepend(
                 // if (-hoedirt.state.Value < getConfig().Delay)
-                Instructions.Ldloc_0(),
+                first,
                 Instructions.Ldfld(typeof(HoeDirt), nameof(HoeDirt.state)),
                 Instructions.Callvirt_get(typeof(NetInt), nameof(NetInt.Value)),
                 Instructions.Neg(),
