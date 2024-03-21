@@ -8,7 +8,6 @@ using GenericModConfigMenu;
 using System.Reflection;
 using HarmonyLib;
 using StardewValley.Extensions;
-using System.Collections.Generic;
 
 namespace StardewHack.TilledSoilDecay
 {
