@@ -41,10 +41,10 @@ namespace BiggerBackpack
             Patch(()=>new InventoryPage(0,0,0,0), InventoryPage_ctor);
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
             Patch(()=>new CraftingPage(0,0,0,0,false,false,null), CraftingPage_ctor);
-            //Patch(()=>new ShopMenu("",null,null), ShopMenu_ctor);
+            Patch(()=>new ShopMenu("",null,null,null,null,null,true), ShopMenu_ctor);
             Patch((ShopMenu m)=>m.draw(null), ShopMenu_draw);
             Patch((ShopMenu m)=>m.drawCurrency(null), ShopMenu_drawCurrency);
-            //Patch(()=>new MenuWithInventory(null,false,false,0,0,0), ShippingMenu_ctor);
+            Patch(()=>new MenuWithInventory(null,false,false,0,0,0,ItemExitBehavior.Drop,false), ShippingMenu_ctor);
             Patch((JunimoNoteMenu m)=>m.setUpMenu(0,null), JunimoNoteMenu_setUpMenu);
         }
 

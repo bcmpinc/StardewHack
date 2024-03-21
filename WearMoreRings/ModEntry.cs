@@ -19,9 +19,7 @@ namespace StardewHack.WearMoreRings
         public int Rings = 8;
     }
 
-#pragma warning disable CS0618 // Type or member is obsolete
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI_2
-#pragma warning restore CS0618 // Type or member is obsolete
     {
         private Type forge_menu_class = typeof(ForgeMenu);
         public static readonly Random random = new Random();
@@ -529,6 +527,7 @@ namespace StardewHack.WearMoreRings
 #region Patch Ring
         // Not sure how my mod uses this, but the code in the Ring constructor that generates a UniqueID seems seriously flawed.
         // It has a reasonably high probability of creating duplicates. So this patch replaces it with a number from a randomly seeded PRNG.
+        // It's for migration purposes. When my mod makes multiple rings sequentially, they get the same UniqueID. This prevents that.
         void Ring_ctor() {
             var code = FindCode(
                 OpCodes.Ldarg_0,
@@ -539,7 +538,7 @@ namespace StardewHack.WearMoreRings
             );
             code.Extend(
                 Instructions.Call_get(typeof(Game1), nameof(Game1.stats)),
-                Instructions.Ldfld(typeof(Stats), nameof(Stats.ItemsCrafted)),
+                Instructions.Call_get(typeof(Stats), nameof(Stats.ItemsCrafted)),
                 OpCodes.Add,
                 OpCodes.Callvirt
             );
