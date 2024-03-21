@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using GenericModConfigMenu;
 using Microsoft.Xna.Framework;
-using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Crops;
@@ -14,10 +13,10 @@ using static HarmonyLib.Code;
 namespace StardewHack.HarvestWithScythe
 {
     public enum HarvestModeEnum {
-        HAND, 
-        IRID, // I.e. vanilla default
-        GOLD, // I.e. hand, unless the golden scythe is equipped.
-        BOTH, // I.e. determined by whether the scythe is equipped.
+        HAND, // prevent scythe harvesting.
+        IRID, // vanilla default.
+        GOLD, // golden scythe can be used.
+        BOTH, // determined by whether a scythe is equipped.
     }
 
     public class ModConfig {
@@ -25,15 +24,12 @@ namespace StardewHack.HarvestWithScythe
         public bool HarvestWithSword = false;
     
         /** How should flowers be harvested? 
-            * Any object whose harvest has Object.flowersCategory. */
+         * Any object whose harvest has Object.flowersCategory. */
         public HarvestModeEnum Flowers = HarvestModeEnum.BOTH;
             
-        /** How should forage be harvested? 
-            * Any Object where `isForage() && isSpawnedObject && !questItem` evaluates to true is considered forage. */
-        public HarvestModeEnum Forage = HarvestModeEnum.BOTH;
-            
-        /** How should pluckable crops be harvested? 
-            * Any Crop that has `harvestMethod == 0` is considered a pluckable crop. */
+        /** How should pluckable crops & forage be harvested? 
+         * Any Crop that has `harvestMethod == 0` is considered a pluckable crop.
+         * Any object that sits on top of HoeDirt is considered forage. */
         public HarvestModeEnum PluckableCrops = HarvestModeEnum.BOTH;
     }
 
@@ -57,24 +53,12 @@ namespace StardewHack.HarvestWithScythe
      * in SDV 1.6. Whether a crop is a flower is detected using IsFlower, which is based on
      * Utility.findCloseFlower.
      *
-     * Forage are plain Objects where `isForage() && isSpawnedObject && !questItem` evaluates to true.
-     * Those are handled by GameLocation.checkAction() and Object.performToolAction(). As the 
-     * game does not provide logic for scythe harvesting of forage, this is provided by this mod, 
-     * see ScytheForage().
-     *
+     * Forage are plain Objects that exist on top of HoeDirt.
      */
     public class ModEntry : HackWithConfig<ModEntry, ModConfig> {
         public override void HackEntry(IModHelper helper) {
             I18n.Init(helper.Translation);
-
-            // Scythe harvesting
             Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2()), HoeDirt_performToolAction);
-
-            // Interaction with HoeDirt
-            //Patch((HoeDirt hd) => hd.performUseAction(new Vector2()), HoeDirt_performUseAction);
-
-            // Sword harvesting grass
-            Patch((Grass g) => g.performToolAction(null, 0, new Vector2()), Grass_performToolAction);
         }
 
 #region ModConfig
@@ -113,15 +97,7 @@ namespace StardewHack.HarvestWithScythe
             return false;
         }
 
-        /** Determine whether the given crop can be harvested using a scythe. */
-        public static bool CanScytheCrop(Crop crop, Tool tool) {
-            getInstance().Monitor.Log($"{crop} {tool}");
-            if (crop == null) return false;
-            if (crop.GetHarvestMethod() == HarvestMethod.Scythe) return true;
-
-            ModConfig config = getInstance().config;
-            HarvestModeEnum mode = IsFlower(crop) ? config.Flowers : config.PluckableCrops;
-
+        public static bool CheckMode(HarvestModeEnum mode, Tool tool) {
             switch (mode) {
                 case HarvestModeEnum.BOTH: return true;
                 case HarvestModeEnum.GOLD: return tool.QualifiedItemId == MeleeWeapon.goldenScytheId || tool.QualifiedItemId == MeleeWeapon.iridiumScytheID;
@@ -131,12 +107,25 @@ namespace StardewHack.HarvestWithScythe
                     throw new System.Exception("unreachable code");
             }
         }
+
+        /** Determine whether the given crop can be harvested using a scythe. */
+        public static bool CanScytheCrop(Crop crop, Tool tool) {
+            if (crop == null) return false;
+            if (crop.GetHarvestMethod() == HarvestMethod.Scythe) return true;
+
+            ModConfig config = getInstance().config;
+            HarvestModeEnum mode = IsFlower(crop) ? config.Flowers : config.PluckableCrops;
+            return CheckMode(mode, tool);
+        }
+
+        public static bool CanScytheForage(Tool tool) {
+            ModConfig config = getInstance().config;
+            return CheckMode(config.PluckableCrops, tool);
+        }
+
 #endregion
 
 #region Patch HoeDirt
-
-        static readonly InstructionMatcher HoeDirt_crop = Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop));
-
         void HoeDirt_performToolAction() {
             // Replace Tool.isScythe call with our own method.
             var code = FindCode(
@@ -171,137 +160,30 @@ namespace StardewHack.HarvestWithScythe
             );
             crop.length--;
             crop.Replace(
+                // if (ModEntry.CanScytheCrop(this.crop, t))
                 Instructions.Ldarg_0(),
                 Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
                 Instructions.Ldarg_1(),
                 Instructions.Call(typeof(ModEntry), nameof(CanScytheCrop), typeof(Crop), typeof(Tool))
             );
-        }
 
-#if false
-        private void HoeDirt_performUseAction_hand(LocalBuilder var_temp_harvestMethod) {
-            // Do plucking logic
-            var harvest_hand = FindCode(
-                // if ((int)crop.harvestMethod == 0) {
+            // Add fix for forage
+            var forage = crop.FindNext(
+                // if (this.crop == null && 
                 OpCodes.Ldarg_0,
-                HoeDirt_crop,
-                Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
-                OpCodes.Call, // NetCode implicit cast.
-                OpCodes.Brtrue
-            );
-            harvest_hand.Replace(
-                // var temp_harvestmethod = crop.harvestMethod;
-                harvest_hand[0],
-                harvest_hand[1],
-                harvest_hand[2],
-                harvest_hand[3],
-                Instructions.Stloc_S(var_temp_harvestMethod),
-                
-                // if (ModEntry.CanHarvestCrop(crop, 0)) {
-                Instructions.Ldarg_0(),
-                harvest_hand[1],
-                Instructions.Ldc_I4_0(),
-                Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
-                Instructions.Brfalse((Label)harvest_hand[4].operand),
-                
-                // crop.harvestMethod = 0;
-                Instructions.Ldarg_0(),
-                harvest_hand[1],
-                harvest_hand[2],
-                Instructions.Ldc_I4_0(),
-                Instructions.Call_set(typeof(NetInt), nameof(NetInt.Value))
-            );
-        }
-
-        private void HoeDirt_performUseAction_scythe(LocalBuilder var_temp_harvestMethod) {
-            // Do scything logic
-            var harvest_scythe = FindCode(
-                // if ((int)crop.harvestMethod == 1) {
-                OpCodes.Ldarg_0,
-                HoeDirt_crop,
-                Instructions.Ldfld(typeof(Crop), nameof(Crop.harvestMethod)),
-                OpCodes.Call, // NetCode implicit cast.
-                OpCodes.Ldc_I4_1,
-                OpCodes.Bne_Un
-            );
-            harvest_scythe.Replace(
-                // crop.harvestMethod = temp_harvestmethod;
-                harvest_scythe[0],
-                harvest_scythe[1],
-                harvest_scythe[2],
-                Instructions.Ldloc_S(var_temp_harvestMethod),
-                Instructions.Call_set(typeof(NetInt), nameof(NetInt.Value)),
-
-                // if (ModEntry.CanHarvestCrop(crop, 1)) {
-                Instructions.Ldarg_0(),
-                harvest_scythe[1],
-                Instructions.Ldc_I4_1(),
-                Instructions.Call(typeof(ModEntry), nameof(CanHarvestCrop), typeof(Crop), typeof(int)),
-                Instructions.Brfalse((Label)harvest_scythe[5].operand)
-            );
-
-            harvest_scythe = harvest_scythe.FindNext(
-                // Game1.player.CurrentTool is MeleeWeapon &&
-                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                OpCodes.Brfalse,
-
-                // (Game1.player.CurrentTool as MeleeWeapon).isScythe()
-                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
-                Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                OpCodes.Ldc_I4_M1,
-                Instructions.Callvirt(typeof(MeleeWeapon), nameof(MeleeWeapon.isScythe), typeof(int)),
+                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                OpCodes.Brtrue_S,
+                // t.ItemId == "66" &&
+                OpCodes.Ldarg_1,
+                Instructions.Callvirt_get(typeof(Item), nameof(Item.ItemId)),
+                Instructions.Ldstr("66"),
+                OpCodes.Call,
                 OpCodes.Brfalse
             );
-
-            harvest_scythe.Replace(
-                harvest_scythe[0],
-                harvest_scythe[1],
-                Instructions.Call(GetType(), nameof(IsScythe), typeof(Tool)),
-                harvest_scythe[3]
+            forage.Splice(4,3,
+                // ModEntry.CanScytheCrop(t) &&
+                Instructions.Call(typeof(ModEntry), nameof(CanScytheForage), typeof(Tool))
             );
-        }
-
-        void HoeDirt_performUseAction() {
-            LocalBuilder var_temp_harvestMethod = generator.DeclareLocal(typeof(int));
-            HoeDirt_performUseAction_hand(var_temp_harvestMethod);
-            HoeDirt_performUseAction_scythe(var_temp_harvestMethod);
-        }
-
-#endif
-#endregion
-
-#region Grass
-        private void Grass_performToolAction() {
-            /*
-            var isScytheCode = FindCode(
-                // if (t is MeleeWeapon && 
-                OpCodes.Ldarg_1,
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                OpCodes.Brfalse,
-
-                // (t.Name.Contains("Scythe") || 
-                OpCodes.Ldarg_1,
-                Instructions.Callvirt_get(typeof(Item), nameof(Item.Name)),
-                Instructions.Ldstr("Scythe"),
-                OpCodes.Callvirt,
-                OpCodes.Brtrue,
-
-                // (t as MeleeWeapon).isScythe()))
-                OpCodes.Ldarg_1,
-                Instructions.Isinst(typeof(MeleeWeapon)),
-                OpCodes.Ldc_I4_M1,
-                Instructions.Callvirt(typeof(MeleeWeapon), nameof(MeleeWeapon.isScythe), typeof(int)),
-                OpCodes.Brfalse
-            );
-            isScytheCode.Replace(
-                isScytheCode[0],
-                Instructions.Call(GetType(), nameof(IsScythe), typeof(Tool)),
-                isScytheCode[2]
-            );
-            */
         }
 #endregion
     }
