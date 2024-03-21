@@ -100,8 +100,8 @@ namespace StardewHack.HarvestWithScythe
         public static bool CheckMode(HarvestModeEnum mode, Tool tool) {
             switch (mode) {
                 case HarvestModeEnum.BOTH: return true;
-                case HarvestModeEnum.GOLD: return tool.QualifiedItemId == MeleeWeapon.goldenScytheId || tool.QualifiedItemId == MeleeWeapon.iridiumScytheID;
-                case HarvestModeEnum.IRID: return tool.QualifiedItemId == MeleeWeapon.iridiumScytheID;
+                case HarvestModeEnum.GOLD: return tool.ItemId == MeleeWeapon.goldenScytheId || tool.ItemId == MeleeWeapon.iridiumScytheID;
+                case HarvestModeEnum.IRID: return tool.ItemId == MeleeWeapon.iridiumScytheID;
                 case HarvestModeEnum.HAND: return false;
                 default:
                     throw new System.Exception("unreachable code");
