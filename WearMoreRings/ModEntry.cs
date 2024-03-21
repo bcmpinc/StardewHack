@@ -220,38 +220,18 @@ namespace StardewHack.WearMoreRings
         void InventoryPage_draw() {
             // Change the equipment slot drawing code to draw the 4 additional slots.
             InstructionRange range;
-            try {
-                // Windows
-                range  = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloca_S,
-                    OpCodes.Call,
-                    OpCodes.Stloc_S, // 4
-                    OpCodes.Ldloc_S, // 4
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_S, // 5
-                    // case "Hat":
-                    OpCodes.Ldloc_S, // 5
-                    Instructions.Ldstr("Hat")
-                );
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                // Linux & MacOS
-                range  = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloca_S,
-                    OpCodes.Call,
-                    OpCodes.Stloc_S, // 4
-                    OpCodes.Ldloc_S, // 4
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_S, // 5
-                    OpCodes.Ldloc_S, // 5
-                    OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_S, // 5
-                    Instructions.Ldstr("Hat")
-                );
-            }
+            range  = FindCode(
+                // switch (equipmentIcon.name) {
+                OpCodes.Ldloca_S,
+                OpCodes.Call,
+                OpCodes.Stloc_S, // 4
+                OpCodes.Ldloc_S, // 4
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_S, // 5
+                // case "Hat":
+                OpCodes.Ldloc_S, // 5
+                Instructions.Ldstr("Hat")
+            );
             
             // Select entire loop contents (i.e. switch block)
             range.Extend(range.Follow(-1));
@@ -274,42 +254,23 @@ namespace StardewHack.WearMoreRings
             // Change code responsible for obtaining the tooltip information.
             var var_item = generator.DeclareLocal(typeof(Item));
             InstructionRange code;
-            try {
-                // Windows
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    // case "Hat":
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Pants"),
-                    OpCodes.Call,
-                    OpCodes.Brtrue,
-                    OpCodes.Br
-                );
-                code.Extend(code.End.Follow(-1));
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                // Linux & MacOS
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_2,
-                    // case null: break;
-                    OpCodes.Ldloc_2,
-                    OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_2,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(code.Follow(4));
-            }
+            code = FindCode(
+                // switch (equipmentIcon.name) {
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_2,
+                // case "Hat":
+                OpCodes.Ldloc_2,
+                Instructions.Ldstr("Hat")
+            );
+            code.Extend(
+                OpCodes.Ldloc_2,
+                Instructions.Ldstr("Pants"),
+                OpCodes.Call,
+                OpCodes.Brtrue,
+                OpCodes.Br
+            );
+            code.Extend(code.End.Follow(-1));
             code.Replace(
                 // var item = EquipmentIcon.item
                 code[0],
@@ -420,42 +381,23 @@ namespace StardewHack.WearMoreRings
         void InventoryPage_receiveLeftClick() {
             // Handle a ring-inventory slot being clicked.
             InstructionRange code;
-            try {
-                // Windows
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_3,
-                    // case "Hat":
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Pants"),
-                    OpCodes.Call,
-                    OpCodes.Brtrue,
-                    OpCodes.Br
-                );
-                code.Extend(code.End.Follow(-1));
-            } catch (Exception err) {
-                LogException(err, LogLevel.Trace);
-                // Linux & MacOS
-                code = FindCode(
-                    // switch (equipmentIcon.name) {
-                    OpCodes.Ldloc_1,
-                    Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                    OpCodes.Stloc_3,
-                    // case null: break;
-                    OpCodes.Ldloc_3,
-                    OpCodes.Brfalse,
-                    // case "Hat":
-                    OpCodes.Ldloc_3,
-                    Instructions.Ldstr("Hat")
-                );
-                code.Extend(code.Follow(4));
-            }
+            code = FindCode(
+                // switch (equipmentIcon.name) {
+                OpCodes.Ldloc_1,
+                Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
+                OpCodes.Stloc_3,
+                // case "Hat":
+                OpCodes.Ldloc_3,
+                Instructions.Ldstr("Hat")
+            );
+            code.Extend(
+                OpCodes.Ldloc_3,
+                Instructions.Ldstr("Pants"),
+                OpCodes.Call,
+                OpCodes.Brtrue,
+                OpCodes.Br
+            );
+            code.Extend(code.End.Follow(-1));
             code.Replace(
                 code[0],
                 Instructions.Call(typeof(ModEntry), nameof(EquipmentClick), typeof(ClickableComponent)),

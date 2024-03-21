@@ -291,27 +291,22 @@ namespace BiggerBackpack
             );
             EndCode().ReplaceJump(-1, EndCode()[-4]);
             
-            try {
-                // Move portrait `Game1.tileSize` pixels down.
-                // This only affects where the tooltip shows up.
-                FindCode(
-                    OpCodes.Ldarg_0,
-                    Instructions.Ldfld(typeof(IClickableMenu), nameof(IClickableMenu.yPositionOnScreen)),
-                    Instructions.Ldsfld(typeof(IClickableMenu), nameof(IClickableMenu.borderWidth)),
-                    OpCodes.Add,
-                    Instructions.Ldsfld(typeof(IClickableMenu), nameof(IClickableMenu.spaceToClearTopBorder)),
-                    OpCodes.Add,
-                    Instructions.Ldc_I4(256),
-                    OpCodes.Add,
-                    Instructions.Ldc_I4_8(),
-                    OpCodes.Sub,
-                    Instructions.Ldc_I4_S(64),
-                    OpCodes.Add
-                )[6].operand = 256 + Game1.tileSize;
-            } catch (System.Exception err) {
-                Monitor.Log("Failed to fix portrait tooltip position.", LogLevel.Warn);
-                LogException(err, LogLevel.Warn);
-            }
+            // Move portrait `Game1.tileSize` pixels down.
+            // This only affects where the tooltip shows up.
+            FindCode(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(IClickableMenu), nameof(IClickableMenu.yPositionOnScreen)),
+                Instructions.Ldsfld(typeof(IClickableMenu), nameof(IClickableMenu.borderWidth)),
+                OpCodes.Add,
+                Instructions.Ldsfld(typeof(IClickableMenu), nameof(IClickableMenu.spaceToClearTopBorder)),
+                OpCodes.Add,
+                Instructions.Ldc_I4(256),
+                OpCodes.Add,
+                Instructions.Ldc_I4_8(),
+                OpCodes.Sub,
+                Instructions.Ldc_I4_S(64),
+                OpCodes.Add
+            )[6].operand = 256 + Game1.tileSize;
         }
 
         void InventoryPage_draw() {
