@@ -23,6 +23,9 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes
+#### 7.3:
+* Chineese translation.
+
 #### 7.2:
 * Fixed the Gold and Iridium settings.
 
