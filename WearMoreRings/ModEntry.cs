@@ -10,6 +10,7 @@ using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using System.Text;
 
 namespace StardewHack.WearMoreRings
 {
@@ -228,13 +229,17 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_S, // 4
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
                 OpCodes.Stloc_S, // 5
-                // case "Hat":
                 OpCodes.Ldloc_S, // 5
-                Instructions.Ldstr("Hat")
+                OpCodes.Call
+            );
+
+            // Get one of the "no match" branches.
+            var branch = range.FindNext(
+                OpCodes.Br
             );
             
             // Select entire loop contents (i.e. switch block)
-            range.Extend(range.Follow(-1));
+            range.Extend(branch.Follow(0));
             range.Replace(
                 range[0],
                 range[1],
@@ -259,18 +264,14 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_1,
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
                 OpCodes.Stloc_2,
-                // case "Hat":
                 OpCodes.Ldloc_2,
-                Instructions.Ldstr("Hat")
+                OpCodes.Call
             );
-            code.Extend(
-                OpCodes.Ldloc_2,
-                Instructions.Ldstr("Pants"),
-                OpCodes.Call,
-                OpCodes.Brtrue,
+            // Get one of the "no match" branches.
+            var branch = code.FindNext(
                 OpCodes.Br
             );
-            code.Extend(code.End.Follow(-1));
+            code.Extend(branch.Follow(0));
             code.Replace(
                 // var item = EquipmentIcon.item
                 code[0],
@@ -385,19 +386,15 @@ namespace StardewHack.WearMoreRings
                 // switch (equipmentIcon.name) {
                 OpCodes.Ldloc_1,
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
-                OpCodes.Stloc_3,
-                // case "Hat":
-                OpCodes.Ldloc_3,
-                Instructions.Ldstr("Hat")
+                OpCodes.Stloc_S, // 4
+                OpCodes.Ldloc_S, // 4
+                OpCodes.Call
             );
-            code.Extend(
-                OpCodes.Ldloc_3,
-                Instructions.Ldstr("Pants"),
-                OpCodes.Call,
-                OpCodes.Brtrue,
+            // Get one of the "no match" branches.
+            var branch = code.FindNext(
                 OpCodes.Br
             );
-            code.Extend(code.End.Follow(-1));
+            code.Extend(branch.Follow(0));
             code.Replace(
                 code[0],
                 Instructions.Call(typeof(ModEntry), nameof(EquipmentClick), typeof(ClickableComponent)),
@@ -444,7 +441,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Ret()
             );
         }
-        #endregion Patch InventoryPage
+#endregion Patch InventoryPage
 
 #region Patch ForgeMenu
         void ForgeMenu_CreateButtons() {
@@ -491,7 +488,7 @@ namespace StardewHack.WearMoreRings
                 Instructions.Call(typeof(Random), nameof(Random.Next))
             );
         }
-        #endregion Patch Ring
+#endregion Patch Ring
     }
 }
 
