@@ -10,6 +10,8 @@ using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using StardewValley.Minigames;
+using static HarmonyLib.Code;
 
 namespace StardewHack.WearMoreRings
 {
@@ -217,6 +219,22 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Callvirt
             );
             items.Remove();
+            
+            // Remove trinkets
+            items = items.FindNext(
+                // if (num)
+                OpCodes.Brfalse,
+                // Farmer.MaximumTrinkets = 1;
+                OpCodes.Ldc_I4_1,
+                Instructions.Stsfld(typeof(Farmer), nameof(Farmer.MaximumTrinkets)),
+                // for (int i = 0;
+                OpCodes.Ldc_I4_0,
+                OpCodes.Stloc_1
+            );
+            items.Extend(items.Follow(0));
+            items.Replace(
+                Instructions.Pop()
+            );
         }
         
         static public void DrawEquipment(ClickableComponent icon, Microsoft.Xna.Framework.Graphics.SpriteBatch b) {
