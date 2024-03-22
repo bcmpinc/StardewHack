@@ -10,8 +10,6 @@ using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-using StardewValley.Minigames;
-using static HarmonyLib.Code;
 
 namespace StardewHack.WearMoreRings
 {
@@ -19,6 +17,7 @@ namespace StardewHack.WearMoreRings
     {
         /** How many ring slots are available. */
         public int Rings = 8;
+        public bool BonusTrinket = false;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI_2
@@ -75,6 +74,15 @@ namespace StardewHack.WearMoreRings
                 },
                 min: 2, 
                 max: 20
+            );
+            api.AddBoolOption(
+                mod: ModManifest, 
+                name: I18n.BonusTrinketName, 
+                tooltip: I18n.BonusTrinketTooltip,
+                getValue: () => config.BonusTrinket, 
+                setValue: (bool val) => {
+                    config.BonusTrinket = val; 
+                }
             );
         }
 
@@ -135,15 +143,17 @@ namespace StardewHack.WearMoreRings
 
         static public void AddEquipmentIcons(InventoryPage page) {
             int inv = Game1.player.MaxItems - 12;
-            bool has_trinkets = Game1.player.stats.Get("trinketSlots") != 0;
-            var brt = has_trinkets ? 120 : 112;
+            int trinkets = Game1.player.stats.Get("trinketSlots") == 0 ? 0 : getConfig().BonusTrinket ? 2 : 1;
+            var brt = trinkets == 0 ? 112 : 120;
             //             name            x   y   id   up   dn   lt   rt, item
             AddIcon(page, "Hat",           0,  0, 102, inv, 103,  -1, 110, Game1.player.hat.Value);
             AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, 111, Game1.player.shirtItem.Value);
             AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, 112, Game1.player.pantsItem.Value);
             AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, brt, Game1.player.boots.Value);
-            if (has_trinkets) { 
-                AddIcon(page, "Trinket",  18, 48, 120, 104,  -1, 108, 112, get_trinket(0));
+            var rlt = 108;
+            for (int i=0; i<trinkets; i++) {
+                AddIcon(page, "Trinket",  18+16*i, 48, 120+i, 104,  -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                rlt = 120+i;
             }
 
             var max_rings = getInstance().config.Rings;
@@ -153,7 +163,7 @@ namespace StardewHack.WearMoreRings
                       case 0: return 102;
                       case 1: return 103;
                       case 2: return 104;
-                      case 3: return has_trinkets ? 120 : 108;
+                      case 3: return rlt;
                     }
                 }
                 if (y==-1) {
@@ -383,7 +393,7 @@ namespace StardewHack.WearMoreRings
                 case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing);    break;
                 case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing);    break;
                 case "Boots":        Game1.player.boots.Set (helditem as Boots);           break;
-                case "Trinket":      set_trinket(0, helditem as Trinket);                  break;
+                case "Trinket":      set_trinket(icon.myID - 120, helditem as Trinket);    break;
                 default:
                     if (icon.name.StartsWith("Ring ", StringComparison.Ordinal)) {
                         int id = int.Parse(icon.name.Substring(5));
