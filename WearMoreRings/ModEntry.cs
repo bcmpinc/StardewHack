@@ -214,6 +214,7 @@ namespace StardewHack.WearMoreRings
                 if (icon.name == "Shirt") tile = 69;
                 if (icon.name == "Pants") tile = 68;
                 if (icon.name == "Boots") tile = 40;
+                if (icon.name == "Trinket") tile = 70;
                 b.Draw (Game1.menuTexture, icon.bounds, Game1.getSourceRectForStandardTileSheet (Game1.menuTexture, tile, -1, -1), Color.White);
             }
         }
@@ -342,10 +343,11 @@ namespace StardewHack.WearMoreRings
             
             // Update inventory
             switch (icon.name) {
-                case "Hat":          Game1.player.hat.Set (helditem as Hat);            break;
-                case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing); break;
-                case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing); break;
-                case "Boots":        Game1.player.boots.Set (helditem as Boots);        break;
+                case "Hat":          Game1.player.hat.Set (helditem as Hat);               break;
+                case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing);    break;
+                case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing);    break;
+                case "Boots":        Game1.player.boots.Set (helditem as Boots);           break;
+                case "Trinket":      Game1.player.trinketItems[0] = (helditem as Trinket); break;
                 default:
                     if (icon.name.StartsWith("Ring ", StringComparison.Ordinal)) {
                         int id = int.Parse(icon.name.Substring(5));
@@ -358,10 +360,12 @@ namespace StardewHack.WearMoreRings
             }
 
             // Equip/unequip
-            (icon.item as Ring )?.onUnequip(Game1.player);
-            (icon.item as Boots)?.onUnequip(Game1.player);
-            (helditem as Ring )?.onEquip(Game1.player);
-            (helditem as Boots)?.onEquip(Game1.player);
+            (icon.item as Ring   )?.onUnequip(Game1.player);
+            (icon.item as Boots  )?.onUnequip(Game1.player);
+            (icon.item as Trinket)?.onUnequip(Game1.player);
+            (helditem  as Ring   )?.onEquip(Game1.player);
+            (helditem  as Boots  )?.onEquip(Game1.player);
+            (helditem  as Trinket)?.onEquip(Game1.player);
             
             // Swap items
             Game1.player.CursorSlotItem = Utility.PerformSpecialItemGrabReplacement(icon.item);
