@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.2:
+* Fixed compatibility issue with SpaceCore mod.
+
 #### 7.1:
 * Updated for Stardew Valley 1.6
 * Added config option for bonus trinket (untested).

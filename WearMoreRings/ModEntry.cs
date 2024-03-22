@@ -22,7 +22,6 @@ namespace StardewHack.WearMoreRings
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>, IWearMoreRingsAPI_2
     {
-        private Type forge_menu_class = typeof(ForgeMenu);
         public static readonly Random random = new Random();
         public static readonly PerScreen<RingMap> container = new PerScreen<RingMap>();
 
@@ -54,12 +53,7 @@ namespace StardewHack.WearMoreRings
             Patch((InventoryPage ip)=>ip.performHoverAction(0,0), InventoryPage_performHoverAction);
             Patch((InventoryPage ip)=>ip.receiveLeftClick(0,0,false), InventoryPage_receiveLeftClick);
             Patch(()=>new Ring("0"), Ring_ctor);
-
-            if (helper.ModRegistry.IsLoaded("spacechase0.SpaceCore")) {
-                Monitor.Log("Found SpaceCore mod, trying to patch its NewForgeMenu class instead.", LogLevel.Warn);
-                forge_menu_class = AccessTools.TypeByName("SpaceCore.Interface.NewForgeMenu");
-            }
-            Patch(forge_menu_class, "_CreateButtons", ForgeMenu_CreateButtons);
+            Patch(typeof(ForgeMenu), "_CreateButtons", ForgeMenu_CreateButtons);
         }
         
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
@@ -498,7 +492,7 @@ namespace StardewHack.WearMoreRings
             // Remove vanilla ring buttons.
             var code = FindCode(
                 OpCodes.Ldarg_0,
-                Instructions.Ldfld(forge_menu_class, nameof(ForgeMenu.equipmentIcons))
+                Instructions.Ldfld(typeof(ForgeMenu), nameof(ForgeMenu.equipmentIcons))
             );
             code.Extend(
                 Instructions.Ldstr("Ring2")
