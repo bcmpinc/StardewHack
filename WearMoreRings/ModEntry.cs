@@ -10,7 +10,6 @@ using StardewValley.Objects;
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-using System.Text;
 
 namespace StardewHack.WearMoreRings
 {
@@ -121,14 +120,30 @@ namespace StardewHack.WearMoreRings
             page.equipmentIcons.Add(component);
         }
 
+        static public Item get_trinket(int i) {
+            if (i >= Game1.player.trinketItems.Count) return null;
+            return Game1.player.trinketItems[i];
+        }
+        static public void set_trinket(int i, Trinket item) {
+            while (i >= Game1.player.trinketItems.Count) {
+                Game1.player.trinketItems.Add(null);
+            }
+            Game1.player.trinketItems[i] = item;
+        }
+
         static public void AddEquipmentIcons(InventoryPage page) {
             int inv = Game1.player.MaxItems - 12;
+            bool has_trinkets = Game1.player.stats.Get("trinketSlots") != 0;
+            var brt = has_trinkets ? 120 : 112;
             //             name            x   y   id   up   dn   lt   rt, item
             AddIcon(page, "Hat",           0,  0, 102, inv, 103,  -1, 110, Game1.player.hat.Value);
             AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, 111, Game1.player.shirtItem.Value);
             AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, 112, Game1.player.pantsItem.Value);
-            AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, 112, Game1.player.boots.Value);
-            
+            AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, brt, Game1.player.boots.Value);
+            if (has_trinkets) { 
+                AddIcon(page, "Trinket",  18, 48, 120, 104,  -1, 108, 112, get_trinket(0));
+            }
+
             var max_rings = getInstance().config.Rings;
             int slot_id(int x, int y, int def=-1) {
                 if (x==-1) {
@@ -136,7 +151,7 @@ namespace StardewHack.WearMoreRings
                       case 0: return 102;
                       case 1: return 103;
                       case 2: return 104;
-                      case 3: return 108;
+                      case 3: return has_trinkets ? 120 : 108;
                     }
                 }
                 if (y==-1) {
@@ -303,8 +318,7 @@ namespace StardewHack.WearMoreRings
             // And play corresponding sound.
             var helditem = Game1.player.CursorSlotItem;
             // Convert special items (such as copper pan & Lewis pants)
-            if (helditem is StardewValley.Tools.Pan) helditem = new Hat("71");
-            if (helditem is StardewValley.Object && helditem.ItemId == "71") helditem = new Clothing("15");
+            helditem = Utility.PerformSpecialItemPlaceReplacement(helditem);
             if (helditem == null) {
                 if (icon.item == null) return false;
                 Game1.playSound("dwop");
@@ -329,6 +343,10 @@ namespace StardewHack.WearMoreRings
                         Game1.playSound ("sandyStep");
                         DelayedAction.playSoundAfterDelay ("sandyStep", 150, null);
                         break;
+                    case "Trinket":
+                        if (!(helditem is Trinket)) return false;
+                        Game1.playSound ("clank");
+                        break;
                     default:
                         if (!(helditem is Ring)) return false;
                         Game1.playSound ("crit");
@@ -347,7 +365,7 @@ namespace StardewHack.WearMoreRings
                 case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing);    break;
                 case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing);    break;
                 case "Boots":        Game1.player.boots.Set (helditem as Boots);           break;
-                case "Trinket":      Game1.player.trinketItems[0] = (helditem as Trinket); break;
+                case "Trinket":      set_trinket(0, helditem as Trinket);                  break;
                 default:
                     if (icon.name.StartsWith("Ring ", StringComparison.Ordinal)) {
                         int id = int.Parse(icon.name.Substring(5));
