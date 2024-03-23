@@ -1,7 +1,7 @@
 # Yet Another Harvest With Scythe Mod
 
 ## Description
-Allows you to harvest all crops and forage using the scythe. They can also still be plucked, without having to press a toggle button (though this can be disabled in `config.json`). Unlike other 'harvest with scythe' mods, this patch does not affect your savegame. So it is possible to revert to the old behavior by simply removing this mod.
+Allows you to harvest all crops and forage using the scythe. They can also still be plucked, without having to press a toggle button (though this can be disabled in `config.json`). Unlike other 'harvest with scythe' mods, this patch does not affect your save game. So it is possible to revert to the old behavior by simply removing this mod.
 
 ## Config
 *Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.*
@@ -24,7 +24,8 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes
 #### 7.3:
-* Chineese translation.
+* Chinese translation.
+* Patch foraging xp and skills not being applied when using the scythe (bug in SDV vanilla).
 
 #### 7.2:
 * Fixed the Gold and Iridium settings.

@@ -8,7 +8,6 @@ using StardewValley;
 using StardewValley.GameData.Crops;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
-using static HarmonyLib.Code;
 
 namespace StardewHack.HarvestWithScythe
 {
@@ -17,16 +16,23 @@ namespace StardewHack.HarvestWithScythe
         IRID, // vanilla default.
         GOLD, // golden scythe can be used.
         BOTH, // determined by whether a scythe is equipped.
+        SCYTHE, // cannot be harvested by hand.
     }
 
     public class ModConfig {
         /** Whether a sword can be used instead of a normal scythe. */
         public bool HarvestWithSword = false;
+
+        /** Whether you can still pluck plants with a valid scythe equipped. */
+        public bool PluckingScythe = false;
+
+        /** Whether the scythe should work too on forage not above tilled soil. */
+        public bool HarvestAllForage = false;
     
         /** How should flowers be harvested? 
          * Any object whose harvest has Object.flowersCategory. */
         public HarvestModeEnum Flowers = HarvestModeEnum.BOTH;
-            
+
         /** How should pluckable crops & forage be harvested? 
          * Any Crop that has `harvestMethod == 0` is considered a pluckable crop.
          * Any object that sits on top of HoeDirt is considered forage. */
@@ -61,17 +67,20 @@ namespace StardewHack.HarvestWithScythe
             Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2()), HoeDirt_performToolAction);
         }
 
-#region ModConfig
+        #region ModConfig
 
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddBoolOption(mod: ModManifest, name: I18n.HarvestWithSwordName, tooltip: I18n.HarvestWithSwordTooltip, getValue: () => config.HarvestWithSword, setValue: (bool val) => config.HarvestWithSword = val);
+            api.AddBoolOption(mod: ModManifest, name: I18n.PluckingScytheName,   tooltip: I18n.PluckingScytheTooltip,   getValue: () => config.PluckingScythe,   setValue: (bool val) => config.PluckingScythe   = val);
+            api.AddBoolOption(mod: ModManifest, name: I18n.AllForageName,        tooltip: I18n.AllForageTooltip,        getValue: () => config.HarvestAllForage, setValue: (bool val) => config.HarvestAllForage = val);
 
             var options_dict = new Dictionary<HarvestModeEnum, string>()
             {
-                {HarvestModeEnum.HAND, I18n.Hand()},
-                {HarvestModeEnum.IRID, I18n.Irid()},
-                {HarvestModeEnum.GOLD, I18n.Gold()},
-                {HarvestModeEnum.BOTH, I18n.Both()},
+                {HarvestModeEnum.HAND,   I18n.Hand()},
+                {HarvestModeEnum.IRID,   I18n.Irid()},
+                {HarvestModeEnum.GOLD,   I18n.Gold()},
+                {HarvestModeEnum.BOTH,   I18n.Both()},
+                {HarvestModeEnum.SCYTHE, I18n.Scythe()},
             };
             var reverse_dict = options_dict.ToDictionary(x=>x.Value, x=>x.Key);
             string[] options = options_dict.Values.ToArray();
@@ -122,7 +131,6 @@ namespace StardewHack.HarvestWithScythe
             ModConfig config = getInstance().config;
             return CheckMode(config.PluckableCrops, tool);
         }
-
 #endregion
 
 #region Patch HoeDirt
@@ -167,7 +175,7 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Call(typeof(ModEntry), nameof(CanScytheCrop), typeof(Crop), typeof(Tool))
             );
 
-            // Add fix for forage
+            // Add fix for forage, including quality & xp
             var forage = crop.FindNext(
                 // if (this.crop == null && 
                 OpCodes.Ldarg_0,
@@ -180,10 +188,45 @@ namespace StardewHack.HarvestWithScythe
                 OpCodes.Call,
                 OpCodes.Brfalse
             );
-            forage.Splice(4,3,
-                // ModEntry.CanScytheCrop(t) &&
-                Instructions.Call(typeof(ModEntry), nameof(CanScytheForage), typeof(Tool))
+            forage.Extend(
+	            // location.objects.Remove(tileLocation);
+                OpCodes.Ldloc_0,
+                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                OpCodes.Ldarg_3,
+                OpCodes.Callvirt,
+                OpCodes.Pop
+	        );
+            forage.Replace(
+                Instructions.Ldarg_0(),
+                Instructions.Ldarg_1(),
+                Instructions.Ldloc_0(),
+                Instructions.Ldarg_3(),
+                Instructions.Call(typeof(ModEntry), nameof(harvest_forage_with_xp), typeof(HoeDirt), typeof(Tool), typeof(GameLocation), typeof(Vector2))
             );
+        }
+
+        static void harvest_forage_with_xp(HoeDirt dirt, Tool t, GameLocation location, Vector2 tileLocation) {
+            if (dirt.crop == null && CanScytheForage(t) && location.objects.ContainsKey(tileLocation) && location.objects[tileLocation].isForage()) {
+				Object o = location.objects[tileLocation];
+                var r = Game1.random;
+                var who = t.getLastFarmerToUse();
+				if (t.getLastFarmerToUse() != null && who.professions.Contains(16)) {
+					o.Quality = 4;
+				} else if (r.NextDouble() < (double)(who.ForagingLevel / 30f)) {
+					o.Quality = 2;
+				} else if (r.NextDouble() < (double)(who.ForagingLevel / 15f)) {
+					o.Quality = 1;
+				}
+                who.gainExperience(2, 7);
+                Game1.stats.ItemsForaged += 1;
+                var vector = new Vector2(tileLocation.X * 64f + 32f, tileLocation.Y * 64f + 32f);
+				Game1.createItemDebris(o, vector, -1);
+                if (who.professions.Contains(13) && r.NextDouble() < 0.2) {
+                    who.gainExperience(2, 7);
+                    Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+                }
+				location.objects.Remove(tileLocation);
+			}
         }
 #endregion
     }
