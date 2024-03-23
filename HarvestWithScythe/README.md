@@ -8,10 +8,13 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 
 * `HarvestWithSword`: Whether a sword can be used instead of a scythe. Default = false.
 
-Valid values for the following settings are: `HAND` (only pluckable), `IRID` (vanilla behavior), `GOLD` (harvestable with golden scythe) `BOTH` (both pluckable and scythable).
+Valid values for the following settings are: `NONE` (crop cannot be harvested at all), `HAND` (only pluckable), `IRID` (vanilla behavior), `GOLD` (harvestable with golden scythe) `BOTH` (both pluckable and scythable), `SCYTHE` (only harvestable with any scythe).
+Note that `NONE` is only useful when using the Generic Mod Config Menu to change this setting in-game.
 
-* `PluckableCrops`: How crops that normally can only be harvested by hand can be harvested. This includes forage that is above tilled soil. Default = BOTH.
+* `PluckableCrops`: How crops that normally can only be harvested by hand can be harvested. Default = BOTH.
+* `ScythableCrops`: How crops that normally can only be harvested with a scythe can be harvested. Default = SCYTHE.
 * `Flowers`: How flowers can be harvested. Default = BOTH.
+* `Forage`:  How forage can be harvested. Default = BOTH.
 
 ## Dependencies
 This mod requires the following mods to be installed:
@@ -24,8 +27,10 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes
 #### 7.3:
-* Chinese translation.
+* Chinese translation (partial).
 * Patch foraging xp and skills not being applied when using the scythe (bug in SDV vanilla).
+* Option for allowing plucking while wielding a scythe.
+* Brought back most of the old settings.
 
 #### 7.2:
 * Fixed the Gold and Iridium settings.
