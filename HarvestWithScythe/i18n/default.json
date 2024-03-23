@@ -1,4 +1,5 @@
 ﻿{
+    // Translation provided by: <leave your name or nexus/discord username here>
     HarvestModeSection: "Harvest mode",
     Hand:   "Hand",
     Irid:   "Iridium",
@@ -9,7 +10,9 @@
     // The words Hand/Iridium/Gold/Both are tags, use the exact same word as specified above.
     HarvestModeDescription: "• Hand: only pluckable; \n • Iridium: vanilla behavior; \n • Gold: can also be harvested with the golden scythe; \n • Both: both pluckable and scythable; \n • Scythe: only scythable;.",
     PluckableCropsName:   "Hand harvested crops",   PluckableCropsTooltip:   "How crops that normally can only be harvested by hand can be harvested.", 
+    ScythableCropsName:   "ScythableCrops",         ScythableCropsTooltip:   "How crops that normally can only be harvested with a scythe can be harvested.",
     FlowersName:          "Flowers",                FlowersTooltip:          "How flowers can be harvested.",
+    ForageName:           "Forage",                 ForageTooltip:           "How forage can be harvested.",
     HarvestWithSwordName: "Harvest with sword",     HarvestWithSwordTooltip: "Whether a sword can be used as a scythe.",
     PluckingScytheName:   "Plucking with scythe",   PluckingScytheTooltip:   "Whether you can still pluck plants with a valid scythe equipped.",
     AllForageName:        "Scythe all forage",      AllForageTooltip:        "Whether the scythe should work too on forage not above tilled soil.",

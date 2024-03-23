@@ -8,6 +8,7 @@ using StardewValley;
 using StardewValley.GameData.Crops;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
+using static HarmonyLib.Code;
 
 namespace StardewHack.HarvestWithScythe
 {
@@ -42,7 +43,7 @@ namespace StardewHack.HarvestWithScythe
     /**
      * This is the core of the Harvest With Scythe mod.
      *
-     * Crops are either harvested by hand, which is initiatied by HoeDirt.PerformUseAction(), 
+     * Crops are either harvested by hand, which is initiated by HoeDirt.PerformUseAction(), 
      * or harvested by scythe, which is initiated by HoeDirt.PerformToolAction().
      * These methods check whether the crop is allowed to be harvested by this method and 
      * then passes control to Crop.harvest() to perform the actual harvesting. 
@@ -64,11 +65,11 @@ namespace StardewHack.HarvestWithScythe
     public class ModEntry : HackWithConfig<ModEntry, ModConfig> {
         public override void HackEntry(IModHelper helper) {
             I18n.Init(helper.Translation);
-            Patch((HoeDirt hd) => hd.performToolAction(null, 0, new Vector2()), HoeDirt_performToolAction);
+            Patch((HoeDirt hd) => hd.performUseAction(Vector2.Zero), HoeDirt_performUseAction);
+            Patch((HoeDirt hd) => hd.performToolAction(null, 0, Vector2.Zero), HoeDirt_performToolAction);
         }
 
         #region ModConfig
-
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddBoolOption(mod: ModManifest, name: I18n.HarvestWithSwordName, tooltip: I18n.HarvestWithSwordTooltip, getValue: () => config.HarvestWithSword, setValue: (bool val) => config.HarvestWithSword = val);
             api.AddBoolOption(mod: ModManifest, name: I18n.PluckingScytheName,   tooltip: I18n.PluckingScytheTooltip,   getValue: () => config.PluckingScythe,   setValue: (bool val) => config.PluckingScythe   = val);
@@ -108,6 +109,7 @@ namespace StardewHack.HarvestWithScythe
 
         public static bool CheckMode(HarvestModeEnum mode, Tool tool) {
             switch (mode) {
+                case HarvestModeEnum.SCYTHE: return true;
                 case HarvestModeEnum.BOTH: return true;
                 case HarvestModeEnum.GOLD: return tool.ItemId == MeleeWeapon.goldenScytheId || tool.ItemId == MeleeWeapon.iridiumScytheID;
                 case HarvestModeEnum.IRID: return tool.ItemId == MeleeWeapon.iridiumScytheID;
@@ -134,6 +136,50 @@ namespace StardewHack.HarvestWithScythe
 #endregion
 
 #region Patch HoeDirt
+        void HoeDirt_performUseAction() {
+            // Change the code that checks and handles Iridium Scythe to allow any scythe that our mod accepts.
+            var code = FindCode(
+                // if (Game1.player.CurrentTool != null && Game1.player.CurrentTool.isScythe() && Game1.player.CurrentTool.ItemId == "66")
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
+                OpCodes.Brfalse_S,
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
+                Instructions.Callvirt(typeof(Tool), nameof(Tool.isScythe)),
+                OpCodes.Brfalse_S,
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
+                Instructions.Callvirt_get(typeof(Item), nameof(Item.ItemId)),
+                Instructions.Ldstr("66"),
+                OpCodes.Call,
+                OpCodes.Brfalse_S
+            );
+            code.length--;
+            code.Replace(
+                Instructions.Ldarg_0(),
+                code[0],
+                code[1],
+                Instructions.Call(typeof(ModEntry), nameof(is_force_scythe), typeof(HoeDirt), typeof(Tool))
+            );
+
+            // Replace the second Tool.isScythe call with our own.
+            code = code.FindNext(
+                Instructions.Callvirt(typeof(Tool), nameof(Tool.isScythe))
+            );
+            code[0] = Instructions.Call(typeof(ModEntry), nameof(IsScythe), typeof(Tool));
+        }
+
+        static bool is_force_scythe(HoeDirt dirt, Tool tool) {
+            var crop = dirt.crop;
+            // Always force scythe if this is a scythe only crop.
+            
+
+            // Never force scythe when plucking while wielding a scythe is enabled.
+            if (getConfig().PluckingScythe) return false;
+
+            return tool != null && IsScythe(tool) && CanScytheCrop(crop, tool);
+        }
+
         void HoeDirt_performToolAction() {
             // Replace Tool.isScythe call with our own method.
             var code = FindCode(
