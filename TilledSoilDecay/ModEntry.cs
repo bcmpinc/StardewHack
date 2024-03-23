@@ -108,15 +108,12 @@ namespace StardewHack.TilledSoilDecay
             ChainPatch(method, AccessTools.Method(typeof(ModEntry), nameof(GameLocation_DayUpdate_Chain)));
         }
 
-        static bool does_soil_decay(GameLocation loc, HoeDirt hoedirt)
-        {
-            var chance = loc.GetDirtDecayChance(Vector2.Zero); // Tile argument is unused.
-            if (chance < 1)
-            {
-                if (-hoedirt.state.Value < getConfig().Delay)
-                {
-                    return false;
-                }
+        static bool does_soil_decay(double chance, HoeDirt hoedirt) {
+            if (chance > 0.99) {
+                return true;
+            }
+            if (-hoedirt.state.Value < getConfig().Delay) {
+                return false;
             }
             chance *= getConfig().DryingRateMultiplier;
             return Game1.random.NextBool(chance);
@@ -134,10 +131,13 @@ namespace StardewHack.TilledSoilDecay
                 OpCodes.Ret
             );
             code.Replace(
-                // return ModEntry.does_soil_decay(this, dirt);
-                Instructions.Ldarg_0(),
+                // return ModEntry.does_soil_decay(this.GetDirtDecayChance(pair.Key), dirt);
+                code[1],
+                code[2],
+                code[3],
+                code[4],
                 Instructions.Ldloc_0(),
-                Instructions.Call(typeof(ModEntry), nameof(does_soil_decay), typeof(GameLocation), typeof(HoeDirt)),
+                Instructions.Call(typeof(ModEntry), nameof(does_soil_decay), typeof(double), typeof(HoeDirt)),
                 Instructions.Ret()
             );
         }

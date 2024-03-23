@@ -19,6 +19,9 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes
+#### 7.3:
+* Fix soil outside of farm areas not decaying.
+
 #### 7.2:
 * Don't apply soil decay delay outside of farm areas.
 
