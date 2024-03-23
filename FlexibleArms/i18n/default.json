@@ -1,3 +1,4 @@
 {
-	Ignore:""
+    // Translation provided by: <leave your name or nexus/discord username here>
+	RangeName: "Max range", RangeTooltip:"How many tiles far can the player reach."
 }
