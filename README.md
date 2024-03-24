@@ -17,4 +17,4 @@ Android is not supported. In particular Wear More Rings and Bigger Backpack will
 
 ## Compiling
 
-Open `StardewHack2.sln` in Visual Studio 2019 (or whatever development tool you are using) and hope it compiles. :)
+Open `StardewHack2.sln` in Visual Studio 2022 (or whatever development tool you are using) and hope it compiles. :)

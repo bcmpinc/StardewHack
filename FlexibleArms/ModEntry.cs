@@ -6,7 +6,7 @@ using StardewValley;
 namespace StardewHack.FlexibleArms
 {
     public class ModConfig {
-        public float MaxRange = 1.5f;
+        public float MaxRange = 1.4f;
     }
 
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
@@ -14,10 +14,10 @@ namespace StardewHack.FlexibleArms
         public override void HackEntry(IModHelper helper)
         {
             I18n.Init(helper.Translation);
-            Patch((Character c) => c.GetToolLocation(false), Character_GetToolLocation);
+            Patch((Character c) => c.GetToolLocation(Vector2.Zero, false), Character_GetToolLocation);
         }
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
-            api.AddNumberOption(mod: ModManifest, name: I18n.RangeName, tooltip: I18n.RangeTooltip, getValue: () => config.MaxRange, setValue: (float val) => config.MaxRange = val, min: 0, max: 10);
+            api.AddNumberOption(mod: ModManifest, name: I18n.RangeName, tooltip: I18n.RangeTooltip, getValue: () => config.MaxRange, setValue: (float val) => config.MaxRange = val, min: 1, max: 5);
         }
 
         void Character_GetToolLocation() {
@@ -27,23 +27,23 @@ namespace StardewHack.FlexibleArms
                 Instructions.Ldarg_2(),
                 Instructions.Call(typeof(ModEntry), nameof(GetToolLocation), typeof(Character), typeof(Vector2), typeof(bool)),
                 Instructions.Ret()
-            );        
+            );
         }
 
-		public static bool withinRadiusOfPlayer(Vector2 point, float radius, Farmer f) {
-			return (f.Position - point).LengthSquared() < radius * radius;
-		}
-
 		public static Vector2 GetToolLocation(Character c, Vector2 target_position, bool ignoreClick) {
-			int direction = c.FacingDirection;
 			if (!ignoreClick && !target_position.Equals(Vector2.Zero) && c.Name.Equals(Game1.player.Name)) {
-				if (withinRadiusOfPlayer(target_position, getConfig().MaxRange * 64.0f, Game1.player)) {
+                var player_position = Game1.player.getStandingPosition();
+                var delta = target_position - player_position;
+                var range = getConfig().MaxRange * 64.0f;
+				if (delta.LengthSquared() <= range * range) {
 					return target_position;
-				}
-				direction = Game1.player.getGeneralDirectionTowards(target_position);
+				} else { 
+                    delta.Normalize();
+				    return player_position + delta * range;
+                }
 			}
 			Rectangle boundingBox = c.GetBoundingBox();
-			return direction switch {
+			return c.FacingDirection switch {
 				0 => new Vector2(boundingBox.X + boundingBox.Width / 2, boundingBox.Y - 48), 
 				1 => new Vector2(boundingBox.X + boundingBox.Width + 48, boundingBox.Y + boundingBox.Height / 2), 
 				2 => new Vector2(boundingBox.X + boundingBox.Width / 2, boundingBox.Y + boundingBox.Height + 48), 
