@@ -7,6 +7,8 @@ Allows you to harvest all crops and forage using the scythe. They can also still
 *Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.*
 
 * `HarvestWithSword`: Whether a sword can be used instead of a scythe. Default = false.
+* `HarvestAllForage`: Whether the scythe should work too on forage not above tilled soil. Default = true.
+* `PluckingScythe`: Whether you can still pluck plants with a scythe equipped. Allowed values: `NEVER`, `INVALID` (only if the scythe cannot harvest it), `ALWAYS`.
 
 Valid values for the following settings are: `NONE` (crop cannot be harvested at all), `HAND` (only pluckable), `IRID` (vanilla behavior), `GOLD` (harvestable with golden scythe) `BOTH` (both pluckable and scythable), `SCYTHE` (only harvestable with any scythe).
 Note that `NONE` is only useful when using the Generic Mod Config Menu to change this setting in-game.

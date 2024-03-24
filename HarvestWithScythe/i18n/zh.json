@@ -1,12 +1,9 @@
 ﻿{
     HarvestModeSection: "收获模式",
-    Hand: "手",
-    Irid: "铱",
-    Gold: "金",
-    Both: "两个都",
-    // The '\n' are line breaks. The '•' are the dots of an itemized list.
-    // The words Hand/Iridium/Gold/Both are tags, use the exact same word as specified above.
-    HarvestModeDescription: "• 手：只能拔毛； \n • 铱：普通行为； \n • 黄金：也可以用金色镰刀收获； \n • 两者：既可拔除又可镰刀。",
+    HM_Hand: "只能拔毛",
+    HM_Irid: "普通行为",
+    HM_Gold: "也可以用金色镰刀收获",
+    HM_Both: "既可拔除又可镰刀",
     PluckableCropsName:   "手工收割庄稼",  PluckableCropsTooltip:   "如何收割通常只能手工收割的农作物。", 
     FlowersName:          "花朵",         FlowersTooltip:          "如何采收鲜花。",
     HarvestWithSwordName: "用剑收获",     HarvestWithSwordTooltip: "剑是否可以当镰刀使用。",

@@ -20,15 +20,21 @@ namespace StardewHack.HarvestWithScythe
         SCYTHE, // cannot be harvested by hand.
     }
 
+    public enum PluckingScytheEnum {
+        NEVER,
+        INVALID,
+        ALWAYS,
+    }
+
     public class ModConfig {
         /** Whether a sword can be used instead of a normal scythe. */
         public bool HarvestWithSword = false;
 
-        /** Whether you can still pluck plants with a valid scythe equipped. */
-        public bool PluckingScythe = false;
-
         /** Whether the scythe should work too on forage not above tilled soil. */
-        public bool HarvestAllForage = false;
+        public bool HarvestAllForage = true;
+
+        /** Whether you can still pluck plants with a scythe equipped. */
+        public PluckingScytheEnum PluckingScythe = PluckingScytheEnum.INVALID;
     
         /** How should flowers be harvested? 
          * Any object whose harvest has Object.flowersCategory. */
@@ -39,7 +45,7 @@ namespace StardewHack.HarvestWithScythe
         public HarvestModeEnum Forage = HarvestModeEnum.BOTH;
 
         /** How should pluckable crops & forage be harvested? 
-         * Any Crop that has `GetHarvestMethod() == HarvestMethod.Hand` is considered a pluckable crop.
+         * Any Crop that has `GetHarvestMethod() == HarvestMethod.Grab` is considered a pluckable crop.
          * Any object that sits on top of HoeDirt is considered forage. */
         public HarvestModeEnum PluckableCrops = HarvestModeEnum.BOTH;
 
@@ -73,6 +79,7 @@ namespace StardewHack.HarvestWithScythe
     public class ModEntry : HackWithConfig<ModEntry, ModConfig> {
         public override void HackEntry(IModHelper helper) {
             I18n.Init(helper.Translation);
+            Patch((Crop c) => c.harvest(0,0,null,null,false), Crop_harvest);
             Patch((HoeDirt hd) => hd.performUseAction(Vector2.Zero), HoeDirt_performUseAction);
             Patch((HoeDirt hd) => hd.performToolAction(null, 0, Vector2.Zero), HoeDirt_performToolAction);
         }
@@ -80,27 +87,35 @@ namespace StardewHack.HarvestWithScythe
         #region ModConfig
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddBoolOption(mod: ModManifest, name: I18n.HarvestWithSwordName, tooltip: I18n.HarvestWithSwordTooltip, getValue: () => config.HarvestWithSword, setValue: (bool val) => config.HarvestWithSword = val);
-            api.AddBoolOption(mod: ModManifest, name: I18n.PluckingScytheName,   tooltip: I18n.PluckingScytheTooltip,   getValue: () => config.PluckingScythe,   setValue: (bool val) => config.PluckingScythe   = val);
             api.AddBoolOption(mod: ModManifest, name: I18n.AllForageName,        tooltip: I18n.AllForageTooltip,        getValue: () => config.HarvestAllForage, setValue: (bool val) => config.HarvestAllForage = val);
+            {// PluckingScythe Settings
+                var options_dict = new Dictionary<PluckingScytheEnum, string>() {
+                    {PluckingScytheEnum.NEVER,   I18n.PSNever()},
+                    {PluckingScytheEnum.INVALID, I18n.PSInvalid()},
+                    {PluckingScytheEnum.ALWAYS,  I18n.PSAlways()},
+                };
+                var reverse_dict = options_dict.ToDictionary(x=>x.Value, x=>x.Key);
+                string[] options = options_dict.Values.ToArray();
+                api.AddTextOption(mod: ModManifest, name: I18n.PluckingScytheName, tooltip: I18n.PluckingScytheTooltip, getValue: () => options_dict[config.PluckingScythe], setValue: (string val) => config.PluckingScythe = reverse_dict[val], allowedValues: options);
+            }
+            {// HarvestMode Settings
+                var options_dict = new Dictionary<HarvestModeEnum, string>() {
+                    {HarvestModeEnum.HAND,   I18n.HMHand()},
+                    {HarvestModeEnum.IRID,   I18n.HMIrid()},
+                    {HarvestModeEnum.GOLD,   I18n.HMGold()},
+                    {HarvestModeEnum.BOTH,   I18n.HMBoth()},
+                    {HarvestModeEnum.SCYTHE, I18n.HMScythe()},
+                    {HarvestModeEnum.NONE,   I18n.HMNone()},
+                };
+                var reverse_dict = options_dict.ToDictionary(x=>x.Value, x=>x.Key);
+                string[] options = options_dict.Values.ToArray();
 
-            var options_dict = new Dictionary<HarvestModeEnum, string>()
-            {
-                {HarvestModeEnum.HAND,   I18n.Hand()},
-                {HarvestModeEnum.IRID,   I18n.Irid()},
-                {HarvestModeEnum.GOLD,   I18n.Gold()},
-                {HarvestModeEnum.BOTH,   I18n.Both()},
-                {HarvestModeEnum.SCYTHE, I18n.Scythe()},
-                {HarvestModeEnum.NONE,   I18n.None()},
-            };
-            var reverse_dict = options_dict.ToDictionary(x=>x.Value, x=>x.Key);
-            string[] options = options_dict.Values.ToArray();
-
-            api.AddSectionTitle(mod: ModManifest, text: I18n.HarvestModeSection);
-            api.AddParagraph(mod: ModManifest, text: I18n.HarvestModeDescription);
-            api.AddTextOption(mod: ModManifest, name: I18n.PluckableCropsName, tooltip: I18n.PluckableCropsTooltip, getValue: () => options_dict[config.PluckableCrops], setValue: (string val) => config.PluckableCrops = reverse_dict[val], allowedValues: options);
-            api.AddTextOption(mod: ModManifest, name: I18n.ScythableCropsName, tooltip: I18n.ScythableCropsTooltip, getValue: () => options_dict[config.ScythableCrops], setValue: (string val) => config.ScythableCrops = reverse_dict[val], allowedValues: options);
-            api.AddTextOption(mod: ModManifest, name: I18n.FlowersName,        tooltip: I18n.FlowersTooltip,        getValue: () => options_dict[config.Flowers       ], setValue: (string val) => config.Flowers        = reverse_dict[val], allowedValues: options);
-            api.AddTextOption(mod: ModManifest, name: I18n.ForageName,         tooltip: I18n.ForageTooltip,         getValue: () => options_dict[config.Forage        ], setValue: (string val) => config.Forage         = reverse_dict[val], allowedValues: options);
+                api.AddSectionTitle(mod: ModManifest, text: I18n.HarvestModeSection);
+                api.AddTextOption(mod: ModManifest, name: I18n.PluckableCropsName, tooltip: I18n.PluckableCropsTooltip, getValue: () => options_dict[config.PluckableCrops], setValue: (string val) => config.PluckableCrops = reverse_dict[val], allowedValues: options);
+                api.AddTextOption(mod: ModManifest, name: I18n.ScythableCropsName, tooltip: I18n.ScythableCropsTooltip, getValue: () => options_dict[config.ScythableCrops], setValue: (string val) => config.ScythableCrops = reverse_dict[val], allowedValues: options);
+                api.AddTextOption(mod: ModManifest, name: I18n.FlowersName,        tooltip: I18n.FlowersTooltip,        getValue: () => options_dict[config.Flowers       ], setValue: (string val) => config.Flowers        = reverse_dict[val], allowedValues: options);
+                api.AddTextOption(mod: ModManifest, name: I18n.ForageName,         tooltip: I18n.ForageTooltip,         getValue: () => options_dict[config.Forage        ], setValue: (string val) => config.Forage         = reverse_dict[val], allowedValues: options);
+            }
         } 
 #endregion 
 
@@ -150,10 +165,45 @@ namespace StardewHack.HarvestWithScythe
         }
 #endregion
 
+#region Patch Crop
+        void Crop_harvest() {
+            var code = FindCode(
+                // HarvestMethod harvestMethod = data?.HarvestMethod ?? HarvestMethod.Grab;
+                OpCodes.Ldloc_S,
+                OpCodes.Brtrue_S,
+                OpCodes.Ldc_I4_0,
+                OpCodes.Br_S,
+
+	            // if (harvestMethod == HarvestMethod.Scythe || isForcedScytheHarvest)
+                OpCodes.Ldloc_S,
+                Instructions.Ldfld(typeof(CropData), nameof(CropData.HarvestMethod)),
+                OpCodes.Stloc_S,
+                OpCodes.Ldloc_S,
+                OpCodes.Ldc_I4_1,
+                OpCodes.Ceq,
+                OpCodes.Ldarg_S,
+                OpCodes.Or,
+                OpCodes.Brfalse
+            );
+            code.Replace(
+                // if (isForcedScytheHarvest)
+                code[code.length-3],
+                code[code.length-1]
+            );
+        }
+#endregion
+
 #region Patch HoeDirt
         void HoeDirt_performUseAction() {
-            // Change the code that checks and handles Iridium Scythe to allow any scythe that our mod accepts.
+            // Change the code that determines the harvest method for the crop &
+            // checks and handles Iridium Scythe to allow any scythe that our mod accepts.
             var code = FindCode(
+                // HarvestMethod harvestMethod = this.crop.GetHarvestMethod();
+                OpCodes.Ldarg_0,
+                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
+                Instructions.Callvirt(typeof(Crop), nameof(Crop.GetHarvestMethod)),
+                OpCodes.Stloc_1,
+
                 // if (Game1.player.CurrentTool != null && Game1.player.CurrentTool.isScythe() && Game1.player.CurrentTool.ItemId == "66")
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Callvirt_get(typeof(Farmer), nameof(Farmer.CurrentTool)),
@@ -167,14 +217,18 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Callvirt_get(typeof(Item), nameof(Item.ItemId)),
                 Instructions.Ldstr("66"),
                 OpCodes.Call,
-                OpCodes.Brfalse_S
+                OpCodes.Brfalse_S,
+
+                // harvestMethod = HarvestMethod.Scythe;
+                OpCodes.Ldc_I4_1,
+                OpCodes.Stloc_1
             );
-            code.length--;
             code.Replace(
                 Instructions.Ldarg_0(),
                 code[0],
                 code[1],
-                Instructions.Call(typeof(ModEntry), nameof(is_force_scythe), typeof(HoeDirt), typeof(Tool))
+                Instructions.Call(typeof(ModEntry), nameof(get_harvest_method), typeof(HoeDirt), typeof(Tool)),
+                Instructions.Stloc_1()
             );
 
             // Replace the second Tool.isScythe call with our own.
@@ -184,18 +238,28 @@ namespace StardewHack.HarvestWithScythe
             code[0] = Instructions.Call(typeof(ModEntry), nameof(IsScythe), typeof(Tool));
         }
 
-        static bool is_force_scythe(HoeDirt dirt, Tool tool) {
+        static HarvestMethod get_harvest_method(HoeDirt dirt, Tool tool) {
             var crop = dirt.crop;
 
             // Always force scythe if this is set as a non-pluckable crop (SCYTHE & NONE).
             var mode = GetHarvestSetting(crop);
-            if (mode == HarvestModeEnum.SCYTHE || mode == HarvestModeEnum.NONE) return true;
+            if (mode == HarvestModeEnum.SCYTHE || mode == HarvestModeEnum.NONE) return HarvestMethod.Scythe;
 
-            // Never force scythe when plucking while wielding a scythe is enabled.
-            if (getConfig().PluckingScythe) return false;
-
-            // Return whether the current tool can be used to harvest the crop.
-            return tool != null && IsScythe(tool) && CanScytheCrop(crop, tool);
+            // Force scythe when trying to pluck depending on setting and whether the player is wielding a (valid) scythe.
+            switch (getConfig().PluckingScythe) {
+                case PluckingScytheEnum.NEVER:
+                    if (tool != null && IsScythe(tool)) return HarvestMethod.Scythe;
+                    break;
+                case PluckingScytheEnum.INVALID:
+                    // Return whether the current tool can be used to harvest the crop.
+                    if (tool != null && IsScythe(tool) && CanScytheCrop(crop, tool)) {
+                        return HarvestMethod.Scythe;
+                    }
+                    break;
+                case PluckingScytheEnum.ALWAYS:
+                    break;
+            }
+            return HarvestMethod.Grab;
         }
 
         void HoeDirt_performToolAction() {
