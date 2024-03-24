@@ -19,3 +19,8 @@ Android is not supported. In particular Wear More Rings and Bigger Backpack will
 ## Compiling
 
 Open `StardewHack2.sln` in Visual Studio 2022 (or whatever development tool you are using) and hope it compiles. :)
+
+## Translating
+
+Starting with version 7.0 my mods have support for translation files. If you like to help out, I've combined all the translation files into a single file: 
+[default.json](/translations/default.json). To get your translation included in the next release, create a new issue and attach your translated file.
