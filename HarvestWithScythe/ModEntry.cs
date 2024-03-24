@@ -85,7 +85,7 @@ namespace StardewHack.HarvestWithScythe
 
             // If forage harvesting is configured to allow scythe.
             Patch((Object o) => o.performToolAction(null), Object_performToolAction);
-            //Patch((GameLocation gl) => gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
+            Patch((GameLocation gl) => gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
         }
 
         #region ModConfig
@@ -131,6 +131,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         static public bool IsScythe(Tool t) {
+            if (t == null) return false;
             if (t is MeleeWeapon) {
                 return getInstance().config.HarvestWithSword || (t as MeleeWeapon).isScythe();
             }
@@ -243,20 +244,21 @@ namespace StardewHack.HarvestWithScythe
         }
 
         static HarvestMethod get_harvest_method(HoeDirt dirt, Tool tool) {
-            var crop = dirt.crop;
+            return get_harvest_method(GetHarvestSetting(dirt.crop), tool);
+        }
 
+        static HarvestMethod get_harvest_method(HarvestModeEnum mode, Tool tool) {
             // Always force scythe if this is set as a non-pluckable crop (SCYTHE & NONE).
-            var mode = GetHarvestSetting(crop);
             if (mode == HarvestModeEnum.SCYTHE || mode == HarvestModeEnum.NONE) return HarvestMethod.Scythe;
 
             // Force scythe when trying to pluck depending on setting and whether the player is wielding a (valid) scythe.
             switch (getConfig().PluckingScythe) {
                 case PluckingScytheEnum.NEVER:
-                    if (tool != null && IsScythe(tool)) return HarvestMethod.Scythe;
+                    if (IsScythe(tool)) return HarvestMethod.Scythe;
                     break;
                 case PluckingScytheEnum.INVALID:
                     // Return whether the current tool can be used to harvest the crop.
-                    if (tool != null && IsScythe(tool) && CanScytheCrop(crop, tool)) {
+                    if (IsScythe(tool) && CheckMode(mode, tool)) {
                         return HarvestMethod.Scythe;
                     }
                     break;
@@ -346,7 +348,7 @@ namespace StardewHack.HarvestWithScythe
         }
 
         static void harvest_forage_with_xp(Object o, Tool t, Vector2 tileLocation) {
-            var r = Game1.random;
+            System.Random r = Utility.CreateDaySaveRandom(tileLocation.X, tileLocation.Y * 777f);
             var who = t.getLastFarmerToUse();
 			if (t.getLastFarmerToUse() != null && who.professions.Contains(16)) {
 				o.Quality = 4;
@@ -384,7 +386,7 @@ namespace StardewHack.HarvestWithScythe
 
         public static bool ScytheForage(Object o, Tool t) {
             var config = getConfig();
-            if (config.HarvestAllForage && IsScythe(t) && CanScytheForage(t)) {
+            if (config.HarvestAllForage && IsForage(o) && IsScythe(t) && CanScytheForage(t)) {
                 var vector = o.TileLocation;
                 // For objects stored in GameLocation.Objects, the TileLocation is not always set.
                 // So determine its location by looping trough all such objects.
@@ -404,86 +406,58 @@ namespace StardewHack.HarvestWithScythe
                 return false;
             }
         }
-        #if false
+        
         void GameLocation_checkAction() {
-            var var_object = generator.DeclareLocal(typeof(StardewValley.Object));
-            InstructionRange code;
-            Label cant_harvest;
-            code = FindCode(
-                // if (who.couldInventoryAcceptThisItem (objects [vector])) {
-                OpCodes.Ldarg_3, // who
-                OpCodes.Ldarg_0,
-                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                OpCodes.Ldloc_1,
-                OpCodes.Callvirt,
-                // <- Insert is here.
-                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
-                OpCodes.Brfalse
+            var code = FindCode(
+                // int oldQuality = obj.quality;
+                OpCodes.Ldloc_3, // obj
+                Instructions.Ldfld(typeof(Item), nameof(Item.quality)),
+                OpCodes.Call,
+                OpCodes.Stloc_S
             );
-            cant_harvest = (Label)code[6].operand;
-
-            // Check whether harvesting forage by hand is allowed.
-            code.Replace(
-                // var object = objects [vector];
-                code[1], // objects
-                code[2],
-                code[3],
-                code[4],
-                Instructions.Stloc_S(var_object),
-
-                // if (ModEntry.CanHarvestObject(object, location, 0)) {
-                Instructions.Ldloc_S(var_object),
-                Instructions.Ldarg_0(),
-                Instructions.Ldc_I4_0(),
-                Instructions.Call(typeof(ModEntry), nameof(CanHarvestObject), typeof(StardewValley.Object), typeof(GameLocation), typeof(int)),
-                Instructions.Brfalse(cant_harvest),
-
-                // if (who.couldInventoryAcceptThisItem (object)) {
-                code[0], // who
-                Instructions.Ldloc_S(var_object),
-                code[5], // couldInventoryAcceptThisItem
-                code[6]
-            );
-
-            // Move to this.objects [vector].Quality = quality;
-            code = code.FindNext(
-                OpCodes.Ldarg_0,
-                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                OpCodes.Ldloc_1,
-                OpCodes.Callvirt,
-                OpCodes.Ldloc_S,
-                Instructions.Callvirt_set(typeof(StardewValley.Object), nameof(StardewValley.Object.Quality))
-            );
-            var label_dont_scythe = AttachLabel(code.End[0]);
-            // Append code to handle trigger harvest with scythe.
-            code.Append(
-                // if (ModEntry.CanHarvestObject(object, location, HARVEST_SCYTHING) {
-                Instructions.Ldloc_S(var_object),
-                Instructions.Ldarg_0(),
-                Instructions.Ldc_I4_1(), // HARVEST_SCYTHING
-                Instructions.Call(typeof(ModEntry), nameof(ModEntry.CanHarvestObject), typeof(StardewValley.Object), typeof(GameLocation), typeof(int)),
-                Instructions.Brfalse(label_dont_scythe),
-                // ModEntry.TryScythe()
-                Instructions.Call(typeof(ModEntry), nameof(ModEntry.TryScythe))
+            // (Nothing jumps here.)
+            code.Prepend(
+                Instructions.Ldloc_3(),
+                Instructions.Ldarg_3(),
+                Instructions.Call(typeof(ModEntry), nameof(MayTriggerScythe), typeof(Object), typeof(Farmer)),
+                Instructions.Brfalse(AttachLabel(code[0])),
+                Instructions.Ldc_I4_1(),
+                Instructions.Ret()
             );
         }
         
-        static void TryScythe() {
-            // Copied from HoeDirt.performUseAction()
-            // TODO: Filter items that are not considered forage.
-            if (Game1.player.CurrentTool != null && IsScythe(Game1.player.CurrentTool)) {
-                Game1.player.CanMove = false;
-                Game1.player.UsingTool = true;
-                Game1.player.canReleaseTool = true;
-                Game1.player.Halt ();
-                try {
-                    Game1.player.CurrentTool.beginUsing (Game1.currentLocation, (int)Game1.player.lastClick.X, (int)Game1.player.lastClick.Y, Game1.player);
-                } catch (System.Exception) {
-                }
-                ((MeleeWeapon)Game1.player.CurrentTool).setFarmerAnimating (Game1.player);
-            } 
+        static bool IsForage(Object o) {
+            // This somewhat reliably decides if something is forage.
+            return o.IsSpawnedObject && !o.questItem.Value && o.isForage();
         }
-        #endif
+
+        static bool MayTriggerScythe(Object o, Farmer who) {
+            // Force scythe when trying to pluck depending on setting and whether the player is wielding a (valid) scythe.
+            var tool = who.CurrentTool;
+            if (IsForage(o) && (getConfig().HarvestAllForage || o.Location.isTileHoeDirt(o.TileLocation))) {
+                var mode = get_harvest_method(getConfig().Forage, tool);
+                if (mode == HarvestMethod.Grab) return false;
+
+                // Copied from HoeDirt.performUseAction()
+                if (IsScythe(tool) && CanScytheForage(tool)) {
+                    who.CanMove = false;
+                    who.UsingTool = true;
+                    who.canReleaseTool = true;
+                    who.Halt();
+                    try {
+                        tool.beginUsing(o.Location, (int)who.lastClick.X, (int)who.lastClick.Y, who);
+                    } catch (System.Exception) {
+                    }
+                    ((MeleeWeapon)tool).setFarmerAnimating (Game1.player);
+                } else if (Game1.didPlayerJustClickAtAll(ignoreNonMouseHeldInput: true)) {
+                    // Requires scythe message
+                    Game1.showRedMessage(Game1.content.LoadString("Strings\\StringsFromCSFiles:HoeDirt.cs.13915"));
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
 
 #endregion
     }
