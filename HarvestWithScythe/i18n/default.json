@@ -3,7 +3,7 @@
 
     // Boolean options.
     HarvestWithSwordName: "Harvest with sword",     HarvestWithSwordTooltip: "Whether a sword can be used as a scythe.",
-    AllForageName:        "Scythe all forage",      AllForageTooltip:        "Whether the scythe should work too on forage not above tilled soil.",
+    AllForageName:        "Scythe all forage",      AllForageTooltip:        "Whether the scythe should work too on forage not above tilled soil. This might cause issues with the Tractor mod.",
 
     // Plucking Scythe
     PluckingScytheName:   "Plucking with scythe",   PluckingScytheTooltip:   "Whether you can still pluck plants while wielding a scythe.",

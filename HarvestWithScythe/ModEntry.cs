@@ -82,6 +82,10 @@ namespace StardewHack.HarvestWithScythe
             Patch((Crop c) => c.harvest(0,0,null,null,false), Crop_harvest);
             Patch((HoeDirt hd) => hd.performUseAction(Vector2.Zero), HoeDirt_performUseAction);
             Patch((HoeDirt hd) => hd.performToolAction(null, 0, Vector2.Zero), HoeDirt_performToolAction);
+
+            // If forage harvesting is configured to allow scythe.
+            Patch((Object o) => o.performToolAction(null), Object_performToolAction);
+            //Patch((GameLocation gl) => gl.checkAction(new xTile.Dimensions.Location(), new xTile.Dimensions.Rectangle(), null), GameLocation_checkAction);
         }
 
         #region ModConfig
@@ -336,26 +340,151 @@ namespace StardewHack.HarvestWithScythe
         static void harvest_forage_with_xp(HoeDirt dirt, Tool t, GameLocation location, Vector2 tileLocation) {
             if (dirt.crop == null && CanScytheForage(t) && location.objects.ContainsKey(tileLocation) && location.objects[tileLocation].isForage()) {
 				Object o = location.objects[tileLocation];
-                var r = Game1.random;
-                var who = t.getLastFarmerToUse();
-				if (t.getLastFarmerToUse() != null && who.professions.Contains(16)) {
-					o.Quality = 4;
-				} else if (r.NextDouble() < (double)(who.ForagingLevel / 30f)) {
-					o.Quality = 2;
-				} else if (r.NextDouble() < (double)(who.ForagingLevel / 15f)) {
-					o.Quality = 1;
-				}
-                who.gainExperience(2, 7);
-                Game1.stats.ItemsForaged += 1;
-                var vector = new Vector2(tileLocation.X * 64f + 32f, tileLocation.Y * 64f + 32f);
-				Game1.createItemDebris(o, vector, -1);
-                if (who.professions.Contains(13) && r.NextDouble() < 0.2) {
-                    who.gainExperience(2, 7);
-                    Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
-                }
+                harvest_forage_with_xp(o, t, tileLocation);
 				location.objects.Remove(tileLocation);
 			}
         }
+
+        static void harvest_forage_with_xp(Object o, Tool t, Vector2 tileLocation) {
+            var r = Game1.random;
+            var who = t.getLastFarmerToUse();
+			if (t.getLastFarmerToUse() != null && who.professions.Contains(16)) {
+				o.Quality = 4;
+			} else if (r.NextDouble() < (double)(who.ForagingLevel / 30f)) {
+				o.Quality = 2;
+			} else if (r.NextDouble() < (double)(who.ForagingLevel / 15f)) {
+				o.Quality = 1;
+			}
+            who.gainExperience(2, 7);
+            Game1.stats.ItemsForaged += 1;
+            var vector = new Vector2(tileLocation.X * 64f + 32f, tileLocation.Y * 64f + 32f);
+			Game1.createItemDebris(o, vector, -1);
+            if (who.professions.Contains(13) && r.NextDouble() < 0.2) {
+                who.gainExperience(2, 7);
+                Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+            }
+        }
+#endregion
+
+#region Patch Object
+        void Object_performToolAction() {
+            // Inject code that allows harvesting forage objects with the scythe.
+            var code = BeginCode();
+            Label begin = AttachLabel(code[0]);
+            code.Prepend(
+                // Hook
+                Instructions.Ldarg_0(),
+                Instructions.Ldarg_1(),
+                Instructions.Call(typeof(ModEntry), nameof(ScytheForage), typeof(Object), typeof(Tool)),
+                Instructions.Brfalse(begin),
+                Instructions.Ldc_I4_1(),
+                Instructions.Ret()
+            );
+        }
+
+        public static bool ScytheForage(Object o, Tool t) {
+            var config = getConfig();
+            if (config.HarvestAllForage && IsScythe(t) && CanScytheForage(t)) {
+                var vector = o.TileLocation;
+                // For objects stored in GameLocation.Objects, the TileLocation is not always set.
+                // So determine its location by looping trough all such objects.
+                if (vector == Vector2.Zero) {
+                    getInstance().Monitor.LogOnce("Harvesting forage with invalid location.", LogLevel.Info);
+                    var loc = o.Location;
+                    foreach (KeyValuePair<Vector2, Object> pair in loc.Objects.Pairs) {
+                        if (pair.Value.Equals(o)) {
+                            vector = pair.Key;
+                            break;
+                        }
+                    }
+                }
+                harvest_forage_with_xp(o, t, vector);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        #if false
+        void GameLocation_checkAction() {
+            var var_object = generator.DeclareLocal(typeof(StardewValley.Object));
+            InstructionRange code;
+            Label cant_harvest;
+            code = FindCode(
+                // if (who.couldInventoryAcceptThisItem (objects [vector])) {
+                OpCodes.Ldarg_3, // who
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                OpCodes.Ldloc_1,
+                OpCodes.Callvirt,
+                // <- Insert is here.
+                Instructions.Callvirt(typeof(Farmer), nameof(Farmer.couldInventoryAcceptThisItem), typeof(Item)),
+                OpCodes.Brfalse
+            );
+            cant_harvest = (Label)code[6].operand;
+
+            // Check whether harvesting forage by hand is allowed.
+            code.Replace(
+                // var object = objects [vector];
+                code[1], // objects
+                code[2],
+                code[3],
+                code[4],
+                Instructions.Stloc_S(var_object),
+
+                // if (ModEntry.CanHarvestObject(object, location, 0)) {
+                Instructions.Ldloc_S(var_object),
+                Instructions.Ldarg_0(),
+                Instructions.Ldc_I4_0(),
+                Instructions.Call(typeof(ModEntry), nameof(CanHarvestObject), typeof(StardewValley.Object), typeof(GameLocation), typeof(int)),
+                Instructions.Brfalse(cant_harvest),
+
+                // if (who.couldInventoryAcceptThisItem (object)) {
+                code[0], // who
+                Instructions.Ldloc_S(var_object),
+                code[5], // couldInventoryAcceptThisItem
+                code[6]
+            );
+
+            // Move to this.objects [vector].Quality = quality;
+            code = code.FindNext(
+                OpCodes.Ldarg_0,
+                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
+                OpCodes.Ldloc_1,
+                OpCodes.Callvirt,
+                OpCodes.Ldloc_S,
+                Instructions.Callvirt_set(typeof(StardewValley.Object), nameof(StardewValley.Object.Quality))
+            );
+            var label_dont_scythe = AttachLabel(code.End[0]);
+            // Append code to handle trigger harvest with scythe.
+            code.Append(
+                // if (ModEntry.CanHarvestObject(object, location, HARVEST_SCYTHING) {
+                Instructions.Ldloc_S(var_object),
+                Instructions.Ldarg_0(),
+                Instructions.Ldc_I4_1(), // HARVEST_SCYTHING
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.CanHarvestObject), typeof(StardewValley.Object), typeof(GameLocation), typeof(int)),
+                Instructions.Brfalse(label_dont_scythe),
+                // ModEntry.TryScythe()
+                Instructions.Call(typeof(ModEntry), nameof(ModEntry.TryScythe))
+            );
+        }
+        
+        static void TryScythe() {
+            // Copied from HoeDirt.performUseAction()
+            // TODO: Filter items that are not considered forage.
+            if (Game1.player.CurrentTool != null && IsScythe(Game1.player.CurrentTool)) {
+                Game1.player.CanMove = false;
+                Game1.player.UsingTool = true;
+                Game1.player.canReleaseTool = true;
+                Game1.player.Halt ();
+                try {
+                    Game1.player.CurrentTool.beginUsing (Game1.currentLocation, (int)Game1.player.lastClick.X, (int)Game1.player.lastClick.Y, Game1.player);
+                } catch (System.Exception) {
+                }
+                ((MeleeWeapon)Game1.player.CurrentTool).setFarmerAnimating (Game1.player);
+            } 
+        }
+        #endif
+
 #endregion
     }
 }
