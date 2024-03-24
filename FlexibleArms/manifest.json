@@ -9,6 +9,6 @@
    "UpdateKeys": [],
    "Dependencies": [{
       "UniqueID": "bcmpinc.StardewHack",
-      "MinimumVersion": "7.1"
+      "MinimumVersion": "7.2"
    }]
 }

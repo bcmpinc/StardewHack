@@ -64,27 +64,36 @@ namespace StardewHack
         public override void Entry(IModHelper helper) {
             this.helper = helper;
 
-            ModChecks.validateAssemblyVersion(this);
-            ModChecks.checkIncompatible(this);
+            try {
+                ModChecks.validateAssemblyVersion(this);
+                ModChecks.checkIncompatible(this);
 
-            // Use the Mod's UniqueID to create the harmony instance.
-            string UniqueID = helper.ModRegistry.ModID;
-            Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
-            harmony = new Harmony(UniqueID);
+                // Use the Mod's UniqueID to create the harmony instance.
+                string UniqueID = helper.ModRegistry.ModID;
+                Monitor.Log($"Applying bytecode patches for {UniqueID}.", LogLevel.Debug);
+                harmony = new Harmony(UniqueID);
 
-            // Let the mod register its patches.
-            HackEntry(helper);
+                // Let the mod register its patches.
+                HackEntry(helper);
 
-            // Apply the registered patches.
-            // Any patched that are added by calls to ChainPatch during patching will be applied as well.
-            var apply = getApplyPatchProxy(UniqueID);
-            while (to_be_patched.Count > 0) {
-                var method = to_be_patched.Pop();
-                try {
-                    harmony.Patch(method, null, null, new HarmonyMethod(apply));
-                } catch (Exception err) {
-                    MarkAsBroken(err);
+                // Apply the registered patches.
+                // Any patched that are added by calls to ChainPatch during patching will be applied as well.
+                var apply = getApplyPatchProxy(UniqueID);
+                while (to_be_patched.Count > 0) {
+                    var method = to_be_patched.Pop();
+                    try {
+                        harmony.Patch(method, null, null, new HarmonyMethod(apply));
+                    } catch (Exception err) {
+                        MarkAsBroken(err);
+                    }
                 }
+            } catch (Exception err) {
+                Monitor.Log("The mod failed to initialize cleanly. To avoid further problems, the game will not load.", LogLevel.Error);
+                Monitor.Log("The mod is either broken or incompatible with your version of Stardew Valley, or any of your other mods.", LogLevel.Error);
+                Monitor.Log("Please try updating the mod, or otherwise removing it.", LogLevel.Error);
+                Monitor.Log("Please upload your log file at https://log.smapi.io/ and report this bug at " + getReportUrl() + ".", LogLevel.Error);
+                ModChecks.InitializationError(this);
+                LogException(err);
             }
         }
 

@@ -2,7 +2,6 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using StardewValley;
-using System.Threading;
 using System.Text;
 
 namespace StardewHack.Library
@@ -15,6 +14,7 @@ namespace StardewHack.Library
         static private Dictionary<string, SemanticVersion> version_checks = new Dictionary<string, SemanticVersion>() {
             {"bcmpinc.AlwaysScrollMap"   , new SemanticVersion(7,1,0)},
             {"bcmpinc.FixAnimalTools"    , new SemanticVersion(7,1,0)},
+            {"bcmpinc.FlexibleArms"      , new SemanticVersion(7,1,0)},
             {"bcmpinc.GrassGrowth"       , new SemanticVersion(7,1,0)},
             {"bcmpinc.HarvestWithScythe" , new SemanticVersion(7,1,0)},
             {"bcmpinc.MovementSpeed"     , new SemanticVersion(7,1,0)},
@@ -37,7 +37,7 @@ namespace StardewHack.Library
             errors.Add(new ModError(mod, I18n.Corrupted(), true));
         }
         public static void checkIncompatible(this Mod mod) {
-            SemanticVersion version = version_checks[mod.ModManifest.UniqueID];
+            SemanticVersion version = version_checks.GetValueOrDefault(mod.ModManifest.UniqueID, null);
             var manifest = mod.ModManifest;
             if (version == null) {
                 mod.Monitor.Log($"Mod '{manifest.Name}' v{manifest.Version} is not known to the currently used StardewHack.", LogLevel.Info);
@@ -52,7 +52,9 @@ namespace StardewHack.Library
         public static void failedPatches(Mod mod) {
             errors.Add(new ModError(mod, I18n.FailedPatch(), false));
         }
-
+        public static void InitializationError(Mod mod) {
+            errors.Add(new ModError(mod, I18n.InitializationError(), true));
+        }
     }
 
     public class ModEntry : Mod
