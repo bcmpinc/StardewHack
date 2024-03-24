@@ -2,6 +2,9 @@
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
+using static HarmonyLib.Code;
+using System;
+using System.Reflection.Emit;
 
 namespace StardewHack.FlexibleArms
 {
@@ -15,6 +18,7 @@ namespace StardewHack.FlexibleArms
         {
             I18n.Init(helper.Translation);
             Patch((Character c) => c.GetToolLocation(Vector2.Zero, false), Character_GetToolLocation);
+            Patch(() => Game1.pressUseToolButton(), Game1_pressUseToolButton);
         }
         protected override void InitializeApi(IGenericModConfigMenuApi api) {
             api.AddNumberOption(mod: ModManifest, name: I18n.RangeName, tooltip: I18n.RangeTooltip, getValue: () => config.MaxRange, setValue: (float val) => config.MaxRange = val, min: 1, max: 5);
@@ -52,6 +56,39 @@ namespace StardewHack.FlexibleArms
 			};
 		}
 
+        void Game1_pressUseToolButton() {
+            var code = FindCode(
+                // Vector2 toolLocation = Game1.player.GetToolLocation(position);
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                OpCodes.Ldloc_0,
+                OpCodes.Ldfld,
+                OpCodes.Ldc_I4_0,
+                Instructions.Callvirt(typeof(Character), nameof(Character.GetToolLocation), typeof(Vector2), typeof(bool)),
+                OpCodes.Stloc_S,
+
+	            // Game1.player.FacingDirection = Game1.player.getGeneralDirectionTowards(new Vector2((int)toolLocation.X, (int)toolLocation.Y));
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+
+                OpCodes.Ldloc_S,
+                OpCodes.Ldfld,
+                OpCodes.Conv_I4,
+                OpCodes.Conv_R4,
+
+                OpCodes.Ldloc_S,
+                OpCodes.Ldfld,
+                OpCodes.Conv_I4,
+                OpCodes.Conv_R4,
+
+                OpCodes.Newobj
+            );
+            code.Replace(
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
+                code[1],
+                code[2]
+            );
+        }
     }
 }
 
