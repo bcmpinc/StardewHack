@@ -11,13 +11,13 @@ for f in glob.glob("*/manifest.json"):
         text = file.read()
 
     # Bump mod version
-    text = re.sub('"Version": "[\d.]+",', '"Version": "'+VERSION+'",', text)
+    #text = re.sub('"Version": "[\d.]+",', '"Version": "'+VERSION+'",', text)
 
     # Bump api version
-    text = re.sub('"MinimumApiVersion": "[\d.]+",', '"MinimumApiVersion": "3.18.0",', text)
+    text = re.sub('"MinimumApiVersion": "[\d.]+",', '"MinimumApiVersion": "4.0.0",', text)
 
     # Bump StardewHack version
-    text = re.sub('("UniqueID": "bcmpinc[.]StardewHack",\s+"MinimumVersion":) "[\d.]+"', '\\1 "'+VERSION+'"', text)
+    #text = re.sub('("UniqueID": "bcmpinc[.]StardewHack",\s+"MinimumVersion":) "[\d.]+"', '\\1 "'+VERSION+'"', text)
 
     with open(f, "w") as file:
         file.write(text)
@@ -30,7 +30,7 @@ for f in glob.glob("*/*.csproj"):
         text = file.read()
 
     # Bump solutionversion
-    text = re.sub('<Version>\d[.]\d', '<Version>' + VERSION, text)
+    #text = re.sub('<Version>\d[.]\d', '<Version>' + VERSION, text)
 
     with open(f, "w") as file:
         file.write(text)
