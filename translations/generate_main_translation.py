@@ -10,7 +10,7 @@ print("{", file=out)
 for f in glob.glob("../*/i18n/default.json"):
     name = os.path.basename(os.path.dirname(os.path.dirname(f)))
     print("Gathering", name)
-    with open(f, encoding="UTF-8") as file:
+    with open(f, encoding="UTF-8-sig") as file:
         text = file.read().strip()
         print('  ',name,": ",text[:-1],"  },", sep='', file=out)
 print("}", file=out)

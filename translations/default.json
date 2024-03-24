@@ -30,7 +30,7 @@
     DailyGrowthName:    "Daily Growth",    DailyGrowthTooltip:    "The number of iterations that grass growth is applied per day",
     MonthlyGrowthName:  "Monthly Growth",  MonthlyGrowthTooltip:  "Additional iterations that grass growth is applied at the start of each month.",
   },
-  HarvestWithScythe: ﻿{
+  HarvestWithScythe: {
     // Translation provided by: <leave your name or nexus/discord username here>
 
     // Boolean options.
