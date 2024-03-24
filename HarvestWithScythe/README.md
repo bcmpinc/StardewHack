@@ -32,6 +32,7 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * Chinese translation (partial).
 * Patch foraging xp and skills not being applied when using the scythe (bug in SDV vanilla).
 * Option for allowing plucking while wielding a scythe.
+* Harvesting forage not above tilled soil.
 * Brought back most of the old settings.
 
 #### 7.2:
