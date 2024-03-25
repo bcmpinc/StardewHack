@@ -1,6 +1,5 @@
 ﻿using StardewModdingAPI;
 using System.Net;
-using System;
 using StardewValley.Network;
 using StardewValley.Locations;
 using StardewModdingAPI.Events;
@@ -10,6 +9,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using Internationalization.Handlers;
+using System.Reflection;
 
 namespace Internationalization
 {
@@ -29,6 +29,8 @@ namespace Internationalization
             server.Start();
             
             Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);
+            
+            var reg = new TranslationRegistry(Helper.ModRegistry);
 
             // Location from where to serve static stuff.
             handlers = new Dictionary<string, RequestHandler> {
@@ -36,6 +38,7 @@ namespace Internationalization
             };
 
             Helper.Events.GameLoop.UpdateTicking += process;
+
         }
 
         private void process(object sender, UpdateTickingEventArgs e) {
