@@ -9,6 +9,9 @@ namespace StardewHack.Library
     public record ModError(Mod mod, string error, bool fatal);
 
     public static class ModChecks {
+        /// <summary>
+        /// During startup mods that are broken are added to this list. Used to produce an error message during startup.
+        /// </summary>
         static public List<ModError> errors = new List<ModError>();
 
         static private Dictionary<string, SemanticVersion> version_checks = new Dictionary<string, SemanticVersion>() {
@@ -59,10 +62,6 @@ namespace StardewHack.Library
 
     public class ModEntry : Mod
     {
-        /// <summary>
-        /// During startup mods that are broken are added to this list. Used to produce an error message during startup.
-        /// </summary>
-    
         public override void Entry(IModHelper helper) {
             I18n.Init(helper.Translation);
 

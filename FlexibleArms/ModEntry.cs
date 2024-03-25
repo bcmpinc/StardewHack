@@ -2,8 +2,6 @@
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
-using static HarmonyLib.Code;
-using System;
 using System.Reflection.Emit;
 
 namespace StardewHack.FlexibleArms

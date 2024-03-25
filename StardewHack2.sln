@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WearMoreRings", "WearMoreRi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlexibleArms", "FlexibleArms\FlexibleArms.csproj", "{F027E567-2AAE-40BD-A00E-9BA10D016A03}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Internationalization", "Internationalization\Internationalization.csproj", "{B1285288-9805-4769-B29D-F40A4C3AA2F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{F027E567-2AAE-40BD-A00E-9BA10D016A03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F027E567-2AAE-40BD-A00E-9BA10D016A03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F027E567-2AAE-40BD-A00E-9BA10D016A03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1285288-9805-4769-B29D-F40A4C3AA2F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1285288-9805-4769-B29D-F40A4C3AA2F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1285288-9805-4769-B29D-F40A4C3AA2F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1285288-9805-4769-B29D-F40A4C3AA2F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
