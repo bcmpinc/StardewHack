@@ -15,21 +15,22 @@ namespace Internationalization.Handlers
             this.root = root;
         }
 
-        public override void handle(Request r) {
+        public override HttpStatusCode handle(Request r) {
             if (r.path.Length != 1) {
-                r.status(HttpStatusCode.Forbidden);
-                return;
+                return HttpStatusCode.Forbidden;
+            }
+            if (r.req.HttpMethod != "GET") {
+                return HttpStatusCode.MethodNotAllowed;
             }
 
             var file = Path.Combine(root, r.path[0]);
             try { 
                 var data = File.ReadAllBytes(file);
-                r.status(HttpStatusCode.OK);
                 r.write_buffer(data);
+                return HttpStatusCode.OK;
             } catch {
-                r.status(HttpStatusCode.NotFound);
+                return HttpStatusCode.NotFound;
             }
-            return;
         }
     }
 }

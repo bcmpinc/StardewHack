@@ -28,11 +28,10 @@ namespace Internationalization
         }
     }
 
-    internal class TranslationRegistry
-    {
-        struct Entry { 
+    static class TranslationRegistry {
+        private struct Entry { 
             readonly public IModInfo Mod;
-            public ITranslationHelper Translations;
+            readonly public ITranslationHelper Translations;
 
             public Entry(IModInfo mod) {
                 Mod = mod;
@@ -40,13 +39,17 @@ namespace Internationalization
             }
         }
 
-        Dictionary<string,Entry> table = new Dictionary<string, Entry>();
+        static Dictionary<string,Entry> table;
 
-        public TranslationRegistry(IModRegistry registry) {
-            var all_mods = registry.GetAll();
-            foreach (var i in all_mods) {
+        static public void Init(IModRegistry registry) {
+            table = new Dictionary<string, Entry>();
+            foreach (var i in registry.GetAll()) {
                 table[i.Manifest.UniqueID] = new Entry(i);
             }
+        }
+
+        internal static IEnumerable<IModInfo> AllMods() {
+            return table.Values.Select(e => e.Mod);
         }
     }
 }

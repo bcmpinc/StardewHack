@@ -22,23 +22,22 @@ namespace Internationalization
 
         public override void Entry(IModHelper helper) {
             I18n.Init(helper.Translation);
+            TranslationRegistry.Init(Helper.ModRegistry);
 
             // Start a webserver.
             server = new HttpListener();
             server.Prefixes.Add(URI);
             server.Start();
-            
-            Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);
-            
-            var reg = new TranslationRegistry(Helper.ModRegistry);
 
             // Location from where to serve static stuff.
             handlers = new Dictionary<string, RequestHandler> {
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
+                {"mods",   new ModList()},
             };
 
-            Helper.Events.GameLoop.UpdateTicking += process;
+            Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);
 
+            Helper.Events.GameLoop.UpdateTicking += process;
         }
 
         private void process(object sender, UpdateTickingEventArgs e) {
@@ -53,7 +52,12 @@ namespace Internationalization
 
             if (handlers.TryGetValue(req.path[0], out var handler)) {
                 req.path = req.path.Skip(1).ToArray();
-                handler.handle(req);
+                try {
+                    req.status(handler.handle(req));
+                } catch (System.Exception ex) {
+                    req.write_text(ex.ToString());
+                    req.status(HttpStatusCode.InternalServerError);
+                }
             } else {
                 req.status(HttpStatusCode.NotFound);
                 req.write_text("No handler for: " + string.Join("/", req.path));

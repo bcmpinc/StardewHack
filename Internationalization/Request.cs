@@ -9,7 +9,7 @@ namespace Internationalization
 {
     public abstract class RequestHandler
     {
-        public abstract void handle(Request req);
+        public abstract HttpStatusCode handle(Request req);
     }
 
     public class Request
