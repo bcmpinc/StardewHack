@@ -11,13 +11,8 @@ namespace Internationalization.Handlers
     public class ModList : RequestHandler
     {
 
-        public override HttpStatusCode handle(Request r) {
-            if (r.path.Length != 0) {
-                return HttpStatusCode.NotFound;
-            }
-            if (r.req.HttpMethod != "GET") {
-                return HttpStatusCode.MethodNotAllowed;
-            }
+        public override HttpStatusCode Get(Request r) {
+            if (r.path.Length != 0) return HttpStatusCode.NotFound;
 
             var entries = TranslationRegistry.AllMods().Select(m => $"\"{m.Manifest.UniqueID}\":\"{m.Manifest.Name}\"");
             var data = "{"+string.Join(",",entries)+"}";

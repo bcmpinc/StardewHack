@@ -33,6 +33,7 @@ namespace Internationalization
             handlers = new Dictionary<string, RequestHandler> {
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
                 {"mods",   new ModList()},
+                {"json",   new TranslationFile()},
             };
 
             Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);
@@ -52,12 +53,7 @@ namespace Internationalization
 
             if (handlers.TryGetValue(req.path[0], out var handler)) {
                 req.path = req.path.Skip(1).ToArray();
-                try {
-                    req.status(handler.handle(req));
-                } catch (System.Exception ex) {
-                    req.write_text(ex.ToString());
-                    req.status(HttpStatusCode.InternalServerError);
-                }
+                req.status(handler.Handle(req));
             } else {
                 req.status(HttpStatusCode.NotFound);
                 req.write_text("No handler for: " + string.Join("/", req.path));

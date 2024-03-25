@@ -1,5 +1,7 @@
-﻿using StardewModdingAPI;
+﻿using Microsoft.CodeAnalysis;
+using StardewModdingAPI;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -29,13 +31,15 @@ namespace Internationalization
     }
 
     static class TranslationRegistry {
-        private struct Entry { 
+        internal struct Entry { 
             readonly public IModInfo Mod;
             readonly public ITranslationHelper Translations;
+            readonly public string I18nPath;
 
             public Entry(IModInfo mod) {
                 Mod = mod;
                 Translations = ReflectionHelper.get_property<ITranslationHelper>(mod, "Translations");
+                I18nPath     = Path.Combine(ReflectionHelper.get_property<string>(mod, "DirectoryPath"), "i18n");
             }
         }
 
@@ -51,5 +55,16 @@ namespace Internationalization
         internal static IEnumerable<IModInfo> AllMods() {
             return table.Values.Select(e => e.Mod);
         }
+
+        internal static IModInfo Mod(string uniqueId) {
+            if (table.TryGetValue(uniqueId, out var e)) return e.Mod;
+            return null;
+        }
+
+        internal static string TranslationPath(string uniqueId) {
+            if (table.TryGetValue(uniqueId, out var e)) return e.I18nPath;
+            return null;
+        }
+
     }
 }

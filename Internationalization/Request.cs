@@ -9,7 +9,21 @@ namespace Internationalization
 {
     public abstract class RequestHandler
     {
-        public abstract HttpStatusCode handle(Request req);
+        public HttpStatusCode Handle(Request r) {
+            try {
+                switch (r.req.HttpMethod) {
+                    case "GET": return Get(r);
+                    case "PUT": return Put(r);
+                    default: return HttpStatusCode.MethodNotAllowed;
+                }
+            } catch (System.Exception ex) {
+                r.write_text(ex.ToString());
+                return HttpStatusCode.InternalServerError;
+            }
+        }
+
+        public virtual HttpStatusCode Get(Request r) => HttpStatusCode.MethodNotAllowed;
+        public virtual HttpStatusCode Put(Request r) => HttpStatusCode.MethodNotAllowed;
     }
 
     public class Request

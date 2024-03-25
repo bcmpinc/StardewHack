@@ -15,13 +15,8 @@ namespace Internationalization.Handlers
             this.root = root;
         }
 
-        public override HttpStatusCode handle(Request r) {
-            if (r.path.Length != 1) {
-                return HttpStatusCode.Forbidden;
-            }
-            if (r.req.HttpMethod != "GET") {
-                return HttpStatusCode.MethodNotAllowed;
-            }
+        public override HttpStatusCode Get(Request r) {
+            if (r.path.Length != 1) return HttpStatusCode.Forbidden;
 
             var file = Path.Combine(root, r.path[0]);
             try { 
