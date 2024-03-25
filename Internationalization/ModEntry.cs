@@ -15,12 +15,15 @@ namespace Internationalization
 {
     public class ModEntry : Mod {
         const string URI = "http://localhost:8018/";
+        static ModEntry instance;
 
         private HttpListener server;
         private Task<HttpListenerContext> task;
         Dictionary<string,RequestHandler> handlers;
 
         public override void Entry(IModHelper helper) {
+            instance = this;
+
             I18n.Init(helper.Translation);
             TranslationRegistry.Init(Helper.ModRegistry);
 
@@ -61,6 +64,9 @@ namespace Internationalization
             }
             req.res.Close();
         }
+
+        public static void Log(string message, LogLevel level = LogLevel.Trace) => instance.Monitor.Log(message, level);
+        public static void LogOnce(string message, LogLevel level = LogLevel.Trace) => instance.Monitor.LogOnce(message, level);
     }
 }
 

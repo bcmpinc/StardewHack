@@ -57,13 +57,17 @@ namespace Internationalization
         }
 
         internal static IModInfo Mod(string uniqueId) {
-            if (table.TryGetValue(uniqueId, out var e)) return e.Mod;
-            return null;
+            if (!table.TryGetValue(uniqueId, out var e)) return null;
+            return e.Mod;
         }
 
-        internal static string TranslationPath(string uniqueId) {
-            if (table.TryGetValue(uniqueId, out var e)) return e.I18nPath;
-            return null;
+        internal static string TranslationPath(string uniqueId, string locale) {
+            if (!table.TryGetValue(uniqueId, out var e)) return null;
+            if (locale == "current")
+                locale = e.Translations.Locale;
+            if (locale == "")
+                locale = "default";
+            return Path.Combine(e.I18nPath, locale + ".json");
         }
 
     }
