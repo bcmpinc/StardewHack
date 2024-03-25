@@ -14,7 +14,7 @@ namespace Internationalization.Handlers
 
         // Requesting translation files.
         public override HttpStatusCode Get(Request r) {
-            if (r.path.Length != 2) return HttpStatusCode.Forbidden;
+            if (r.path.Length != 2) return HttpStatusCode.BadRequest;
             var file = TranslationRegistry.TranslationPath(r.path[0], r.path[1]);
             if (file==null) return HttpStatusCode.NotFound;
             try {
@@ -29,7 +29,7 @@ namespace Internationalization.Handlers
 
         // Saving translation files.
         public override HttpStatusCode Put(Request r) {
-            if (r.path.Length != 2) return HttpStatusCode.Forbidden;
+            if (r.path.Length != 2) return HttpStatusCode.BadRequest;
             if (!r.req.HasEntityBody) return HttpStatusCode.BadRequest;
             var file = TranslationRegistry.TranslationPath(r.path[0], r.path[1]);
             if (file==null) return HttpStatusCode.NotFound;

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Internationalization.Handlers;
 using System.Reflection;
+using Microsoft.Xna.Framework.Input;
 
 namespace Internationalization
 {
@@ -37,6 +38,7 @@ namespace Internationalization
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
                 {"mods",   new ModList()},
                 {"json",   new TranslationFile()},
+                {"dict",   new Translations()},
             };
 
             Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);
@@ -47,11 +49,19 @@ namespace Internationalization
         private void process(object sender, UpdateTickingEventArgs e) {
             if (task == null) {
                 task = server.GetContextAsync();
+                return;
             }
             if (!task.IsCompleted) return;
             var req = new Request(task.Result);
             task = null;
 
+            if (!req.req.IsLocal) {
+                // Do not allow remote connections.
+                req.res.Abort();
+                return;
+            }
+
+            // Serve index when '/' is requested.
             if (req.path.Length == 0) req.path = new string[]{"static", "index.html"};
 
             if (handlers.TryGetValue(req.path[0], out var handler)) {
