@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>WearMoreRings</AssemblyName>
     <RootNamespace>StardewHack.WearMoreRings</RootNamespace>
-    <Version>7.2</Version>
+    <Version>7.3</Version>
     <TargetFramework>net6.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>

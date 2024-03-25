@@ -11,8 +11,8 @@ Configure the amount of ring slots in your inventory. By default adds 6 addition
 
 ## Console Commands
 * `player_openforge`:        Opens the forge menu.
-* `player_resetmodifiers`:   Clears buffs, then resets and reapplies the modifiers applied by boots & rings.
 * `world_destroyringchests`: Removes the chests used for storing player's rings. Any items contained therein will be dropped at your feet.
+
 ## Dependencies
 This mod requires the following mods to be installed:
 
@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.3:
+* Fix issue with ring effects (e.g. magnetism) not being applied.
+
 #### 7.2:
 * Fixed compatibility issue with SpaceCore mod.
 

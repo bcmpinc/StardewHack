@@ -399,12 +399,7 @@ namespace StardewHack.WearMoreRings
             }
 
             // Equip/unequip
-            (icon.item as Ring   )?.onUnequip(Game1.player);
-            (icon.item as Boots  )?.onUnequip(Game1.player);
-            (icon.item as Trinket)?.onUnequip(Game1.player);
-            (helditem  as Ring   )?.onEquip(Game1.player);
-            (helditem  as Boots  )?.onEquip(Game1.player);
-            (helditem  as Trinket)?.onEquip(Game1.player);
+            Game1.player.Equip(helditem, icon.item, (x) => {});
             
             // Swap items
             Game1.player.CursorSlotItem = Utility.PerformSpecialItemGrabReplacement(icon.item);
