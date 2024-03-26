@@ -1,12 +1,15 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley.Network.NetEvents;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Internationalization
 {
@@ -15,19 +18,38 @@ namespace Internationalization
             readonly public IModInfo Mod;
             readonly public ITranslationHelper Translations;
             readonly public string I18nPath;
+            readonly private object Translator;
+            readonly public IDictionary<string, IDictionary<string, string>> All;
 
-            public Entry(IModInfo mod) {
+            internal Entry(IModInfo mod) {
                 Mod = mod;
                 Translations = ReflectionHelper.Property<ITranslationHelper>(mod, "Translations");
                 I18nPath     = Path.Combine(ReflectionHelper.Property<string>(mod, "DirectoryPath"), "i18n");
+                Translator   = ReflectionHelper.Field<object>(Translations, "Translator");
+                All          = ReflectionHelper.Field<IDictionary<string, IDictionary<string, string>>>(Translator, "All");
             }
+
+            private readonly IDictionary<string, Translation> ForLocale {get => ReflectionHelper.Field<IDictionary<string, Translation>>(Translator , "ForLocale"); }
+            internal bool HasKey(string key) {
+                return ForLocale.ContainsKey(key);
+            }
+
+            internal void UpdateKey(string key) {
+                string text = ReflectionHelper.Method<string>(Translator, "GetRaw", key, Translations.Locale, true);
+                if (text != null)
+                    ForLocale[key] = ReflectionHelper.Constructor<Translation>(Translations.Locale, key, text);
+            }
+        }
+
+        static Translation NewTranslation(string locale, string key, string text) {
+            return ReflectionHelper.Constructor<Translation>(locale, key, text); 
         }
 
         static Dictionary<string,Entry> table;
 
         static public void Init(IModRegistry registry) {
-            // Sanity check to prevent issues later.
-            ReflectionHelper.Constructor<Translation>("", "", ""); 
+            // Make sure we can make new translations to prevent issues later.
+            NewTranslation("", "", ""); 
 
             // Create the internal table.
             table = new Dictionary<string, Entry>();
@@ -54,20 +76,23 @@ namespace Internationalization
             return Path.Combine(e.I18nPath, locale + ".json");
         }
 
-        internal static string Get(string uniqueId, string key) {
+        internal static string Get(string uniqueId, string locale, string key) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
-            var ForLocale = ReflectionHelper.Property<IDictionary<string, Translation>>(e, "ForLocale");
-            if (ForLocale == null) return null;
-            if (!ForLocale.TryGetValue(key, out var res)) return null;
-            return res; // Automatically converts to text.
+            if (!e.All.TryGetValue(locale, out var dict)) return null;
+            if (!dict .TryGetValue(key, out var res)) return null;
+            return res;
         }
 
-        internal static bool Set(string uniqueId, string key, string value) {
+        internal static bool Set(string uniqueId, string locale, string key, string value) {
             if (!table.TryGetValue(uniqueId, out var e)) return false;
-            var ForLocale = ReflectionHelper.Property<IDictionary<string, Translation>>(e, "ForLocale");
-            if (ForLocale == null) return false;
-            if (!ForLocale.ContainsKey(key)) return false;
-            ForLocale[key] = ReflectionHelper.Constructor<Translation>(e.Translations.Locale, key, value);
+            if (!e.All.TryGetValue(locale, out var dict)) return false;
+            
+            // Make sure this key exists
+            if (!e.HasKey(key)) return false;
+
+            // Set new value & update current localization
+            dict[key] = value;
+            e.UpdateKey(key);
             return true;
         }
     }
