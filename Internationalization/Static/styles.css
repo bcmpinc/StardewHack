@@ -1,0 +1,26 @@
+body {
+  background: linear-gradient(180deg, rgb(0,44,92) 0%, rgb(4,118,227,1) 50%, rgb(105,239,224) 100%);
+  background-attachment: fixed;
+  height: 100%;
+  font-size: large;
+  margin: 0;
+}
+
+label, legend {
+	font-weight: bold;
+}
+
+.panel {
+  margin: 2em;
+  padding: 0.5em;
+  border: 0.9em solid;
+  border-image: url("/static/panel.png") 24 fill;
+}
+legend {
+  border: 0.6em solid;
+  border-image: url("/static/panel-small.png") 16 fill;
+}
+pre {
+	margin: 0;
+	tab-size: 4;
+}

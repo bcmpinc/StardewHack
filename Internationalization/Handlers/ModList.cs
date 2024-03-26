@@ -16,23 +16,39 @@ namespace Internationalization.Handlers
 
         struct Entry {
             [JsonInclude] public string name;
+            [JsonInclude] public string current_locale;
             [JsonInclude] public string[] locales;
         }
 
         public override HttpStatusCode Get(Request r) {
-            if (r.path.Length != 0) return HttpStatusCode.BadRequest;
-            var entries = new Dictionary<string, Entry>();
-            foreach (var m in TranslationRegistry.AllMods()) {
-                var id = m.Manifest.UniqueID;
-                entries[id] = new Entry() {
-                    name = m.Manifest.Name,
-                    locales = TranslationRegistry.Locales(id),
-                };
-            };
-            var data = JsonSerializer.Serialize(entries);
-            r.content_json();
-            r.write_text(data);
-            return HttpStatusCode.OK;
+            switch (r.path.Length) {
+                case 0: {
+                    var entries = new Dictionary<string, string>();
+                    foreach (var m in TranslationRegistry.AllMods()) {
+                        var id = m.Manifest.UniqueID;
+                        entries[id] = m.Manifest.Name;
+                    }
+                    var data = JsonSerializer.Serialize(entries);
+                    r.content_json();
+                    r.write_text(data);
+                    return HttpStatusCode.OK;
+                }
+                case 1: {
+                    var id = r.path[0];
+                    var m = TranslationRegistry.Mod(id);
+                    var entry = new Entry() {
+                        name = m.Manifest.Name,
+                        current_locale = TranslationRegistry.Current(id),
+                        locales = TranslationRegistry.Locales(id),
+                    };
+                    var data = JsonSerializer.Serialize(entry);
+                    r.content_json();
+                    r.write_text(data);
+                    return HttpStatusCode.OK;
+                }
+                default:
+                    return HttpStatusCode.BadRequest;
+            }
         }
     }
 }

@@ -5,6 +5,12 @@
 <script src="static/script.js"></script>
 </head>
 <body>
-<h1>Hi There!</h1>
+<form class="panel">
+  <label for="mod">Mod: </label><select id="mod"></select>
+  <label for="locale">Locale: </label><input type="text" id="locale" list="locale-list"/><datalist id="locale-list"></datalist>
+  <button type="button" id="current">&larr; current</button>
+</form>
+<fieldset class="panel"><legend>New translation</legend><pre id="new"></pre></fieldset>
+<fieldset class="panel"><legend>Old translation</legend><pre id="old"></pre></fieldset>
 </body>
 </html>

@@ -38,7 +38,7 @@ namespace Internationalization
             handlers = new Dictionary<string, RequestHandler> {
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
                 {"mods",   new ModList()},
-                {"json",   new TranslationFile()},
+                {"file",   new TranslationFile()},
                 {"dict",   new Translations()},
                 {"images", new Images(Helper.GameContent)},
             };

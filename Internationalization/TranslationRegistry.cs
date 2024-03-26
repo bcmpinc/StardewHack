@@ -40,10 +40,10 @@ namespace Internationalization
                     ForLocale[key] = ReflectionHelper.Constructor<Translation>(Translations.Locale, key, text);
             }
 
-            internal string support_current(string locale) {
-                if (locale == "current") locale = Translations.Locale;
-                if (locale == "") locale = "default";
-                return locale;
+            internal string Current() {
+                var res = Translations.Locale;
+                if (res == "") return "default";
+                return res;
             }
         }
 
@@ -60,7 +60,10 @@ namespace Internationalization
             // Create the internal table.
             table = new Dictionary<string, Entry>();
             foreach (var i in registry.GetAll()) {
-                table[i.Manifest.UniqueID] = new Entry(i);
+                var ent = new Entry(i);
+                if (ent.All.Count > 0) {
+                    table[i.Manifest.UniqueID] = ent;
+                }
             }
         }
 
@@ -75,13 +78,11 @@ namespace Internationalization
 
         internal static string TranslationPath(string uniqueId, string locale) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
-            locale = e.support_current(locale);
             return Path.Combine(e.I18nPath, locale + ".json");
         }
         
         internal static object GetAll(string uniqueId, string locale) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
-            locale = e.support_current(locale);
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             return dict;
         }
@@ -89,7 +90,6 @@ namespace Internationalization
 
         internal static string Get(string uniqueId, string locale, string key) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
-            locale = e.support_current(locale);
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             if (!dict .TryGetValue(key, out var res)) return null;
             return res;
@@ -101,8 +101,6 @@ namespace Internationalization
             // Make sure this key exists 
             if (!e.HasKey(key)) return false;
 
-            locale = e.support_current(locale);
-
             // Create locale if it does not yet exist.
             if (!e.All.TryGetValue(locale, out var dict)) {
                 dict = new Dictionary<string, string>();
@@ -113,6 +111,11 @@ namespace Internationalization
             dict[key] = value;
             e.UpdateKey(key);
             return true;
+        }
+
+        internal static string Current(string uniqueId) {
+            if (!table.TryGetValue(uniqueId, out var e)) return null;
+            return e.Current();
         }
 
         internal static string[] Locales(string uniqueId) {
