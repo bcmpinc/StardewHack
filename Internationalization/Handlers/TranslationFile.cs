@@ -19,7 +19,7 @@ namespace Internationalization.Handlers
             if (file==null) return HttpStatusCode.NotFound;
             try {
                 var data = File.ReadAllBytes(file);
-                r.content("application/javascript"); // These files often contain comments, which is not valid json.
+                r.content_javascript(); // These files often contain comments, which is not valid json.
                 r.write_buffer(data);
                 return HttpStatusCode.OK;
             } catch {
