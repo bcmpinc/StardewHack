@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Internationalization.Handlers;
 using System.Reflection;
 using Microsoft.Xna.Framework.Input;
+using StardewValley;
 
 namespace Internationalization
 {
@@ -39,6 +40,7 @@ namespace Internationalization
                 {"mods",   new ModList()},
                 {"json",   new TranslationFile()},
                 {"dict",   new Translations()},
+                {"images", new Images(Helper.GameContent)},
             };
 
             Monitor.Log("Translation website available at: " + URI, LogLevel.Alert);

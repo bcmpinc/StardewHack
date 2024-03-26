@@ -21,11 +21,13 @@ namespace Internationalization.Handlers
             var file = Path.Combine(root, r.path[0]);
             try { 
                 var data = File.ReadAllBytes(file);
-                r.write_buffer(data);
-                return HttpStatusCode.OK;
+                if (data.Length > 0) {
+                    r.write_buffer(data);
+                    return HttpStatusCode.OK;
+                }
             } catch {
-                return HttpStatusCode.NotFound;
             }
+            return HttpStatusCode.NotFound;
         }
     }
 }
