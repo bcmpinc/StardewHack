@@ -54,6 +54,7 @@ namespace Internationalization
 
         public void content(string type) => res.Headers.Set("Content-Type", type);
         public void content_text() => content("text/plain");
-        public void content_json() => content("text/json");
+        public void content_json() => content("application/json");
+        public void content_javascript() => content("application/javascript");
     }
 }

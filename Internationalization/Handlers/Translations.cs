@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Internationalization.Handlers
@@ -11,12 +12,23 @@ namespace Internationalization.Handlers
     public class Translations : RequestHandler
     {
         public override HttpStatusCode Get(Request r) {
-            if (r.path.Length != 3) return HttpStatusCode.BadRequest;
-
-            var data = TranslationRegistry.Get(r.path[0], r.path[1], r.path[2]);
-            r.content_text();
-            r.write_text(data);
-            return HttpStatusCode.OK;
+            switch(r.path.Length) {
+                case 2: {
+                    var dict = TranslationRegistry.GetAll(r.path[0], r.path[1]);
+                    var data = JsonSerializer.Serialize(dict);
+                    r.content_json();
+                    r.write_text(data);
+                    return HttpStatusCode.OK;
+                }
+                case 3: {
+                    var data = TranslationRegistry.Get(r.path[0], r.path[1], r.path[2]);
+                    r.content_text();
+                    r.write_text(data);
+                    return HttpStatusCode.OK;
+                }
+                default:
+                    return HttpStatusCode.BadRequest;
+            }
         }
 
         public override HttpStatusCode Put(Request r) {

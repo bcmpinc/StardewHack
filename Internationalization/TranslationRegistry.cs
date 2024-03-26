@@ -39,6 +39,12 @@ namespace Internationalization
                 if (text != null)
                     ForLocale[key] = ReflectionHelper.Constructor<Translation>(Translations.Locale, key, text);
             }
+
+            internal string support_current(string locale) {
+                if (locale == "current") locale = Translations.Locale;
+                if (locale == "") locale = "default";
+                return locale;
+            }
         }
 
         static Translation NewTranslation(string locale, string key, string text) {
@@ -69,15 +75,21 @@ namespace Internationalization
 
         internal static string TranslationPath(string uniqueId, string locale) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
-            if (locale == "current")
-                locale = e.Translations.Locale;
-            if (locale == "")
-                locale = "default";
+            locale = e.support_current(locale);
             return Path.Combine(e.I18nPath, locale + ".json");
         }
+        
+        internal static object GetAll(string uniqueId, string locale) {
+            if (!table.TryGetValue(uniqueId, out var e)) return null;
+            locale = e.support_current(locale);
+            if (!e.All.TryGetValue(locale, out var dict)) return null;
+            return dict;
+        }
+
 
         internal static string Get(string uniqueId, string locale, string key) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
+            locale = e.support_current(locale);
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             if (!dict .TryGetValue(key, out var res)) return null;
             return res;
@@ -85,15 +97,27 @@ namespace Internationalization
 
         internal static bool Set(string uniqueId, string locale, string key, string value) {
             if (!table.TryGetValue(uniqueId, out var e)) return false;
-            if (!e.All.TryGetValue(locale, out var dict)) return false;
             
-            // Make sure this key exists
+            // Make sure this key exists 
             if (!e.HasKey(key)) return false;
 
+            locale = e.support_current(locale);
+
+            // Create locale if it does not yet exist.
+            if (!e.All.TryGetValue(locale, out var dict)) {
+                dict = new Dictionary<string, string>();
+                e.All[locale] = dict;
+            }
+            
             // Set new value & update current localization
             dict[key] = value;
             e.UpdateKey(key);
             return true;
+        }
+
+        internal static string[] Locales(string uniqueId) {
+            if (!table.TryGetValue(uniqueId, out var e)) return null;
+            return e.All.Keys.ToArray();                        
         }
     }
 }
