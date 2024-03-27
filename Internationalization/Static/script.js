@@ -2,6 +2,15 @@
 const el = {};
 document.addEventListener('DOMContentLoaded', ready);
 
+// detect if contentEditable="plaintext-only" is supported.
+const has_plaintext_only = (function(){
+	try {
+		node("p").contentEditable = "plaintext-only";
+		return true;
+	} catch {}
+	return false;
+})();
+
 // Translation json parser.
 const magic = new RegExp([
 	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)"(?<value>.*?)(?<!\\(?:\\\\)+)"/, // entry
@@ -114,14 +123,38 @@ function* generate_editor(content, readonly) {
 					node("span", {'class': "default", "data-key": key}),
 					field = node("span", {'class': "value", text: g.value, contentEditable:""}),
 				);
-				let value = g.value;
 				field.addEventListener("beforeinput", (e)=>e.preventDefault());
 			} else {
+				let field;
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", text: g.value}),
-					node("span", {'class': "value", "data-key": key, "data-position":m.indices.groups.value, contentEditable:""}),
+					field = node("span", {'class': "value", "data-key": key, "data-position":m.indices.groups.value, contentEditable:has_plaintext_only ? "plaintext-only" : ""}),
 				);
+				field.addEventListener("input", (e)=>{
+					if (!has_plaintext_only) {
+						let last;
+						// Strip out non plaintext html
+						for (let x of $("./*", e.target)) {
+							if (x.tagName !== "BR") {
+								let array = $(".//text()|.//br", x);
+								last = array.at(-1);
+								x.replaceWith(...array);
+							}
+						}
+						if (last) {
+							// update the selection
+							var range = document.createRange()
+							var sel = window.getSelection()
+							range.setStart(last, last.data.length);
+							range.collapse(true)
+							sel.removeAllRanges()
+							sel.addRange(range)
+						}
+						// concatenate text elements.
+						e.target.normalize();
+					}
+				});
 			}
 			yield r;
 		}

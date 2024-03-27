@@ -49,6 +49,7 @@ legend {
 
 .default {
 	grid-area: default;
+	white-space: pre-wrap;
 }
 
 .value {
@@ -56,6 +57,7 @@ legend {
 	grid-area: value;
 	border: none;
 	font-size: large;
+	white-space: pre-wrap;
 }
 .value:focus {
     outline: 0px solid transparent;
