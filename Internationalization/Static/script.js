@@ -22,7 +22,7 @@ function $(a) {
 function node(nodeType, pars){
 	var e = document.createElement(nodeType);
 	for (var p in pars) {
-		if (p == "text") e.appendChild(text(pars[p]));
+		if (p=="text") e.appendChild(text(pars[p]));
 		else e.setAttribute(p,pars[p]);
 	}
 	return e;
@@ -57,7 +57,7 @@ async function populate_mods() {
 
 	// Populate drop down box.
 	const mod_list = Object.keys(mods).sort(mod_cmp);
-	const mod_options = mod_list.map((id) => node("option", {value:id, text:mods[id]}));
+	const mod_options = mod_list.map((id) => node("option", {value:id, text: mods[id]}));
 	el.mod.replaceChildren(...mod_options);
 
 	// Select last mod
@@ -89,16 +89,14 @@ async function update_mod() {
 	
 	// Generate the translation editor for this mod
 	const text_new = await fetch("/file/" + modid + "/default").then(as_text);
-
 	el.new.replaceChildren(...generate_editor(text_new));
 	el.new.dataset.raw = text_new;
-	// text.split()
 	
 	// Load the selected locale
 	update_locale();
 }
 
-function* generate_editor(content) {
+function* generate_editor(content, readonly) {
 	let pos = 0;
 	for (let m of content.matchAll(magic)) {
 		console.log(m);
@@ -111,11 +109,19 @@ function* generate_editor(content) {
 		if (g.key1 || g.key2) {
 			let r = node("div", {'class': "entry"});
 			let key = g.key1 ?? g.key2;
-			r.replaceChildren(
-				node("span", {'class': "key", text: key}),
-				node("span", {'class': "value", "data-key": key, contentEditable: "", "data-position":m.indices.groups.value}),
-				node("span", {'class': "default", text: g.value}),
-			);
+			if (readonly) {
+				r.replaceChildren(
+					node("span", {'class': "key", text: key}),
+					node("span", {'class': "default", "data-key": key}),
+					node("input", {'class': "value", type:"text", value: g.value}),
+				);
+			} else {
+				r.replaceChildren(
+					node("span", {'class': "key", text: key}),
+					node("span", {'class': "default", text: g.value}),
+					node("input", {'class': "value", type:"text", "data-key": key, "data-position":m.indices.groups.value}),
+				);
+			}
 			yield r;
 		}
 		pos = m.index + m[0].length;
@@ -132,6 +138,6 @@ async function select_ingame_locale() {
 /** Load the selected locale into the editor. */
 async function update_locale() {
 	const text_old = await fetch("/file/" + el.mod.value + "/" + el.locale.value).then(as_text)
-	el.old.textContent = text_old;
+	el.old.replaceChildren(...generate_editor(text_old, true));
 }
 

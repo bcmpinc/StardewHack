@@ -2,7 +2,7 @@ body {
 	background: linear-gradient(180deg, rgb(0,44,92) 0%, rgb(4,118,227,1) 50%, rgb(105,239,224) 100%);
 	background-attachment: fixed;
 	height: 100%;
-	font-size: large;
+	font-family: sans-serif;
 	margin: 0;
 }
 
@@ -54,6 +54,8 @@ legend {
 .value {
 	background: rgba(255,255,255,0.3);
 	grid-area: value;
+	border: none;
+	font-size: large;
 }
 .value:focus {
     outline: 0px solid transparent;
