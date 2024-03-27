@@ -45,6 +45,8 @@ function ready() {
 	el.current.addEventListener('click', select_ingame_locale);
 	el.locale.addEventListener('change', update_locale);
 	el.mod.addEventListener('change', update_mod);
+	
+	el.locale.value = localStorage.getItem("locale") ?? "";
 
 	// Load data
 	populate_mods();
@@ -99,13 +101,9 @@ async function update_mod() {
 function* generate_editor(content, readonly) {
 	let pos = 0;
 	for (let m of content.matchAll(magic)) {
-		//console.log(m);
 		let g = m.groups;
 		if (g.sc) yield node("div", {'class': "comment", text: g.sc});
-		if (g.mc) {
-			// let lines = g.mc.
-			yield node("div", {'class': "comment", text: g.mc});
-		}
+		if (g.mc) yield node("div", {'class': "comment", text: g.mc});
 		if (g.key1 || g.key2) {
 			let r = node("div", {'class': "entry"});
 			let key = g.key1 ?? g.key2;
@@ -113,13 +111,13 @@ function* generate_editor(content, readonly) {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					node("input", {'class': "value", type:"text", value: g.value, readonly:""}),
+					node("span", {'class': "value", text: g.value, readonly:"", contentEditable:""}),
 				);
 			} else {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", text: g.value}),
-					node("input", {'class': "value", type:"text", "data-key": key, "data-position":m.indices.groups.value}),
+					node("span", {'class': "value", "data-key": key, "data-position":m.indices.groups.value, contentEditable:""}),
 				);
 			}
 			yield r;
@@ -139,12 +137,13 @@ async function select_ingame_locale() {
 async function update_locale() {
 	const modid = el.mod.value;
 	const locale = el.locale.value;
+	localStorage.setItem("locale", locale);
 
 	// Load current translation from game
 	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).then(
 	(lang) => {
-		for (let e of $('//*[@data-key]', el.new)) {
-			e.value = lang[e.dataset.key] ?? "";
+		for (let e of $('.//*[@data-key]', el.new)) {
+			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 		}
 	});
 	
@@ -154,7 +153,7 @@ async function update_locale() {
 		el.old.replaceChildren(...generate_editor(text_old, true));
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
 		(lang) => {
-			for (let e of $('//*[@data-key]', el.old)) {
+			for (let e of $('.//*[@data-key]', el.old)) {
 				e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			}
 		});	
