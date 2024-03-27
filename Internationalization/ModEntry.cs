@@ -39,7 +39,7 @@ namespace Internationalization
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
                 {"mods",   new ModList()},
                 {"file",   new TranslationFile()},
-                {"dict",   new Translations()},
+                {"lang",   new Translations()},
                 {"images", new Images(Helper.GameContent)},
             };
 

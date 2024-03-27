@@ -10,8 +10,8 @@ const magic = new RegExp([
 ].map((x)=>x.source).join('|'), "dgiu");
 
 /** Returns an array containing all elements matched by the given XPath expression. */
-function $(a) {
-	const res = document.evaluate(a,document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+function $(a, root) {
+	const res = document.evaluate(a,root ?? document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 	return [...gen()];
 	function* gen() {
 		for (let i=0; i<res.snapshotLength; i++) yield res.snapshotItem(i);
@@ -99,7 +99,7 @@ async function update_mod() {
 function* generate_editor(content, readonly) {
 	let pos = 0;
 	for (let m of content.matchAll(magic)) {
-		console.log(m);
+		//console.log(m);
 		let g = m.groups;
 		if (g.sc) yield node("div", {'class': "comment", text: g.sc});
 		if (g.mc) {
@@ -113,7 +113,7 @@ function* generate_editor(content, readonly) {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					node("input", {'class': "value", type:"text", value: g.value}),
+					node("input", {'class': "value", type:"text", value: g.value, readonly:""}),
 				);
 			} else {
 				r.replaceChildren(
@@ -137,7 +137,26 @@ async function select_ingame_locale() {
 
 /** Load the selected locale into the editor. */
 async function update_locale() {
-	const text_old = await fetch("/file/" + el.mod.value + "/" + el.locale.value).then(as_text)
-	el.old.replaceChildren(...generate_editor(text_old, true));
-}
+	const modid = el.mod.value;
+	const locale = el.locale.value;
 
+	// Load current translation from game
+	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).then(
+	(lang) => {
+		for (let e of $('//*[@data-key]', el.new)) {
+			e.value = lang[e.dataset.key] ?? "";
+		}
+	});
+	
+	// Generate old translation contents
+	fetch("/file/" + modid + "/" + locale).then(as_text).then(
+	(text_old) => {
+		el.old.replaceChildren(...generate_editor(text_old, true));
+		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
+		(lang) => {
+			for (let e of $('//*[@data-key]', el.old)) {
+				e.replaceChildren(text(lang[e.dataset.key] ?? ""));
+			}
+		});	
+	});
+}
