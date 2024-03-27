@@ -108,11 +108,14 @@ function* generate_editor(content, readonly) {
 			let r = node("div", {'class': "entry"});
 			let key = g.key1 ?? g.key2;
 			if (readonly) {
+				let field;
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					node("span", {'class': "value", text: g.value, readonly:"", contentEditable:""}),
+					field = node("span", {'class': "value", text: g.value, contentEditable:""}),
 				);
+				let value = g.value;
+				field.addEventListener("beforeinput", (e)=>e.preventDefault());
 			} else {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
