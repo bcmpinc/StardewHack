@@ -42,8 +42,8 @@ function text(content) {
 	return document.createTextNode(content);
 }
 
-function as_text(res) {return res.text()}
-function as_json(res) {return res.json()}
+function as_text(res) {return res.ok?res.text():undefined;}
+function as_json(res) {return res.ok?res.json():undefined;}
 
 function textarea_fit(e) {
 	e.style.height = "1lh";
@@ -166,19 +166,22 @@ async function update_locale() {
 	// Load current translation from game
 	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).then(
 	(lang) => {
+		if (!lang) return;
 		for (let e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
 		}
-	});
+	}).catch((e)=>console.log(e));
 	
 	// Generate old translation contents
 	fetch("/file/" + modid + "/" + locale).then(as_text).then(
 	(text_old) => {
+		if (!text_old) return;
 		el.old.replaceChildren(...generate_editor(text_old, true));
 		for (let x of $(".//textarea", el.old)) textarea_fit(x);
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
 		(lang) => {
+			if (!lang) return;
 			for (let e of $('.//*[@data-key]', el.old)) {
 				e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			}

@@ -70,3 +70,6 @@ textarea {
 #old {
 	white-space: break-spaces;
 }
+#old .value {
+	color: #666;
+}
