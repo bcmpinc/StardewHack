@@ -1,9 +1,9 @@
 body {
-  background: linear-gradient(180deg, rgb(0,44,92) 0%, rgb(4,118,227,1) 50%, rgb(105,239,224) 100%);
-  background-attachment: fixed;
-  height: 100%;
-  font-size: large;
-  margin: 0;
+	background: linear-gradient(180deg, rgb(0,44,92) 0%, rgb(4,118,227,1) 50%, rgb(105,239,224) 100%);
+	background-attachment: fixed;
+	height: 100%;
+	font-size: large;
+	margin: 0;
 }
 
 label, legend {
@@ -11,16 +11,67 @@ label, legend {
 }
 
 .panel {
-  margin: 2em;
-  padding: 0.5em;
-  border: 0.9em solid;
-  border-image: url("/static/panel.png") 24 fill;
+	margin: 2em;
+	padding: 0.5em;
+	border: 0.9em solid;
+	border-image: url("/static/panel.png") 24 fill;
 }
 legend {
-  border: 0.6em solid;
-  border-image: url("/static/panel-small.png") 16 fill;
+	border: 0.6em solid;
+	border-image: url("/static/panel-small.png") 16 fill;
 }
 pre {
 	margin: 0;
 	tab-size: 4;
 }
+
+.comment{
+	color:#080;
+}
+
+.entry {
+	display: inline-grid;
+	grid-template-columns: auto auto auto;
+	grid-template-rows:    auto auto;
+	grid-template-areas: 
+		"key colon default"
+		"key colon value";
+}
+.entry {
+	border: 1px solid transparent;
+	margin: 0 -0.5em;
+	padding: 0 0.5em;
+}
+.entry:focus-within {
+	border-color: #330;
+}
+
+.key {
+	font-weight: bold;
+	grid-area: key;
+}
+
+.colon {
+	grid-area: colon;
+}
+
+.default {
+	padding: 0px 0.5em;
+	grid-area: default;
+	visibility: hidden;
+	height: 0px;
+}
+.value:focus + .default {
+	visibility: visible;
+}
+
+.value {
+	padding: 0px 0.5em;
+	background: rgba(255,255,255,0.2);
+	grid-area: value;
+}
+
+.value:focus {
+    outline: 0px solid transparent;
+}
+

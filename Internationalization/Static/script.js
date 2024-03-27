@@ -2,6 +2,13 @@
 const el = {};
 document.addEventListener('DOMContentLoaded', ready);
 
+// Translation json parser.
+const magic = new RegExp([
+	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)"(?<value>.*?)(?<!\\(?:\\\\)+)"/, // entry
+	/(?<sc>\/\/.*)/,      // Single line comment
+	/(?<mc>\/\*[^]*?\*\/)/, // Multiline comment
+].map((x)=>x.source).join('|'), "giu");
+
 /** Returns an array containing all elements matched by the given XPath expression. */
 function $(a) {
 	const res = document.evaluate(a,document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
@@ -15,10 +22,15 @@ function $(a) {
 function node(nodeType, pars){
 	var e = document.createElement(nodeType);
 	for (var p in pars) {
-		if (p == "text") e.textContent = pars[p];
+		if (p == "text") e.appendChild(text(pars[p]));
 		else e.setAttribute(p,pars[p]);
 	}
 	return e;
+}
+
+/** Create a text node */
+function text(content) {
+	return document.createTextNode(content);
 }
 
 function as_text(res) {return res.text()}
@@ -77,11 +89,36 @@ async function update_mod() {
 	
 	// Generate the translation editor for this mod
 	const text_new = await fetch("/file/" + modid + "/default").then(as_text);
-	el.new.textContent = text_new;
-	// text.split(/"((?:\\\\|\\"|[^"])+)"\s*:\s*"((?:\\\\|\\"|[^"])+)"|(\/\/.*)|(\/\*(?:[^*]|\*[^/])*\*\/)/i)
+
+	el.new.replaceChildren(...generate_editor(text_new));
+	// text.split()
 	
 	// Load the selected locale
 	update_locale();
+}
+
+function* generate_editor(content) {
+	let pos = 0;
+	for (let m of content.matchAll(magic)) {
+		console.log(m);
+		let g = m.groups;
+		if (pos < m.index) yield text(content.slice(pos, m.index));
+		if (g.sc) yield node("span", {'class': "comment", text: g.sc});
+		if (g.mc) yield node("span", {'class': "comment", text: g.mc});
+		if (g.key1 || g.key2) {
+			let r = node("span", {'class': "entry"});
+			let key = g.key1 ?? g.key2;
+			r.replaceChildren(
+				node("span", {'class': "key", text: key}),
+				node("span", {'class': "colon", text: g.colon}),
+				node("span", {'class': "value", "data-key": key, contentEditable: ""}),
+				node("span", {'class': "default", text: g.value}),
+			);
+			yield r;
+		}
+		pos = m.index + m[0].length;
+	}
+	yield text(content.slice(pos));
 }
 
 /** Set editor locale to what the current mod is set to in-game. */
@@ -96,3 +133,4 @@ async function update_locale() {
 	const text_old = await fetch("/file/" + el.mod.value + "/" + el.locale.value).then(as_text)
 	el.old.textContent = text_old;
 }
+
