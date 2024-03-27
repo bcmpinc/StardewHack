@@ -139,6 +139,10 @@ function* generate_editor(content, readonly) {
 					field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value}),
 				);
 				field.addEventListener('input', (e)=>textarea_fit(e.target));
+				field.addEventListener('change', (e)=>{
+					let content = { method: "PUT", body: e.target.value };
+					fetch("/lang/"+el.mod.value+"/"+el.locale.value+"/"+e.target.dataset.key, content);
+				});
 			}
 			yield r;
 		}
