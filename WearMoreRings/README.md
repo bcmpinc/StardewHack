@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.4:
+* Fix issue with equipping rings removing the effects and unequipping adding them.
+
 #### 7.3:
 * Fix issue with ring effects (e.g. magnetism) not being applied.
 

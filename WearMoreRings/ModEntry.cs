@@ -170,7 +170,7 @@ namespace StardewHack.WearMoreRings
             };
             
             for (int i=0; i<max_rings; i++) {
-                String name;
+                string name;
                 Ring ring;
                 name = "Ring " + i;
                 ring = container.Value[i];
@@ -399,7 +399,7 @@ namespace StardewHack.WearMoreRings
             }
 
             // Equip/unequip
-            Game1.player.Equip(helditem, icon.item, (x) => {});
+            Game1.player.Equip(icon.item, helditem, (x) => {});
             
             // Swap items
             Game1.player.CursorSlotItem = Utility.PerformSpecialItemGrabReplacement(icon.item);
