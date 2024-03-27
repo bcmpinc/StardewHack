@@ -42,6 +42,10 @@ legend {
 	border-radius: 0.1em;
 }
 
+textarea {
+	resize: none;
+}
+
 .key {
 	color: #960;
 	grid-area: key;

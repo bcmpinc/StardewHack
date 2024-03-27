@@ -45,6 +45,11 @@ function text(content) {
 function as_text(res) {return res.text()}
 function as_json(res) {return res.json()}
 
+function textarea_fit(e) {
+	e.style.height = "1lh";
+	e.style.height = (e.scrollHeight-4)+"px";
+}
+
 /** Initialize the web app */
 function ready() {
 	// Map id to their html element
@@ -55,9 +60,12 @@ function ready() {
 	el.locale.addEventListener('change', update_locale);
 	el.mod.addEventListener('change', update_mod);
 	
-	el.locale.value = localStorage.getItem("locale") ?? "";
+	window.addEventListener("resize", () => {
+		for (let x of $("//textarea")) textarea_fit(x);
+	});
 
 	// Load data
+	el.locale.value = localStorage.getItem("locale") ?? "";
 	populate_mods();
 }
 
@@ -121,40 +129,16 @@ function* generate_editor(content, readonly) {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					field = node("span", {'class': "value", text: g.value, contentEditable:""}),
+					field = node("textarea", {'class': "value", text: g.value, readonly:""}),
 				);
-				field.addEventListener("beforeinput", (e)=>e.preventDefault());
 			} else {
 				let field;
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", text: g.value}),
-					field = node("span", {'class': "value", "data-key": key, "data-position":m.indices.groups.value, contentEditable:has_plaintext_only ? "plaintext-only" : ""}),
+					field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value}),
 				);
-				field.addEventListener("input", (e)=>{
-					if (!has_plaintext_only) {
-						let last;
-						// Strip out non plaintext html
-						for (let x of $("./*", e.target)) {
-							if (x.tagName !== "BR") {
-								let array = $(".//text()|.//br", x);
-								last = array.at(-1);
-								x.replaceWith(...array);
-							}
-						}
-						if (last) {
-							// update the selection
-							var range = document.createRange()
-							var sel = window.getSelection()
-							range.setStart(last, last.data.length);
-							range.collapse(true)
-							sel.removeAllRanges()
-							sel.addRange(range)
-						}
-						// concatenate text elements.
-						e.target.normalize();
-					}
-				});
+				field.addEventListener('input', (e)=>textarea_fit(e.target));
 			}
 			yield r;
 		}
@@ -180,6 +164,7 @@ async function update_locale() {
 	(lang) => {
 		for (let e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
+			textarea_fit(e);
 		}
 	});
 	
@@ -187,6 +172,7 @@ async function update_locale() {
 	fetch("/file/" + modid + "/" + locale).then(as_text).then(
 	(text_old) => {
 		el.old.replaceChildren(...generate_editor(text_old, true));
+		for (let x of $(".//textarea", el.old)) textarea_fit(x);
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
 		(lang) => {
 			for (let e of $('.//*[@data-key]', el.old)) {
