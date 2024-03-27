@@ -143,13 +143,17 @@ namespace StardewHack.WearMoreRings
             AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, 111, Game1.player.shirtItem.Value);
             AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, 112, Game1.player.pantsItem.Value);
             AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, brt, Game1.player.boots.Value);
+            var max_rings = getInstance().config.Rings;
             var rlt = 108;
             for (int i=0; i<trinkets; i++) {
-                AddIcon(page, "Trinket",  18+16*i, 48, 120+i, 104,  -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                if (max_rings>6) {
+                    AddIcon(page, "Trinket", 18+16*i, 48, 120+i, 104, -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                } else {
+                    AddIcon(page, "Trinket", 52+16*i, (int)(16*Math.Ceiling((double)max_rings/2)), 120+i, 104, -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                }
                 rlt = 120+i;
             }
-
-            var max_rings = getInstance().config.Rings;
+            
             int slot_id(int x, int y, int def=-1) {
                 if (x==-1) {
                     switch(y) {
@@ -174,8 +178,8 @@ namespace StardewHack.WearMoreRings
                 Ring ring;
                 name = "Ring " + i;
                 ring = container.Value[i];
-                var x = i/4;
-                var y = i%4;
+                var x = max_rings>8 ? i/4 : i%2;
+                var y = max_rings>8 ? i%4 : i/2;
                 AddIcon(page, name, 52+16*x, 16*y, slot_id(x,y), slot_id(x,y-1), slot_id(x,y+1), slot_id(x-1,y), slot_id(x+1,y, 105), ring);
             }
         }
