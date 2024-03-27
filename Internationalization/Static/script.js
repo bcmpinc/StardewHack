@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', ready);
 // Translation json parser.
 const magic = new RegExp([
 	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)"(?<value>.*?)(?<!\\(?:\\\\)+)"/, // entry
-	/(?<sc>\/\/.*)/,      // Single line comment
-	/(?<mc>\/\*[^]*?\*\/)/, // Multiline comment
-].map((x)=>x.source).join('|'), "giu");
+	/\/\/(?<sc>.*)/,      // Single line comment
+	/\/\*(?<mc>[^]*?)\*\//, // Multiline comment
+].map((x)=>x.source).join('|'), "dgiu");
 
 /** Returns an array containing all elements matched by the given XPath expression. */
 function $(a) {
@@ -91,6 +91,7 @@ async function update_mod() {
 	const text_new = await fetch("/file/" + modid + "/default").then(as_text);
 
 	el.new.replaceChildren(...generate_editor(text_new));
+	el.new.dataset.raw = text_new;
 	// text.split()
 	
 	// Load the selected locale
@@ -102,23 +103,23 @@ function* generate_editor(content) {
 	for (let m of content.matchAll(magic)) {
 		console.log(m);
 		let g = m.groups;
-		if (pos < m.index) yield text(content.slice(pos, m.index));
-		if (g.sc) yield node("span", {'class': "comment", text: g.sc});
-		if (g.mc) yield node("span", {'class': "comment", text: g.mc});
+		if (g.sc) yield node("div", {'class': "comment", text: g.sc});
+		if (g.mc) {
+			// let lines = g.mc.
+			yield node("div", {'class': "comment", text: g.mc});
+		}
 		if (g.key1 || g.key2) {
-			let r = node("span", {'class': "entry"});
+			let r = node("div", {'class': "entry"});
 			let key = g.key1 ?? g.key2;
 			r.replaceChildren(
 				node("span", {'class': "key", text: key}),
-				node("span", {'class': "colon", text: g.colon}),
-				node("span", {'class': "value", "data-key": key, contentEditable: ""}),
+				node("span", {'class': "value", "data-key": key, contentEditable: "", "data-position":m.indices.groups.value}),
 				node("span", {'class': "default", text: g.value}),
 			);
 			yield r;
 		}
 		pos = m.index + m[0].length;
 	}
-	yield text(content.slice(pos));
 }
 
 /** Set editor locale to what the current mod is set to in-game. */

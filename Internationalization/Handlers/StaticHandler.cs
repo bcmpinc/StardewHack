@@ -29,7 +29,6 @@ namespace Internationalization.Handlers
             var file = Path.Combine(root, r.path[0]);
             try {
                 var ext = Path.GetExtension(r.path[0]);
-                ModEntry.Log(ext);
                 if (Mime.TryGetValue(ext, out var mime)) r.content(mime);
                 var data = File.ReadAllBytes(file);
                 if (data.Length > 0) {

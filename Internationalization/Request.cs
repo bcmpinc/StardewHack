@@ -37,7 +37,7 @@ namespace Internationalization
             path = ctx.Request.Url.LocalPath.Split("/", StringSplitOptions.RemoveEmptyEntries); ;
             req = ctx.Request;
             res = ctx.Response;
-            ModEntry.Log($"Received {req.HttpMethod} {req.Url}");
+            ModEntry.Log($"{req.HttpMethod} {req.Url}");
         }
 
         public void status(HttpStatusCode code) {
