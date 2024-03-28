@@ -46,8 +46,8 @@ namespace Internationalization.Handlers
                 string current_locale = translation.Locale.Length > 0 ? translation.Locale.Split("-")[0] : "default";
                 InfoEntry info = new InfoEntry(current_locale);
                 foreach (var m in TranslationRegistry.AllMods()) {
-                    var id = m.Manifest.Name;
-                    var mod = new ModEntry(id);
+                    var id = m.Manifest.UniqueID;
+                    var mod = new ModEntry(m.Manifest.Name);
                     foreach (var locale in TranslationRegistry.Locales(id)) {
                         mod.locales[locale] = TranslationRegistry.Status(id,locale);
                     }

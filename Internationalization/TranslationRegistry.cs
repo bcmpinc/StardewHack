@@ -112,9 +112,9 @@ namespace Internationalization
             return true;
         }
 
-        internal static string[] Locales(string uniqueId) {
-            if (!table.TryGetValue(uniqueId, out var e)) return null;
-            return e.All.Keys.ToArray();                        
+        internal static IEnumerable<string> Locales(string uniqueId) {
+            if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException($"Mod '{uniqueId}' not found!");
+            return e.All.Keys;                        
         }
 
         internal static void MarkSaved(string uniqueId, string locale) {
@@ -123,12 +123,12 @@ namespace Internationalization
         }
 
         internal static TranslationStatus Status(string uniqueId, string locale) {
-            if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException("Mod not found!");
-            var def = e.All[""];
+            if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException($"Mod '{uniqueId}' not found!");
+            var def = e.All["default"];
             var dict = e.All[locale];
             return new TranslationStatus() {
                 modified = e.Dirty[locale],
-                lines_translated = def.Where((pair) => dict[pair.Key].Length > 0).Count(),
+                lines_translated = def.Where((pair) => dict.TryGetValue(pair.Key, out var v) && v.Length > 0).Count(),
             };
         }
     }
