@@ -1,29 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Internationalization
 {
     public abstract class RequestHandler
     {
-        public HttpStatusCode Handle(Request r) {
+        public bool Handle(Request r) {
             try {
                 switch (r.req.HttpMethod) {
                     case "GET": return Get(r);
                     case "PUT": return Put(r);
-                    default: return HttpStatusCode.MethodNotAllowed;
+                    default: return r.status(HttpStatusCode.MethodNotAllowed);
                 }
             } catch (System.Exception ex) {
-                r.write_text(ex.ToString());
-                return HttpStatusCode.InternalServerError;
+                return r.write_text(HttpStatusCode.InternalServerError, ex.ToString());
             }
         }
 
-        public virtual HttpStatusCode Get(Request r) => HttpStatusCode.MethodNotAllowed;
-        public virtual HttpStatusCode Put(Request r) => HttpStatusCode.MethodNotAllowed;
+        public virtual bool Get(Request r) => r.status(HttpStatusCode.MethodNotAllowed);
+        public virtual bool Put(Request r) => r.status(HttpStatusCode.MethodNotAllowed);
     }
 
     public class Request
@@ -34,23 +29,28 @@ namespace Internationalization
 
         internal Request(HttpListenerContext ctx)
         {
-            path = ctx.Request.Url.LocalPath.Split("/", StringSplitOptions.RemoveEmptyEntries); ;
+            path = ctx.Request.Url.LocalPath.Split("/", System.StringSplitOptions.RemoveEmptyEntries); ;
             req = ctx.Request;
             res = ctx.Response;
             ModEntry.Log($"{req.HttpMethod} {req.Url}");
         }
 
-        public void status(HttpStatusCode code) {
+        public bool status(HttpStatusCode code) {
             res.StatusCode = (int)code;
             res.StatusDescription = code.ToString();
+            return true;
         }
-
-        public void write_buffer(byte[] data)
-        {
+        public bool write_buffer(HttpStatusCode status, byte[] data) {
+            this.status(status);
             res.ContentLength64 = data.Length;
             res.OutputStream.Write(data, 0, data.Length);
+            return true;
         }
-        public void write_text(string data) => write_buffer(Encoding.UTF8.GetBytes(data));
+
+        public bool write_text(HttpStatusCode status, string data) {
+            res.ContentEncoding = Encoding.UTF8;
+            return write_buffer(status, Encoding.UTF8.GetBytes(data));
+        }
 
         public void content(string type) => res.Headers.Set("Content-Type", type);
         public void content_text() => content("text/plain");

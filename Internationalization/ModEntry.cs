@@ -1,17 +1,11 @@
 ﻿using StardewModdingAPI;
 using System.Net;
-using StardewValley.Network;
-using StardewValley.Locations;
 using StardewModdingAPI.Events;
 using System.Threading.Tasks;
 using System.IO;
-using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using Internationalization.Handlers;
-using System.Reflection;
-using Microsoft.Xna.Framework.Input;
-using StardewValley;
 
 namespace Internationalization
 {
@@ -66,12 +60,13 @@ namespace Internationalization
             // Serve index when '/' is requested.
             if (req.path.Length == 0) req.path = new string[]{"static", "index.html"};
 
+            bool handled = false;
             if (handlers.TryGetValue(req.path[0], out var handler)) {
                 req.path = req.path.Skip(1).ToArray();
-                req.status(handler.Handle(req));
-            } else {
-                req.status(HttpStatusCode.NotFound);
-                req.write_text("No handler for: " + string.Join("/", req.path));
+                handled |= handler.Handle(req);
+            } 
+            if (!handled) {
+                req.write_text(HttpStatusCode.NotFound, "No handler for: " + string.Join("/", req.path));
                 Monitor.Log("No handler for: " + string.Join("/", req.path));
             }
             req.res.Close();

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Internationalization.Handlers
 {
@@ -13,35 +8,34 @@ namespace Internationalization.Handlers
         public TranslationFile() {}
 
         // Requesting translation files.
-        public override HttpStatusCode Get(Request r) {
-            if (r.path.Length != 2) return HttpStatusCode.BadRequest;
+        public override bool Get(Request r) {
+            if (r.path.Length != 2) return r.status(HttpStatusCode.BadRequest);
             var file = TranslationRegistry.TranslationPath(r.path[0], r.path[1]);
-            if (file==null) return HttpStatusCode.NotFound;
+            if (file==null) return r.status(HttpStatusCode.NotFound);
             try {
                 var data = File.ReadAllBytes(file);
                 r.content_javascript(); // These files often contain comments, which is not valid json.
-                r.write_buffer(data);
-                return HttpStatusCode.OK;
+                return r.write_buffer(HttpStatusCode.OK, data);
             } catch {
-                return HttpStatusCode.NotFound;
+                return r.status(HttpStatusCode.NotFound);
             }
         }
 
         // Saving translation files.
-        public override HttpStatusCode Put(Request r) {
-            if (r.path.Length != 2) return HttpStatusCode.BadRequest;
-            if (!r.req.HasEntityBody) return HttpStatusCode.BadRequest;
+        public override bool Put(Request r) {
+            if (r.path.Length != 2) return r.status(HttpStatusCode.BadRequest);
+            if (!r.req.HasEntityBody) return r.status(HttpStatusCode.BadRequest);
             var file = TranslationRegistry.TranslationPath(r.path[0], r.path[1]);
-            if (file==null) return HttpStatusCode.NotFound;
+            if (file==null) return r.status(HttpStatusCode.NotFound);
             try {
                 ModEntry.Log($"Writing new translation file to '{file}'.", StardewModdingAPI.LogLevel.Info);
                 var stream = r.req.InputStream;
                 var output = File.OpenWrite(file);
                 stream.CopyTo(output);
                 output.Close();
-                return HttpStatusCode.NoContent;
+                return r.status(HttpStatusCode.NoContent);
             } catch {
-                return HttpStatusCode.NotFound;
+                return r.status(HttpStatusCode.NotFound);
             }
         }
     }

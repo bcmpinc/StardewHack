@@ -1,16 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
-using StardewValley.Network.NetEvents;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace Internationalization
 {
@@ -130,7 +123,7 @@ namespace Internationalization
         }
 
         internal static TranslationStatus Status(string uniqueId, string locale) {
-            if (!table.TryGetValue(uniqueId, out var e)) throw new ArgumentException("Mod not found!");
+            if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException("Mod not found!");
             var def = e.All[""];
             var dict = e.All[locale];
             return new TranslationStatus() {

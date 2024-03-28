@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Internationalization.Handlers
 {
@@ -23,8 +19,8 @@ namespace Internationalization.Handlers
             this.root = root;
         }
 
-        public override HttpStatusCode Get(Request r) {
-            if (r.path.Length != 1) return HttpStatusCode.Forbidden;
+        public override bool Get(Request r) {
+            if (r.path.Length != 1) return r.status(HttpStatusCode.Forbidden);
 
             var file = Path.Combine(root, r.path[0]);
             try {
@@ -32,12 +28,11 @@ namespace Internationalization.Handlers
                 if (Mime.TryGetValue(ext, out var mime)) r.content(mime);
                 var data = File.ReadAllBytes(file);
                 if (data.Length > 0) {
-                    r.write_buffer(data);
-                    return HttpStatusCode.OK;
+                    return r.write_buffer(HttpStatusCode.OK, data);
                 }
             } catch {
             }
-            return HttpStatusCode.NotFound;
+            return r.status(HttpStatusCode.NotFound);
         }
 
     }

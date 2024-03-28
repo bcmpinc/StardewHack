@@ -1,15 +1,9 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Internationalization.Handlers
 {
@@ -47,7 +41,7 @@ namespace Internationalization.Handlers
             this.translation = translation;
         }
 
-        public override HttpStatusCode Get(Request r) {
+        public override bool Get(Request r) {
             if (r.path.Length == 0) {
                 string current_locale = translation.Locale.Length > 0 ? translation.Locale.Split("-")[0] : "default";
                 InfoEntry info = new InfoEntry(current_locale);
@@ -61,7 +55,7 @@ namespace Internationalization.Handlers
                     info.mods[m.Manifest.UniqueID] = mod;
                 }
                 DataLoader.AdditionalLanguages(Game1.content);
-                foreach (var m in Enum.GetNames(typeof(LocalizedContentManager.LanguageCode))) {
+                foreach (var m in System.Enum.GetNames(typeof(LocalizedContentManager.LanguageCode))) {
                     info.locales[m] = new LocaleEntry();
                 }
                 foreach (var m in DataLoader.AdditionalLanguages(Game1.content)) {
@@ -69,10 +63,9 @@ namespace Internationalization.Handlers
                 }
                 var data = JsonSerializer.Serialize(info);
                 r.content_json();
-                r.write_text(data);
-                return HttpStatusCode.OK;
+                return r.write_text(HttpStatusCode.OK, data);
             } else {
-                return HttpStatusCode.BadRequest;
+                return r.status(HttpStatusCode.BadRequest);
             }
         }
     }

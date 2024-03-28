@@ -1,12 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Internationalization.Handlers
 {
@@ -17,15 +11,16 @@ namespace Internationalization.Handlers
             this.content = content;
         }
 
-        public override HttpStatusCode Get(Request r) {
+        public override bool Get(Request r) {
             try {
                 var assetName = string.Join("\\", r.path);
                 var res = content.Load<Texture2D>(assetName);
                 r.content("image/png");
+                r.status(HttpStatusCode.OK);
                 res.SaveAsPng(r.res.OutputStream, res.Width, res.Height);
-                return HttpStatusCode.OK;
+                return true;
             } catch {
-                return HttpStatusCode.NotFound;
+                return r.status(HttpStatusCode.NotFound);
             }
         }
     }

@@ -1,5 +1,6 @@
 // Internationalization : Stardew Valley Mod Translation Tool
 const el = {};
+const info = {};
 document.addEventListener('DOMContentLoaded', ready);
 
 // detect if contentEditable="plaintext-only" is supported.
@@ -42,8 +43,9 @@ function text(content) {
 	return document.createTextNode(content);
 }
 
-function as_text(res) {return res.ok?res.text():undefined;}
-function as_json(res) {return res.ok?res.json():undefined;}
+function is_ok(res) {if(!res.ok) throw res;}
+function as_text(res) {is_ok(res); return res.text();}
+function as_json(res) {is_ok(res); return res.json();}
 
 function textarea_fit(e) {
 	e.style.height = "1lh";
@@ -72,7 +74,7 @@ function ready() {
 /** Request the mod list and populate drop down box */
 async function populate_mods() {
 	// Request mod list
-	const mods = await fetch("/mods").then(as_json);
+	Object.assign(info, await fetch("/info").then(as_json));
 
 	// Populate drop down box.
 	const mod_list = Object.keys(mods).sort(mod_cmp);
