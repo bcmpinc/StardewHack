@@ -37,7 +37,7 @@ namespace Internationalization
             // Location from where to serve static stuff.
             handlers = new Dictionary<string, RequestHandler> {
                 {"static", new StaticHandler(Path.Combine(Helper.DirectoryPath, "Static"))},
-                {"mods",   new ModList()},
+                {"info",   new Info(Helper.Translation)},
                 {"file",   new TranslationFile()},
                 {"lang",   new Translations()},
                 {"images", new Images(Helper.GameContent)},

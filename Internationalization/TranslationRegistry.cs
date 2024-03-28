@@ -7,12 +7,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
 namespace Internationalization
 {
+    struct TranslationStatus {
+        [JsonInclude] public bool modified;
+        [JsonInclude] public int lines_translated;
+    }
+
     static class TranslationRegistry {
         internal struct Entry { 
             readonly public IModInfo Mod;
@@ -20,6 +26,7 @@ namespace Internationalization
             readonly public string I18nPath;
             readonly private object Translator;
             readonly public IDictionary<string, IDictionary<string, string>> All;
+            readonly public IDictionary<string, bool> Dirty;
 
             internal Entry(IModInfo mod) {
                 Mod = mod;
@@ -27,6 +34,10 @@ namespace Internationalization
                 I18nPath     = Path.Combine(ReflectionHelper.Property<string>(mod, "DirectoryPath"), "i18n");
                 Translator   = ReflectionHelper.Field<object>(Translations, "Translator");
                 All          = ReflectionHelper.Field<IDictionary<string, IDictionary<string, string>>>(Translator, "All");
+                Dirty        = new Dictionary<string, bool>();
+                foreach (string key in All.Keys) {
+                    Dirty[key] = false;
+                }
             }
 
             private readonly IDictionary<string, Translation> ForLocale {get => ReflectionHelper.Field<IDictionary<string, Translation>>(Translator , "ForLocale"); }
@@ -39,19 +50,13 @@ namespace Internationalization
                 if (text != null)
                     ForLocale[key] = ReflectionHelper.Constructor<Translation>(Translations.Locale, key, text);
             }
-
-            internal string Current() {
-                var res = Translations.Locale;
-                if (res == "") return "default";
-                return res;
-            }
         }
 
-        static Translation NewTranslation(string locale, string key, string text) {
+        static private Translation NewTranslation(string locale, string key, string text) {
             return ReflectionHelper.Constructor<Translation>(locale, key, text); 
         }
 
-        static Dictionary<string,Entry> table;
+        static private Dictionary<string,Entry> table;
 
         static public void Init(IModRegistry registry) {
             // Make sure we can make new translations to prevent issues later.
@@ -109,18 +114,29 @@ namespace Internationalization
             
             // Set new value & update current localization
             dict[key] = value;
+            e.Dirty[locale] = true;
             e.UpdateKey(key);
             return true;
-        }
-
-        internal static string Current(string uniqueId) {
-            if (!table.TryGetValue(uniqueId, out var e)) return null;
-            return e.Current();
         }
 
         internal static string[] Locales(string uniqueId) {
             if (!table.TryGetValue(uniqueId, out var e)) return null;
             return e.All.Keys.ToArray();                        
+        }
+
+        internal static void MarkSaved(string uniqueId, string locale) {
+            if (!table.TryGetValue(uniqueId, out var e)) return;
+            e.Dirty[locale] = false;
+        }
+
+        internal static TranslationStatus Status(string uniqueId, string locale) {
+            if (!table.TryGetValue(uniqueId, out var e)) throw new ArgumentException("Mod not found!");
+            var def = e.All[""];
+            var dict = e.All[locale];
+            return new TranslationStatus() {
+                modified = e.Dirty[locale],
+                lines_translated = def.Where((pair) => dict[pair.Key].Length > 0).Count(),
+            };
         }
     }
 }
