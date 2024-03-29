@@ -22,20 +22,26 @@ The editor has support for custom languages. If you have a custom language mod
 installed, or if any of the mods have a translation for a language, then that
 language will be selectable inside the editor.
 
+## Development
+This mod is should be fully functional to translate existing mods that use the 
+SMAPI i18n API. However its still in early access. I don't know if there's any
+bugs, missing features, or how people use this mod. So please let me know. I'd
+love to hear from people how you use it.
+
 ## Usage
 You first need to install the mod. It has no dependencies other than SMAPI.
-After starting the game, go to https://localhost:8018. Choose what mod you want 
-to translate and the language you want to translate to.
+After starting the game, go to [http://localhost:8018](http://localhost:8018). 
+Choose what mod you want to translate and the language you want to translate to.
 
 Under "new translation" you can start editing right away. Click a text and type 
 its translation. This will directly update the translation in-game too. Although
 this is still temporary. Restarting the game at this point will revert all your 
 changes.
 
-Once you're done, click save to store your translations 
-within your game files. Then they will be loaded next time you start Stardew
-Valley. Or click download to download the translation file to your computer.
-Then maybe share it with the mod author.
+Once you're done, click save to store your translations within your game files. 
+Then they will be loaded next time you start Stardew Valley. Or click download 
+to download the translation file to your computer. Then maybe share it with the 
+mod author.
 
 Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
@@ -49,6 +55,7 @@ Stuff that may or may not be added in a future release. Let me know if you're
 particularly interested in one of these.
 
 * Translation support :)
+* Metadata like translation author name, update date, SMAPI & mod version.
 * An in-game button to open the editor.
 * Validation of {{tag}} usage.
 * Upload file from disk (for easier importing).
