@@ -1,16 +1,7 @@
 // Internationalization : Stardew Valley Mod Translation Tool
 const el = {};
 const info = {};
-document.addEventListener('DOMContentLoaded', ready);
-
-// detect if contentEditable="plaintext-only" is supported.
-const has_plaintext_only = (function(){
-	try {
-		node("p").contentEditable = "plaintext-only";
-		return true;
-	} catch {}
-	return false;
-})();
+const iso639_1 = {};
 
 // Translation json parser.
 const magic = new RegExp([
@@ -18,6 +9,13 @@ const magic = new RegExp([
 	/\/\/(?<sc>.*)/,      // Single line comment
 	/\/\*(?<mc>[^]*?)\*\//, // Multiline comment
 ].map((x)=>x.source).join('|'), "dgiu");
+
+// Request mod list
+Promise.all([
+	fetch("/info").then(as_json).then((res) => Object.assign(info, res)),
+	fetch("/static/iso639-1.json").then(as_json).then((res) => Object.assign(iso639_1, res)),
+	content_loaded
+]).then(ready);
 
 /** Returns an array containing all elements matched by the given XPath expression. */
 function $(a, root) {
@@ -47,9 +45,32 @@ function is_ok(res) {if(!res.ok) throw res;}
 function as_text(res) {is_ok(res); return res.text();}
 function as_json(res) {is_ok(res); return res.json();}
 
+/** Modify textarea to fit contents. Must be part of document to work. */
 function textarea_fit(e) {
 	e.style.height = "1lh";
 	e.style.height = (e.scrollHeight-4)+"px";
+}
+
+/** 
+ * Like Arrat.prototype.map, but for objects.
+ * Takes an additional argument to determine sorting order.
+ * Both cmp_prop and fn have the signature function(element, index, object).
+ * @param cmp_prop function that returns a object used as sorting key.
+ * @param fn function that is executed for each element.
+ * @returns An array of the values returned by fn.
+ */
+function sort_and_map(object, cmp_prop, fn) {
+	const keys = Object.getOwnPropertyNames(object);
+	if (cmp_prop) keys.sort(cmp);
+	return keys.map( (x) => fn(object[x],x,object) );
+	
+	function cmp(a,b) {
+		const aa = cmp_prop(object[a],a,object);
+		const bb = cmp_prop(object[b],b,object);
+		if (aa < bb) return -1;
+		if (aa > bb) return  1;
+		return 0;
+	}
 }
 
 /** Initialize the web app */
@@ -57,64 +78,49 @@ function ready() {
 	// Map id to their html element
 	for(let e of $("//*[@id]")) el[e.id.replaceAll("-","_")] = e;
 
-	// Register events
-	el.current.addEventListener('click', select_ingame_locale);
-	el.locale.addEventListener('change', update_locale);
-	el.mod.addEventListener('change', update_mod);
-	
+	// Update textboxes to fit content on window resize.	
 	window.addEventListener("resize", () => {
 		for (let x of $("//textarea")) textarea_fit(x);
 	});
-
-	// Load data
-	el.locale.value = localStorage.getItem("locale") ?? "";
-	populate_mods();
-}
-
-/** Request the mod list and populate drop down box */
-async function populate_mods() {
-	// Request mod list
-	Object.assign(info, await fetch("/info").then(as_json));
-
-	// Populate drop down box.
-	const mod_list = Object.keys(mods).sort(mod_cmp);
-	const mod_options = mod_list.map((id) => node("option", {value:id, text: mods[id]}));
+	
+	// Populate mod picker.
+	const mod_options = sort_and_map(info.mods, (x)=>x.name, (mod,id) => node("option", {value:id, text: mod.name}));
 	el.mod.replaceChildren(...mod_options);
+	el.mod.value = localStorage.getItem("modid"); // Select last mod
+	el.mod.addEventListener('change', update_mod);
 
-	// Select last mod
-	el.mod.value = localStorage.getItem("modid");
+	// Populate locale picker.
+	const locale_options = sort_and_map(info.locales, (_,id)=>iso639_1[id], (entry,id) => node("option", {value:id, text:iso639_1[id], title:entry.modname}));
+	el.locale.replaceChildren(...locale_options);
+	el.locale.value = localStorage.getItem("locale") ?? info.current_locale; // Select previous locale
+	el.locale.addEventListener('change', update_locale);
+	
+	// Configure current locale button
+	el.current.replaceChildren(text(iso639_1[info.current_locale]));
+	el.current.addEventListener('click', function(){
+		el.locale.value = info.current_locale;
+		update_locale();
+	});
+
 	update_mod();
-
-	function mod_cmp(a,b) {
-		if (mods[a] < mods[b]) return -1;
-		if (mods[a] > mods[b]) return  1;
-		return 0;
+	
+	function status(id) {
+		var loc = info.current_locale;
 	}
 }
 
 /** Load the mod's translation file into the editor */
-async function update_mod() {
+function update_mod() {
 	const modid = el.mod.value;
 	localStorage.setItem("modid", modid);
-
-	// Request mod locale info
-	const info = await fetch("/mods/" + modid).then(as_json);
-	if (el.locale.value === "") {
-		el.locale.value = info.current_locale;
-	}
-
-	// Populate locale suggestions
-	const locale_list = info.locales.sort();
-	const locale_options = locale_list.map((id) => node("option", {value:id, text:id}));
-	el.locale_list.replaceChildren(...locale_options);
-	
-	// Generate the translation editor for this mod
-	const text_new = await fetch("/file/" + modid + "/default").then(as_text);
-	el.new.replaceChildren(...generate_editor(text_new));
-	el.new.dataset.raw = text_new;
-	
-	// Load the selected locale
-	update_locale();
+	const text_new = fetch("/file/" + modid + "/default").then(as_text).then((text_new) => {
+		// Generate the translation editor for this mod
+		el.new.replaceChildren(...generate_editor(text_new));
+		el.new.dataset.raw = text_new;
+	}).then(
+		// Load the selected locale
+		update_locale
+	);
 }
 
 function* generate_editor(content, readonly) {
@@ -152,13 +158,6 @@ function* generate_editor(content, readonly) {
 	}
 }
 
-/** Set editor locale to what the current mod is set to in-game. */
-async function select_ingame_locale() {
-	const info = await fetch("/mods/" + el.mod.value).then(as_json);
-	el.locale.value = info.current_locale;
-	update_locale();
-}
-
 /** Load the selected locale into the editor. */
 async function update_locale() {
 	const modid = el.mod.value;
@@ -166,9 +165,9 @@ async function update_locale() {
 	localStorage.setItem("locale", locale);
 
 	// Load current translation from game
-	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).then(
+	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).catch().then(
 	(lang) => {
-		if (!lang) return;
+		lang ??= {};
 		for (let e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
@@ -176,9 +175,9 @@ async function update_locale() {
 	}).catch((e)=>console.log(e));
 	
 	// Generate old translation contents
-	fetch("/file/" + modid + "/" + locale).then(as_text).then(
+	fetch("/file/" + modid + "/" + locale).then(as_text).catch().then(
 	(text_old) => {
-		if (!text_old) return;
+		text_old ??= "";
 		el.old.replaceChildren(...generate_editor(text_old, true));
 		for (let x of $(".//textarea", el.old)) textarea_fit(x);
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(

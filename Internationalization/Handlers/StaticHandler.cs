@@ -24,9 +24,17 @@ namespace Internationalization.Handlers
 
             var file = Path.Combine(root, r.path[0]);
             try {
+                // Check ETag
+                var etag = File.GetLastWriteTimeUtc(file).GetHashCode().ToString();
+                if (r.req.Headers["If-None-Match"] == etag) return r.status(HttpStatusCode. NotModified);
+
+                // Read file
+                var data = File.ReadAllBytes(file);
+
+                // Send data
+                r.res.AddHeader("Etag", etag);
                 var ext = Path.GetExtension(r.path[0]);
                 if (Mime.TryGetValue(ext, out var mime)) r.content(mime);
-                var data = File.ReadAllBytes(file);
                 if (data.Length > 0) {
                     return r.write_buffer(HttpStatusCode.OK, data);
                 }

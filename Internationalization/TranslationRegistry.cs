@@ -13,7 +13,7 @@ namespace Internationalization
     }
 
     static class TranslationRegistry {
-        internal struct Entry { 
+        private struct Entry { 
             readonly public IModInfo Mod;
             readonly public ITranslationHelper Translations;
             readonly public string I18nPath;
@@ -75,11 +75,13 @@ namespace Internationalization
         }
 
         internal static string TranslationPath(string uniqueId, string locale) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return null;
             return Path.Combine(e.I18nPath, locale + ".json");
         }
         
         internal static object GetAll(string uniqueId, string locale) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return null;
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             return dict;
@@ -87,6 +89,7 @@ namespace Internationalization
 
 
         internal static string Get(string uniqueId, string locale, string key) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return null;
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             if (!dict .TryGetValue(key, out var res)) return null;
@@ -94,6 +97,7 @@ namespace Internationalization
         }
 
         internal static bool Set(string uniqueId, string locale, string key, string value) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return false;
             
             // Make sure this key exists 
@@ -114,15 +118,17 @@ namespace Internationalization
 
         internal static IEnumerable<string> Locales(string uniqueId) {
             if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException($"Mod '{uniqueId}' not found!");
-            return e.All.Keys;                        
+            return e.All.Keys.Select(default_to_en);
         }
 
         internal static void MarkSaved(string uniqueId, string locale) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return;
             e.Dirty[locale] = false;
         }
 
         internal static TranslationStatus Status(string uniqueId, string locale) {
+            locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException($"Mod '{uniqueId}' not found!");
             var def = e.All["default"];
             var dict = e.All[locale];
@@ -130,6 +136,17 @@ namespace Internationalization
                 modified = e.Dirty[locale],
                 lines_translated = def.Where((pair) => dict.TryGetValue(pair.Key, out var v) && v.Length > 0).Count(),
             };
+        }
+
+        internal static IEnumerable<string> AllLanguages() {
+            return table.Values.SelectMany((mod) => mod.All.Keys).Distinct().Select(default_to_en);
+        }
+
+        private static string default_to_en(string lang) {
+            return lang == "default" ? "en" : lang;
+        }
+        private static string en_to_default(string lang) {
+            return lang == "en" ? "default" : lang;
         }
     }
 }

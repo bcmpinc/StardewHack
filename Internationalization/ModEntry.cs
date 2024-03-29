@@ -45,31 +45,30 @@ namespace Internationalization
         private void process(object sender, UpdateTickingEventArgs e) {
             if (task == null) {
                 task = server.GetContextAsync();
-                return;
             }
-            if (!task.IsCompleted) return;
-            var req = new Request(task.Result);
-            task = null;
+            for (task ??= server.GetContextAsync(); task.IsCompleted; task = server.GetContextAsync()) {
+                var req = new Request(task.Result);
 
-            if (!req.req.IsLocal) {
-                // Do not allow remote connections.
-                req.res.Abort();
-                return;
+                if (!req.req.IsLocal) {
+                    // Do not allow remote connections.
+                    req.res.Abort();
+                    return;
+                }
+
+                // Serve index when '/' is requested.
+                if (req.path.Length == 0) req.path = new string[]{"static", "index.html"};
+
+                bool handled = false;
+                if (handlers.TryGetValue(req.path[0], out var handler)) {
+                    req.path = req.path.Skip(1).ToArray();
+                    handled |= handler.Handle(req);
+                } 
+                if (!handled) {
+                    req.write_text(HttpStatusCode.NotFound, "No handler for: " + string.Join("/", req.path));
+                    Monitor.Log("No handler for: " + string.Join("/", req.path));
+                }
+                req.res.Close();
             }
-
-            // Serve index when '/' is requested.
-            if (req.path.Length == 0) req.path = new string[]{"static", "index.html"};
-
-            bool handled = false;
-            if (handlers.TryGetValue(req.path[0], out var handler)) {
-                req.path = req.path.Skip(1).ToArray();
-                handled |= handler.Handle(req);
-            } 
-            if (!handled) {
-                req.write_text(HttpStatusCode.NotFound, "No handler for: " + string.Join("/", req.path));
-                Monitor.Log("No handler for: " + string.Join("/", req.path));
-            }
-            req.res.Close();
         }
 
         public static void Log(string message, LogLevel level = LogLevel.Trace) => instance.Monitor.Log(message, level);

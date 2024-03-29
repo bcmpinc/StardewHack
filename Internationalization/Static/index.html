@@ -3,13 +3,14 @@
 <head>
 <title>Internationalization: Stardew Valley Mod Translator</title>
 <link rel="stylesheet" href="static/styles.css"/>
-<script src="static/script.js"></script>
+<script>const content_loaded = new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));</script>
+<script async src="static/script.js"></script>
 </head>
 <body>
 <fieldset class="panel">
   <label for="mod">Mod: </label><select id="mod"></select>
-  <label for="locale">Locale: </label><input type="text" id="locale" list="locale-list"/><datalist id="locale-list"></datalist>
-  <button type="button" id="current">&larr; current</button>
+  <label for="locale">Locale: </label><select id="locale"></select>
+  <button type="button" id="current">(current)</button>
 </fieldset>
 <fieldset class="panel"><legend>New translation</legend><div id="new"></div></fieldset>
 <fieldset class="panel"><legend>Old translation</legend><div id="old"></div></fieldset>

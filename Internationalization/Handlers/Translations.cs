@@ -10,6 +10,7 @@ namespace Internationalization.Handlers
             if (r.path.Length==2) {
                 var dict = TranslationRegistry.GetAll(r.path[0], r.path[1]);
                 var data = JsonSerializer.Serialize(dict);
+                if (data == null) return r.status(HttpStatusCode.NotFound);
                 r.content_json();
                 return r.write_text(HttpStatusCode.OK, data);
             } else if (r.path.Length==2) {
