@@ -28,8 +28,8 @@ function $(a, root) {
 
 /** Create a new element */
 function node(nodeType, pars){
-	var e = document.createElement(nodeType);
-	for (var p in pars) {
+	const e = document.createElement(nodeType);
+	for (const p in pars) {
 		if (p=="text") e.appendChild(text(pars[p]));
 		else e.setAttribute(p,pars[p]);
 	}
@@ -76,11 +76,11 @@ function sort_and_map(object, cmp_prop, fn) {
 /** Initialize the web app */
 function ready() {
 	// Map id to their html element
-	for(let e of $("//*[@id]")) el[e.id.replaceAll("-","_")] = e;
+	for (const e of $("//*[@id]")) el[e.id.replaceAll("-","_")] = e;
 
 	// Update textboxes to fit content on window resize.	
 	window.addEventListener("resize", () => {
-		for (let x of $("//textarea")) textarea_fit(x);
+		for (const x of $("//textarea")) textarea_fit(x);
 	});
 	
 	// Populate mod picker.
@@ -90,7 +90,7 @@ function ready() {
 	el.mod.addEventListener('change', update_mod);
 
 	// Populate locale picker.
-	const locale_options = sort_and_map(info.locales, (_,id)=>iso639_1[id], (entry,id) => node("option", {value:id, text:iso639_1[id], title:entry.modname}));
+	const locale_options = sort_and_map(info.locales, (_,id)=>iso639_1[id], locale_option);
 	el.locale.replaceChildren(...locale_options);
 	el.locale.value = localStorage.getItem("locale") ?? info.current_locale; // Select previous locale
 	el.locale.addEventListener('change', update_locale);
@@ -104,8 +104,16 @@ function ready() {
 
 	update_mod();
 	
+	function locale_option(entry, id) {
+		const res = node("option", {value:id, text:iso639_1[id]})
+		if (entry.modname) {
+			res.setAttribute("title", entry.modname);
+		}
+		return res;
+	}
+	
 	function status(id) {
-		var loc = info.current_locale;
+		const loc = info.current_locale;
 	}
 }
 
@@ -114,8 +122,9 @@ function update_mod() {
 	const modid = el.mod.value;
 	localStorage.setItem("modid", modid);
 	
-	for (var loc of $("./option", el.locale)) {
-		
+	// Update what locale availability for selected mod
+	for (const loc of $("./option", el.locale)) {
+		set_translation_status(loc, modid, loc.value);
 	}
 	
 	const text_new = fetch("/file/" + modid + "/default").then(as_text).then((text_new) => {
@@ -130,33 +139,31 @@ function update_mod() {
 
 function* generate_editor(content, readonly) {
 	let pos = 0;
-	for (let m of content.matchAll(magic)) {
-		let g = m.groups;
+	for (const m of content.matchAll(magic)) {
+		const g = m.groups;
 		if (g.sc) yield node("div", {'class': "comment", text: g.sc});
 		if (g.mc) yield node("div", {'class': "comment", text: g.mc});
 		if (g.key1 || g.key2) {
-			let r = node("div", {'class': "entry"});
-			let key = g.key1 ?? g.key2;
+			const r = node("div", {'class': "entry"});
+			const key = g.key1 ?? g.key2;
+			let field;
 			if (readonly) {
-				let field;
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
 					field = node("textarea", {'class': "value", text: g.value, readonly:""}),
 				);
+				field.addEventListener('focus', (e)=>e.target.select());
 			} else {
-				let field;
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", text: g.value}),
 					field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value}),
 				);
 				field.addEventListener('input', (e)=>textarea_fit(e.target));
-				field.addEventListener('change', (e)=>{
-					let content = { method: "PUT", body: e.target.value };
-					fetch("/lang/"+el.mod.value+"/"+el.locale.value+"/"+e.target.dataset.key, content);
-				});
+				field.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
 			}
+			r.addEventListener('click', ()=>field.focus());
 			yield r;
 		}
 		pos = m.index + m[0].length;
@@ -172,7 +179,7 @@ async function update_locale() {
 	// Load current translation from game
 	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).catch((x)=>Promise.resolve({})).then(
 	(lang) => {
-		for (let e of $('.//*[@data-key]', el.new)) {
+		for (const e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
 		}
@@ -182,13 +189,45 @@ async function update_locale() {
 	fetch("/file/" + modid + "/" + locale).then(as_text).catch((x)=>Promise.resolve("")).then(
 	(text_old) => {
 		el.old.replaceChildren(...generate_editor(text_old, true));
-		for (let x of $(".//textarea", el.old)) textarea_fit(x);
+		for (const x of $(".//textarea", el.old)) textarea_fit(x);
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
 		(lang) => {
 			if (!lang) return;
-			for (let e of $('.//*[@data-key]', el.old)) {
+			for (const e of $('.//*[@data-key]', el.old)) {
 				e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			}
 		});	
 	});
+	
+	// Update what mods have the current locale available
+	for (const mod of $("./option", el.mod)) {
+		set_translation_status(mod, mod.value, locale);
+	}
+
+}
+
+/** Updates a text in game for the current mod & locale. */
+function set_text(text_id, value) {
+	const mod = el.mod.value;
+	const locale = el.locale.value;
+	const content = { method: "PUT", body: value };
+	fetch("/lang/"+mod+"/"+locale+"/"+text_id, content);
+}
+
+function set_translation_status(element, mod, locale) {
+	const mod_info = info.mods[mod];
+	const locale_info = mod_info.locales[locale];
+	element.className = "";
+	if (locale_info) {
+		if (locale_info.modified) {
+			element.classList.add("modified");
+		}
+		if (locale_info.lines_translated < mod_info.lines_total) {
+			element.classList.add("partial");
+		} else {
+			element.classList.add("complete");
+		}
+	} else {
+		element.classList.add("missing");
+	}	
 }
