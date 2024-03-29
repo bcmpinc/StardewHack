@@ -7,11 +7,15 @@
 <script async src="static/script.js"></script>
 </head>
 <body>
-<fieldset class="panel">
+<fieldset class="panel menu">
   <label for="mod">Mod: </label><select id="mod"></select>
   <label for="locale">Locale: </label><select id="locale"></select>
   <button type="button" id="current">(current)</button>
+  <span></span>
+  <button type="button" id="save">Save</button>
+  <button type="button" id="download">Download</button>
 </fieldset>
+<fieldset class="panel hidden"><legend>Error</legend><div id="error"></div><button id="hide-error">Hide</button></fieldset>
 <fieldset class="panel"><legend>New translation</legend><div id="new"></div></fieldset>
 <fieldset class="panel"><legend>Old translation</legend><div id="old"></div></fieldset>
 </body>

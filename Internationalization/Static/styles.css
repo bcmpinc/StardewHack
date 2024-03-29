@@ -27,6 +27,14 @@ legend {
 }
 
 /* Mod & Language Selector */
+.menu {
+	align-items: baseline;
+	display: flex;
+	gap: 0.5em;
+}
+.menu span {
+	flex-grow: 1;
+}
 #current:before {
 	content: "← ";
 }
@@ -37,8 +45,18 @@ select, option, button {
 }
 .modified { font-style: italic; }
 .complete { color: #090; }
-.partial  { color: #660; }
+.partial  { color: #770; }
 .missing  { color: #900; }
+
+/* Error */
+.hidden {
+	display: none;
+}
+
+#error {
+	color: #600;
+	white-space: pre-wrap;
+}
 
 /* Editor */
 .comment{

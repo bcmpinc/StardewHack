@@ -5,7 +5,7 @@ const iso639_1 = {};
 
 // Translation json parser.
 const magic = new RegExp([
-	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)"(?<value>.*?)(?<!\\(?:\\\\)+)"/, // entry
+	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)(?<value>".*?(?<!\\(?:\\\\)+)")/, // entry
 	/\/\/(?<sc>.*)/,      // Single line comment
 	/\/\*(?<mc>[^]*?)\*\//, // Multiline comment
 ].map((x)=>x.source).join('|'), "dgiu");
@@ -61,17 +61,21 @@ function textarea_fit(e) {
  */
 function sort_and_map(object, cmp_prop, fn) {
 	const keys = Object.getOwnPropertyNames(object);
-	if (cmp_prop) keys.sort(cmp);
+	if (cmp_prop) keys.sort(compare_property((a) => cmp_prop(object[a],a,object)));
 	return keys.map( (x) => fn(object[x],x,object) );
-	
-	function cmp(a,b) {
-		const aa = cmp_prop(object[a],a,object);
-		const bb = cmp_prop(object[b],b,object);
+}
+
+/** Returns a comparator for use in sort, that compares the values returned by fn. */
+function compare_property(fn) {
+	return (a,b) => {
+		const aa = fn(a);
+		const bb = fn(b);
 		if (aa < bb) return -1;
 		if (aa > bb) return  1;
 		return 0;
 	}
 }
+
 
 /** Returns the selected option for a given <select> element. */
 function current_option(element) {
@@ -89,6 +93,10 @@ function copy_style_from_option(element) {
 function ready() {
 	// Map id to their html element
 	for (const e of $("//*[@id]")) el[e.id.replaceAll("-","_")] = e;
+
+	el.save.addEventListener('click', save);
+	el.download.addEventListener('click', download);
+	el.hide_error.addEventListener('click', ()=>el.error.parentNode.classList.add("hidden"));
 
 	// Update textboxes to fit content on window resize.	
 	window.addEventListener("resize", () => {
@@ -114,6 +122,7 @@ function ready() {
 	el.current.addEventListener('click', function(){
 		el.locale.value = info.current_locale;
 		update_locale();
+		copy_style_from_option(el.locale);
 	});
 
 	update_mod();
@@ -161,18 +170,19 @@ function* generate_editor(content, readonly) {
 		if (g.key1 || g.key2) {
 			const r = node("div", {'class': "entry"});
 			const key = g.key1 ?? g.key2;
+			const value = JSON.parse(g.value);
 			let field;
 			if (readonly) {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					field = node("textarea", {'class': "value", text: g.value, readonly:""}),
+					field = node("textarea", {'class': "value", text: value, readonly:""}),
 				);
 				field.addEventListener('focus', (e)=>e.target.select());
 			} else {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
-					node("span", {'class': "default", text: g.value}),
+					node("span", {'class': "default", text: value}),
 					field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value}),
 				);
 				field.addEventListener('input', (e)=>textarea_fit(e.target));
@@ -219,6 +229,9 @@ async function update_locale() {
 		set_translation_status(mod, mod.value, locale);
 	}
 	copy_style_from_option(el.mod);
+	
+	// (De)activate save button.
+	el.save.disabled = !is_modified(el.mod.value, el.locale.value);
 }
 
 /** Updates a text in game for the current mod & locale. */
@@ -263,9 +276,66 @@ function mark_modified(mod, locale, status) {
 		};
 	}
 	
+	el.save.disabled = !status;
+	
 	// Update the selection boxes formatting.
 	set_translation_status(current_option(el.mod), mod, locale);
 	set_translation_status(current_option(el.locale), mod, locale);
 	copy_style_from_option(el.mod);
 	copy_style_from_option(el.locale);
+}
+
+function is_modified(mod, locale) {
+	const locales = info.mods[mod].locales;
+	return locales[locale] && locales[locale].modified;
+}
+
+function download() {
+	const data = generate_file()
+	var properties = {type: 'application/octet-stream'}; // Specify the file's mime-type.
+	file = new File(data, el.locale.value + ".json", properties);
+	var url = URL.createObjectURL(file);
+	window.open(url); // Needs to happen in a click event handler.
+	URL.revokeObjectURL(url)
+}
+
+function save() {
+	const data = generate_file().join("");
+	const mod = el.mod.value;
+	const locale = el.locale.value;
+	const content = { method: "PUT", body: data };
+	fetch("/file/"+mod+"/"+locale, content).then((res) => {
+		if (res.ok) {
+			mark_modified(mod, locale, false)
+		} else {
+			error(res.status + " " + res.statusText + "\n\n");
+			res.text().then((res) => el.error.textContent += res);
+		}
+	}).catch(error);
+}
+
+function parse_position(pos) {
+	const a = pos.split(",");
+	return {begin: +a[0], end: +a[1]};
+}
+
+function generate_file() {
+	const raw = el.new.dataset.raw;
+	const result = [];
+	const entries = $('.//*[@data-position]', el.new);
+	entries.sort(compare_property((e) => parse_position(e.dataset.position).begin));
+	let pos = 0;
+	for (const e of entries) {
+		const range = parse_position(e.dataset.position);
+		result.push(raw.slice(pos, range.begin));
+		result.push(JSON.stringify(e.value));
+		pos = range.end;
+	}
+	result.push(raw.slice(pos));
+	return result;
+}
+
+function error(e) {
+	el.error.textContent = e;
+	el.error.parentNode.classList.remove("hidden");
 }
