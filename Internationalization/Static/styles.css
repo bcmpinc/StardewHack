@@ -30,7 +30,11 @@ legend {
 #current:before {
 	content: "← ";
 }
-select, option, button { font-weight: bold; font-size: medium; }
+select, option, button { 
+	font-weight: bold; 
+	font-size: medium; 
+	font-style: normal; 
+}
 .modified { font-style: italic; }
 .complete { color: #090; }
 .partial  { color: #660; }

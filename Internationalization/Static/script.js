@@ -52,7 +52,7 @@ function textarea_fit(e) {
 }
 
 /** 
- * Like Arrat.prototype.map, but for objects.
+ * Like Array.prototype.map, but for objects.
  * Takes an additional argument to determine sorting order.
  * Both cmp_prop and fn have the signature function(element, index, object).
  * @param cmp_prop function that returns a object used as sorting key.
@@ -73,6 +73,18 @@ function sort_and_map(object, cmp_prop, fn) {
 	}
 }
 
+/** Returns the selected option for a given <select> element. */
+function current_option(element) {
+	return element.options[element.selectedIndex];
+}
+
+/** Causse a <select> to copy its css-class from the selected option. */
+function copy_style_from_option(element) {
+	console.log(typeof(element));
+	if (element.target) element = element.target;
+	element.className = current_option(element).className
+}
+
 /** Initialize the web app */
 function ready() {
 	// Map id to their html element
@@ -88,12 +100,14 @@ function ready() {
 	el.mod.replaceChildren(...mod_options);
 	el.mod.value = localStorage.getItem("modid"); // Select last mod
 	el.mod.addEventListener('change', update_mod);
+	el.mod.addEventListener('change', copy_style_from_option);
 
 	// Populate locale picker.
 	const locale_options = sort_and_map(info.locales, (_,id)=>iso639_1[id], locale_option);
 	el.locale.replaceChildren(...locale_options);
 	el.locale.value = localStorage.getItem("locale") ?? info.current_locale; // Select previous locale
 	el.locale.addEventListener('change', update_locale);
+	el.locale.addEventListener('change', copy_style_from_option);
 	
 	// Configure current locale button
 	el.current.replaceChildren(text(iso639_1[info.current_locale]));
@@ -126,6 +140,7 @@ function update_mod() {
 	for (const loc of $("./option", el.locale)) {
 		set_translation_status(loc, modid, loc.value);
 	}
+	copy_style_from_option(el.locale);
 	
 	const text_new = fetch("/file/" + modid + "/default").then(as_text).then((text_new) => {
 		// Generate the translation editor for this mod
@@ -203,7 +218,7 @@ async function update_locale() {
 	for (const mod of $("./option", el.mod)) {
 		set_translation_status(mod, mod.value, locale);
 	}
-
+	copy_style_from_option(el.mod);
 }
 
 /** Updates a text in game for the current mod & locale. */
@@ -212,6 +227,7 @@ function set_text(text_id, value) {
 	const locale = el.locale.value;
 	const content = { method: "PUT", body: value };
 	fetch("/lang/"+mod+"/"+locale+"/"+text_id, content);
+	mark_modified(mod, locale, true);
 }
 
 function set_translation_status(element, mod, locale) {
@@ -230,4 +246,26 @@ function set_translation_status(element, mod, locale) {
 	} else {
 		element.classList.add("missing");
 	}	
+}
+
+/** Sets the modified flag for the given mod & locale. */
+function mark_modified(mod, locale, status) {
+	const locales = info.mods[mod].locales;
+	if (locales[locale] && locales[locale].modified == status) return; // Nothing changed.
+	
+	// Set the new status
+	if (locales[locale]) {
+		locales[locale].modified = status;
+	} else {
+		locales[locale] = {
+			modified: status,
+			lines_translated: 0
+		};
+	}
+	
+	// Update the selection boxes formatting.
+	set_translation_status(current_option(el.mod), mod, locale);
+	set_translation_status(current_option(el.locale), mod, locale);
+	copy_style_from_option(el.mod);
+	copy_style_from_option(el.locale);
 }

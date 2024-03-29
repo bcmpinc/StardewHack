@@ -30,6 +30,8 @@ namespace Internationalization.Handlers
             try {
                 ModEntry.Log($"Writing new translation file to '{file}'.", StardewModdingAPI.LogLevel.Info);
                 var stream = r.req.InputStream;
+                // Make backup of old file.
+                try { File.Move(file, file+"~"); } catch {};
                 var output = File.OpenWrite(file);
                 stream.CopyTo(output);
                 output.Close();
