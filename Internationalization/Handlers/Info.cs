@@ -12,9 +12,9 @@ namespace Internationalization.Handlers
         private readonly ITranslationHelper translation;
 
         struct InfoEntry {
-            [JsonInclude] public Dictionary<string, ModEntry> mods;
-            [JsonInclude] public Dictionary<string, LocaleEntry> locales;
-            [JsonInclude] public string current_locale;
+            public Dictionary<string, ModEntry> mods;
+            public Dictionary<string, LocaleEntry> locales;
+            public string current_locale;
             public InfoEntry(string current_locale) {
                 mods = new Dictionary<string, ModEntry>();
                 locales = new Dictionary<string, LocaleEntry>();
@@ -23,9 +23,9 @@ namespace Internationalization.Handlers
         }
 
         struct ModEntry {
-            [JsonInclude] public string name;
-            [JsonInclude] public Dictionary<string,TranslationStatus> locales;
-            [JsonInclude] public int lines_total;
+            public string name;
+            public Dictionary<string,TranslationStatus> locales;
+            public int lines_total;
             public ModEntry(string name) { 
                 this.name = name;
                 locales = new Dictionary<string, TranslationStatus>();
@@ -34,7 +34,7 @@ namespace Internationalization.Handlers
         }
 
         struct LocaleEntry {
-            [JsonInclude] public string modname;
+            public string modname;
         }
 
         public Info(ITranslationHelper translation) {
@@ -47,6 +47,10 @@ namespace Internationalization.Handlers
 
         public override bool Get(Request r) {
             if (r.path.Length == 0) {
+                var options = new JsonSerializerOptions{
+                    IncludeFields = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                };
                 InfoEntry info = new InfoEntry(current_locale());
                 foreach (var m in TranslationRegistry.AllMods()) {
                     var id = m.Manifest.UniqueID;
@@ -71,7 +75,7 @@ namespace Internationalization.Handlers
                         info.locales[lang] = new LocaleEntry() { modname = "(unknown)" };
                     }
                 }
-                var data = JsonSerializer.Serialize(info);
+                var data = JsonSerializer.Serialize(info, options);
                 r.content_json();
                 return r.write_text(HttpStatusCode.OK, data);
             } else if (r.path.Length == 1 && r.path[0] == "current") {

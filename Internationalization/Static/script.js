@@ -113,6 +113,11 @@ function ready() {
 function update_mod() {
 	const modid = el.mod.value;
 	localStorage.setItem("modid", modid);
+	
+	for (var loc of $("./option", el.locale)) {
+		
+	}
+	
 	const text_new = fetch("/file/" + modid + "/default").then(as_text).then((text_new) => {
 		// Generate the translation editor for this mod
 		el.new.replaceChildren(...generate_editor(text_new));
@@ -165,9 +170,8 @@ async function update_locale() {
 	localStorage.setItem("locale", locale);
 
 	// Load current translation from game
-	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).catch().then(
+	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).catch((x)=>Promise.resolve({})).then(
 	(lang) => {
-		lang ??= {};
 		for (let e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
@@ -175,9 +179,8 @@ async function update_locale() {
 	}).catch((e)=>console.log(e));
 	
 	// Generate old translation contents
-	fetch("/file/" + modid + "/" + locale).then(as_text).catch().then(
+	fetch("/file/" + modid + "/" + locale).then(as_text).catch((x)=>Promise.resolve("")).then(
 	(text_old) => {
-		text_old ??= "";
 		el.old.replaceChildren(...generate_editor(text_old, true));
 		for (let x of $(".//textarea", el.old)) textarea_fit(x);
 		fetch("/lang/" + el.mod.value + "/default").then(as_json).then(

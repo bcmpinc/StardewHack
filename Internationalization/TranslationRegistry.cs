@@ -8,8 +8,8 @@ using System.Text.Json.Serialization;
 namespace Internationalization
 {
     struct TranslationStatus {
-        [JsonInclude] public bool modified;
-        [JsonInclude] public int lines_translated;
+        public bool modified;
+        public int lines_translated;
     }
 
     static class TranslationRegistry {
