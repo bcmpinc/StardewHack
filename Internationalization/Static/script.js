@@ -5,7 +5,7 @@ const iso639_1 = {};
 
 // Translation json parser.
 const magic = new RegExp([
-	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)+)")(?<colon>\s*:\s*)(?<value>".*?(?<!\\(?:\\\\)+)")/, // entry
+	/(?:(?<key1>[_a-z][_a-z0-9]*)|"(?<key2>.*?)(?<!\\(?:\\\\)*)")(?<colon>\s*:\s*)(?<value>".*?(?<!\\(?:\\\\)*)")/, // entry
 	/\/\/(?<sc>.*)/,      // Single line comment
 	/\/\*(?<mc>[^]*?)\*\//, // Multiline comment
 ].map((x)=>x.source).join('|'), "dgiu");
@@ -84,9 +84,17 @@ function current_option(element) {
 
 /** Causse a <select> to copy its css-class from the selected option. */
 function copy_style_from_option(element) {
-	console.log(typeof(element));
 	if (element.target) element = element.target;
 	element.className = current_option(element).className
+}
+
+/** Tries parsing a JSON encoded string. */
+function json_try_parse(value) {
+	try	{
+		return [JSON.parse(value), true];
+	} catch {
+		return [value, false];
+	}
 }
 
 /** Initialize the web app */
@@ -98,9 +106,24 @@ function ready() {
 	el.download.addEventListener('click', download);
 	el.hide_error.addEventListener('click', ()=>el.error.parentNode.classList.add("hidden"));
 
-	// Update textboxes to fit content on window resize.	
+	// Update textboxes to fit content on window resize.
+	let resize_timer;
+	let resize_pos;
 	window.addEventListener("resize", () => {
-		for (const x of $("//textarea")) textarea_fit(x);
+		resize_pos = 0;
+		if (!resize_timer) {
+			resize_timer = setInterval(resize_textareas, 20);
+		}
+		function resize_textareas() {
+			const array = $("//textarea");
+			let count = 0;
+			for (; resize_pos < array.length; resize_pos++) {
+				textarea_fit(array[resize_pos]);
+				if (++count >= 50) return;
+			}
+			clearInterval(resize_timer)
+			resize_timer = null;
+		}
 	});
 	
 	// Populate mod picker.
@@ -170,20 +193,20 @@ function* generate_editor(content, readonly) {
 		if (g.key1 || g.key2) {
 			const r = node("div", {'class': "entry"});
 			const key = g.key1 ?? g.key2;
-			const value = JSON.parse(g.value);
+			const [value, ok] = json_try_parse(g.value);
 			let field;
 			if (readonly) {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", "data-key": key}),
-					field = node("textarea", {'class': "value", text: value, readonly:""}),
+					field = node("textarea", {'class': "value"+(ok?"":" error"), text: value, readonly:""}),
 				);
 				field.addEventListener('focus', (e)=>e.target.select());
 			} else {
 				r.replaceChildren(
 					node("span", {'class': "key", text: key}),
 					node("span", {'class': "default", text: value}),
-					field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value}),
+					field = node("textarea", {'class': "value"+(ok?"":" error"), "data-key": key, "data-position":m.indices.groups.value}),
 				);
 				field.addEventListener('input', (e)=>textarea_fit(e.target));
 				field.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));

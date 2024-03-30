@@ -31,6 +31,7 @@ legend {
 	align-items: baseline;
 	display: flex;
 	gap: 0.5em;
+	flex-wrap: wrap;
 }
 .menu span {
 	flex-grow: 1;
@@ -47,6 +48,9 @@ select, option, button {
 .complete { color: #090; }
 .partial  { color: #770; }
 .missing  { color: #900; }
+label:after {
+	content: ":"
+}
 
 /* Error */
 .hidden {
@@ -56,6 +60,9 @@ select, option, button {
 #error {
 	color: #600;
 	white-space: pre-wrap;
+}
+.error {
+	color: #600;
 }
 
 /* Editor */

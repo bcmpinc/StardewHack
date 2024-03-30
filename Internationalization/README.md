@@ -1,8 +1,8 @@
 # Internationalization
 
 ## Description
-This is a mod translation mod. It allows you to translate your mods live-ish 
-in-game (including this one).
+A tool for translating mods that use SMAPI's I18n API. It allows you to translate 
+those mods live-ish in-game (including this one).
 
 This mod is intended to make translating mods more accessible. It was originally 
 designed to make it easier to update existing translation files. 
@@ -23,14 +23,19 @@ installed, or if any of the mods have a translation for a language, then that
 language will be selectable inside the editor.
 
 ## Development
-This mod is should be fully functional to translate existing mods that use the 
-SMAPI i18n API. However its still in early access. I don't know if there's any
+This mod should be fully functional to translate existing mods that use the 
+SMAPI i18n API. However its still in 'early access'. I don't know if there's any
 bugs, missing features, or how people use this mod. So please let me know. I'd
-love to hear from people how you use it.
+love to hear from people how you use it, so I can help better integrate it into
+your workflow.
 
 ## Usage
-You first need to install the mod. It has no dependencies other than SMAPI.
-After starting the game, go to [http://localhost:8018](http://localhost:8018). 
+First make sure that the mod you want to translate has an i18n folder. If it does
+not, this mod won't be able to help you translate it. Install that mod and make
+sure that SMAPI loads it when you start the game.
+
+You also need to install this translation mod. It has no dependencies other than 
+SMAPI. After starting the game, go to [http://localhost:8018](http://localhost:8018). 
 Choose what mod you want to translate and the language you want to translate to.
 
 Under "new translation" you can start editing right away. Click a text and type 
@@ -47,6 +52,9 @@ Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
 ## Changes
+#### 0.2:
+* Fix bug with not parsing escaped quotes in strings correctly.
+
 #### 0.1:
 * First release
 
@@ -54,6 +62,8 @@ the download button will still work.
 Stuff that may or may not be added in a future release. Let me know if you're 
 particularly interested in one of these.
 
+* Show JSON parse errors somewhere
+* Filter lines (error/untranslated/search query)
 * Translation support :)
 * Metadata like translation author name, update date, SMAPI & mod version.
 * An in-game button to open the editor.
