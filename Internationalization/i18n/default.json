@@ -1,4 +1,11 @@
 {
-    // Translation provided by: <leave your name or nexus/discord username here>
-	Ignore:""
+	"title":"Internationalization: Stardew Valley Mod Translator",
+	"mod": "Mod",
+	"locale": "Locale",
+	"save": "Save",
+	"download": "Download",
+	"error": "Error",
+	"hide": "Hide",
+	"new_translation": "New translation",
+	"old_translation": "Old translation"
 }

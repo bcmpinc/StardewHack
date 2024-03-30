@@ -24,4 +24,8 @@
     <None Update="Static\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <Target Name="Translation Summary">
+		
+	</Target>
+	
 </Project>
