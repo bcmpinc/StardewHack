@@ -55,6 +55,7 @@ the download button will still work.
 #### 0.2:
 * Fix bug with not parsing escaped quotes in strings correctly.
 * Localization support: it can now translate itself.
+* Progress indicator for current file.
 
 #### 0.1:
 * First release
@@ -63,7 +64,6 @@ the download button will still work.
 Stuff that may or may not be added in a future release. Let me know if you're 
 particularly interested in one of these.
 
-* Show JSON parse errors somewhere
 * Filter lines (error/untranslated/search query)
 * Metadata like translation author name, update date, SMAPI & mod version.
 * An in-game button to open the editor.

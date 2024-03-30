@@ -2,6 +2,7 @@
 const el = {};
 const info = {};
 const iso639_1 = {};
+const language = {};
 
 // Translation json parser.
 const magic = new RegExp([
@@ -15,6 +16,7 @@ Promise.all([
 	fetch("/info").then(as_json).then((res) => Object.assign(info, res)),
 	fetch("/static/iso639-1.json").then(as_json).then((res) => Object.assign(iso639_1, res)),
 	fetch("/lang/bcmpinc.Internationalization/current").then(as_json).then(async (res) => {
+		Object.assign(language, res);
 		await content_loaded;
 		for (const element of $('//*[@data-i18n]')) {
 			const value = res[element.dataset['i18n']];
@@ -247,6 +249,11 @@ async function update_locale() {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
 		}
+		const [lines,total] = update_progress();
+		const actual_total = info.mods[modid].lines_total;
+		if (total != actual_total) {
+			show_error(language["error.total_lines"].replace("{{count}}", actual_total))
+		}
 	}).catch(show_error);
 	
 	// Generate old translation contents
@@ -314,14 +321,27 @@ function mark_modified(mod, locale, status) {
 			lines_translated: 0
 		};
 	}
-	
+
 	el.save.disabled = !status;
+	update_progress();
 	
 	// Update the selection boxes formatting.
 	set_translation_status(current_option(el.mod), mod, locale);
 	set_translation_status(current_option(el.locale), mod, locale);
 	copy_style_from_option(el.mod);
 	copy_style_from_option(el.locale);
+}
+
+function update_progress() {
+	const locale_info = info.mods[el.mod.value].locales[el.locale.value];
+	const elements = $('.//*[@data-key]', el.new);
+	const total = elements.length;
+	const lines = elements.filter((x)=>x.value).length;
+	if (locale_info) {
+		locale_info.lines_translated = lines;
+	}
+	el.progress.replaceChildren(text(lines + " / " + total));
+	return [lines,total];
 }
 
 function is_modified(mod, locale) {
@@ -348,7 +368,7 @@ function save() {
 			mark_modified(mod, locale, false)
 		} else {
 			show_error(res.status + " " + res.statusText + "\n\n");
-			res.text().then((res) => el.error.textContent += res);
+			res.text().then((res) => el.error.appendChild(text(res)));
 		}
 	}).catch(show_error);
 }
@@ -375,6 +395,7 @@ function generate_file() {
 }
 
 function show_error(e) {
-	el.error.textContent = e;
+	el.error.replaceChildren(text(e));
+	if (e.stack) el.error.appendChild(text("\n\n"+e.stack));
 	el.error.parentNode.classList.remove("hidden");
 }

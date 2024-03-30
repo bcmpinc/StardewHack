@@ -33,7 +33,7 @@ legend {
 	gap: 0.5em;
 	flex-wrap: wrap;
 }
-.menu span {
+.menu .spacer {
 	flex-grow: 1;
 }
 #current:before {
