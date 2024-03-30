@@ -64,6 +64,7 @@ the download button will still work.
 Stuff that may or may not be added in a future release. Let me know if you're 
 particularly interested in one of these.
 
+* Option to add new entries.
 * Filter lines (error/untranslated/search query)
 * Metadata like translation author name, update date, SMAPI & mod version.
 * An in-game button to open the editor.
