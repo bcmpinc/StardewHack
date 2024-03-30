@@ -8,12 +8,15 @@ namespace Internationalization.Handlers
     {
         public override bool Get(Request r) {
             if (r.path.Length==2) {
-                var dict = TranslationRegistry.GetAll(r.path[0], r.path[1]);
+                var dict = 
+                    r.path[1] == "current" ? 
+                    TranslationRegistry.GetCurrent(r.path[0]) :
+                    TranslationRegistry.GetAll(r.path[0], r.path[1]);
                 if (dict == null) return r.status(HttpStatusCode.NotFound);
                 var data = JsonSerializer.Serialize(dict);
                 r.content_json();
                 return r.write_text(HttpStatusCode.OK, data);
-            } else if (r.path.Length==2) {
+            } else if (r.path.Length==3) {
                 var data = TranslationRegistry.Get(r.path[0], r.path[1], r.path[2]);
                 if (data == null) return r.status(HttpStatusCode.NotFound);
                 r.content_text();

@@ -42,6 +42,10 @@ namespace Internationalization
                 if (text != null)
                     ForLocale[key] = ReflectionHelper.Constructor<Translation>(Translations.Locale, key, text);
             }
+
+            internal IDictionary<string, string> Current() {
+                return new Dictionary<string, string>(ForLocale.Select(item => new KeyValuePair<string, string>(item.Key, item.Value.ToString())));
+            }
         }
 
         static private Translation NewTranslation(string locale, string key, string text) {
@@ -79,13 +83,16 @@ namespace Internationalization
             return Path.Combine(e.I18nPath, locale + ".json");
         }
         
-        internal static object GetAll(string uniqueId, string locale) {
+        internal static IDictionary<string, string> GetAll(string uniqueId, string locale) {
             locale = en_to_default(locale);
             if (!table.TryGetValue(uniqueId, out var e)) return null;
             if (!e.All.TryGetValue(locale, out var dict)) return null;
             return dict;
         }
-
+        internal static IDictionary<string, string> GetCurrent(string uniqueId) {
+            if (!table.TryGetValue(uniqueId, out var e)) throw new System.ArgumentException($"Mod '{uniqueId}' not found!");
+            return e.Current();
+        }
 
         internal static string Get(string uniqueId, string locale, string key) {
             locale = en_to_default(locale);

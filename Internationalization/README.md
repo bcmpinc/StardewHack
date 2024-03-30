@@ -54,6 +54,7 @@ the download button will still work.
 ## Changes
 #### 0.2:
 * Fix bug with not parsing escaped quotes in strings correctly.
+* Localization support: it can now translate itself.
 
 #### 0.1:
 * First release
@@ -64,7 +65,6 @@ particularly interested in one of these.
 
 * Show JSON parse errors somewhere
 * Filter lines (error/untranslated/search query)
-* Translation support :)
 * Metadata like translation author name, update date, SMAPI & mod version.
 * An in-game button to open the editor.
 * Validation of {{tag}} usage.

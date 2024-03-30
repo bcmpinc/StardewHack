@@ -14,8 +14,16 @@ const magic = new RegExp([
 Promise.all([
 	fetch("/info").then(as_json).then((res) => Object.assign(info, res)),
 	fetch("/static/iso639-1.json").then(as_json).then((res) => Object.assign(iso639_1, res)),
-	content_loaded
-]).then(ready);
+	fetch("/lang/bcmpinc.Internationalization/current").then(as_json).then(async (res) => {
+		await content_loaded;
+		for (const element of $('//*[@data-i18n]')) {
+			const value = res[element.dataset['i18n']];
+			if (value) {
+				element.replaceChildren(text(value));
+			}
+		}
+	}),
+]).then(ready).catch(show_error);
 
 /** Returns an array containing all elements matched by the given XPath expression. */
 function $(a, root) {
@@ -91,10 +99,14 @@ function copy_style_from_option(element) {
 /** Tries parsing a JSON encoded string. */
 function json_try_parse(value) {
 	try	{
-		return [JSON.parse(value), true];
-	} catch {
-		return [value, false];
+		return [JSON.parse(value), false];
+	} catch(err) {
+		return [value, err];
 	}
+}
+
+function get_locale_name(locale) {
+	return iso639_1[locale] ?? ("[" + locale + "]");
 }
 
 /** Initialize the web app */
@@ -134,14 +146,14 @@ function ready() {
 	el.mod.addEventListener('change', copy_style_from_option);
 
 	// Populate locale picker.
-	const locale_options = sort_and_map(info.locales, (_,id)=>iso639_1[id], locale_option);
+	const locale_options = sort_and_map(info.locales, (_,id)=>get_locale_name(id), locale_option);
 	el.locale.replaceChildren(...locale_options);
 	el.locale.value = localStorage.getItem("locale") ?? info.current_locale; // Select previous locale
 	el.locale.addEventListener('change', update_locale);
 	el.locale.addEventListener('change', copy_style_from_option);
 	
 	// Configure current locale button
-	el.current.replaceChildren(text(iso639_1[info.current_locale]));
+	el.current.replaceChildren(text(get_locale_name(info.current_locale)));
 	el.current.addEventListener('click', function(){
 		el.locale.value = info.current_locale;
 		update_locale();
@@ -151,7 +163,7 @@ function ready() {
 	update_mod();
 	
 	function locale_option(entry, id) {
-		const res = node("option", {value:id, text:iso639_1[id]})
+		const res = node("option", {value:id, text:get_locale_name(id)})
 		if (entry.modname) {
 			res.setAttribute("title", entry.modname);
 		}
@@ -181,7 +193,7 @@ function update_mod() {
 	}).then(
 		// Load the selected locale
 		update_locale
-	);
+	).catch(show_error);
 }
 
 function* generate_editor(content, readonly) {
@@ -193,26 +205,30 @@ function* generate_editor(content, readonly) {
 		if (g.key1 || g.key2) {
 			const r = node("div", {'class': "entry"});
 			const key = g.key1 ?? g.key2;
-			const [value, ok] = json_try_parse(g.value);
-			let field;
-			if (readonly) {
-				r.replaceChildren(
-					node("span", {'class': "key", text: key}),
-					node("span", {'class': "default", "data-key": key}),
-					field = node("textarea", {'class': "value"+(ok?"":" error"), text: value, readonly:""}),
-				);
-				field.addEventListener('focus', (e)=>e.target.select());
-			} else {
-				r.replaceChildren(
-					node("span", {'class': "key", text: key}),
-					node("span", {'class': "default", text: value}),
-					field = node("textarea", {'class': "value"+(ok?"":" error"), "data-key": key, "data-position":m.indices.groups.value}),
-				);
-				field.addEventListener('input', (e)=>textarea_fit(e.target));
-				field.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
-			}
-			r.addEventListener('click', ()=>field.focus());
+			const [value, error] = json_try_parse(g.value);
+			r.replaceChildren(...generate_entry());
 			yield r;
+
+			function* generate_entry() {
+				yield node("span", {'class': "key", text: key});
+				let field_value;
+				let field_text;
+				if (readonly) {
+					yield field_value = node("span", {'class': "default", "data-key": key}),
+					yield field_text = node("textarea", {'class': "value", text: value, readonly:""});
+					field_text.addEventListener('focus', (e)=>e.target.select());
+				} else {
+					yield node("span", {'class': "default", text: value});
+					yield field_value = field_text = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value});
+					field_text.addEventListener('input', (e)=>textarea_fit(e.target));
+					field_text.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
+				}
+				if (error) {
+					field_value.classList.add("error");
+					field_value.setAttribute("title", error);
+				}
+				r.addEventListener('click', ()=>field_text.focus());
+			}
 		}
 		pos = m.index + m[0].length;
 	}
@@ -231,7 +247,7 @@ async function update_locale() {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			textarea_fit(e);
 		}
-	}).catch((e)=>console.log(e));
+	}).catch(show_error);
 	
 	// Generate old translation contents
 	fetch("/file/" + modid + "/" + locale).then(as_text).catch((x)=>Promise.resolve("")).then(
@@ -244,8 +260,8 @@ async function update_locale() {
 			for (const e of $('.//*[@data-key]', el.old)) {
 				e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 			}
-		});	
-	});
+		}).catch(show_error);	
+	}).catch(show_error);
 	
 	// Update what mods have the current locale available
 	for (const mod of $("./option", el.mod)) {
@@ -262,7 +278,7 @@ function set_text(text_id, value) {
 	const mod = el.mod.value;
 	const locale = el.locale.value;
 	const content = { method: "PUT", body: value };
-	fetch("/lang/"+mod+"/"+locale+"/"+text_id, content);
+	fetch("/lang/"+mod+"/"+locale+"/"+text_id, content).catch(show_error);
 	mark_modified(mod, locale, true);
 }
 
@@ -331,10 +347,10 @@ function save() {
 		if (res.ok) {
 			mark_modified(mod, locale, false)
 		} else {
-			error(res.status + " " + res.statusText + "\n\n");
+			show_error(res.status + " " + res.statusText + "\n\n");
 			res.text().then((res) => el.error.textContent += res);
 		}
-	}).catch(error);
+	}).catch(show_error);
 }
 
 function parse_position(pos) {
@@ -358,7 +374,7 @@ function generate_file() {
 	return result;
 }
 
-function error(e) {
+function show_error(e) {
 	el.error.textContent = e;
 	el.error.parentNode.classList.remove("hidden");
 }
