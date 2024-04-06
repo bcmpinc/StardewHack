@@ -183,12 +183,12 @@ namespace StardewHack.WearMoreRings
                 if (max_rings > 8) {
                     var x = i/4;
                     var y = i%4;
-                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), slot_id(x, y+1), i == 7 && trinkets > 0 ? 200 + trinkets : slot_id(x-1, y), slot_id(x+1, y, 105), ring);
+                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), slot_id(x, y+1), i == 7 && trinkets > 0 ? trinket_slot + trinkets : slot_id(x-1, y), slot_id(x+1, y, 105), ring);
                 } else {
                     var x = i%2;
                     var y = i/2;
                     bool bottom_ring = max_rings%2 == 0 ? i >= max_rings-2 : i >= max_rings-1;
-                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), bottom_ring && trinkets > 0 ? 200 + i%2 : slot_id(x, y+1), slot_id(x-1, y), slot_id(x+1, y, 105), ring);
+                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), bottom_ring && trinkets > 0 ? trinket_slot + i%2 : slot_id(x, y+1), slot_id(x-1, y), slot_id(x+1, y, 105), ring);
                 }
             }
         }
