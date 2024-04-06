@@ -136,51 +136,60 @@ namespace StardewHack.WearMoreRings
 
         static public void AddEquipmentIcons(InventoryPage page) {
             int inv = Game1.player.MaxItems - 12;
+            int max_rings = getInstance().config.Rings;
             int trinkets = Game1.player.stats.Get("trinketSlots") == 0 ? 0 : getConfig().BonusTrinket ? 2 : 1;
-            var brt = trinkets == 0 ? 112 : 120;
-            //             name            x   y   id   up   dn   lt   rt, item
+            var brt = trinkets == 0 ? max_rings > 6 ? 140 : 110 : 200;
+            //hat - 102, shirt - 103, pants - 104, boots - 108
             AddIcon(page, "Hat",           0,  0, 102, inv, 103,  -1, 110, Game1.player.hat.Value);
-            AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, 111, Game1.player.shirtItem.Value);
-            AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, 112, Game1.player.pantsItem.Value);
+            AddIcon(page, "Shirt",         0, 16, 103, 102, 104,  -1, max_rings > 2 ? 120 : 110, Game1.player.shirtItem.Value);
+            AddIcon(page, "Pants",         0, 32, 104, 103, 108,  -1, max_rings > 4 ? 130 : 110, Game1.player.pantsItem.Value);
             AddIcon(page, "Boots",         0, 48, 108, 104,  -1,  -1, brt, Game1.player.boots.Value);
-            var max_rings = getInstance().config.Rings;
-            var rlt = 108;
+            
+            var trinket_slot = 200;
             for (int i=0; i<trinkets; i++) {
                 if (max_rings>6) {
-                    AddIcon(page, "Trinket", 18+16*i, 48, 120+i, 104, -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                    AddIcon(page, "Trinket", 18+16*i, 48, trinket_slot+i, inv + i + 1, -1, i == 1 ? trinket_slot : 108, i == 0 ? 201 : 140, get_trinket(i));
                 } else {
-                    AddIcon(page, "Trinket", 52+16*i, (int)(16*Math.Ceiling((double)max_rings/2)), 120+i, 104, -1, rlt, i+1 < trinkets ? 121+i : 112, get_trinket(i));
+                    int bottom_ring = max_rings/2*10+100 + (max_rings%2 == 0 ? 0 : 10);
+                    AddIcon(page, "Trinket", 52+16*i, (int)(16*Math.Ceiling((double)max_rings/2)), trinket_slot+i, bottom_ring + i, -1, i == 1 ? trinket_slot : 108, i == 0 ? 201 : -1, get_trinket(i));
                 }
-                rlt = 120+i;
             }
             
             int slot_id(int x, int y, int def=-1) {
                 if (x==-1) {
                     switch(y) {
-                      case 0: return 102;
-                      case 1: return 103;
-                      case 2: return 104;
-                      case 3: return rlt;
+                        case 0: return 102;
+                        case 1: return 103;
+                        case 2: return 104;
+                        case 3: return 108;
                     }
                 }
                 if (y==-1) {
                     return inv + 3 + x;
                 }
-                
-                int id = x*4 + y;
+                int xMult = max_rings > 8 ? x*4 : x*2;
+                int id = xMult + y;
                 if (id >= max_rings) return def;
-                if (id == 1) return 101; // Original id for right ring.
                 return 110 + x + y*10;
-            };
+            }
             
+            //ring IDs:
+            //1st slot is 110. Each slot downwards adds 10 and each slot to the right adds 1
             for (int i=0; i<max_rings; i++) {
                 String name;
                 Ring ring;
                 name = "Ring " + i;
                 ring = container.Value[i];
-                var x = max_rings>8 ? i/4 : i%2;
-                var y = max_rings>8 ? i%4 : i/2;
-                AddIcon(page, name, 52+16*x, 16*y, slot_id(x,y), slot_id(x,y-1), slot_id(x,y+1), slot_id(x-1,y), slot_id(x+1,y, 105), ring);
+                if (max_rings > 8) {
+                    var x = i/4;
+                    var y = i%4;
+                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), slot_id(x, y+1), i == 7 && trinkets > 0 ? 200 + trinkets : slot_id(x-1, y), slot_id(x+1, y, 105), ring);
+                } else {
+                    var x = i%2;
+                    var y = i/2;
+                    bool bottom_ring = max_rings%2 == 0 ? i >= max_rings-2 : i >= max_rings-1;
+                    AddIcon(page, name, 52+16*x, 16*y, slot_id(x, y), slot_id(x, y-1), bottom_ring && trinkets > 0 ? 200 + i%2 : slot_id(x, y+1), slot_id(x-1, y), slot_id(x+1, y, 105), ring);
+                }
             }
         }
         
