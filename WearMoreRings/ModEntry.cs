@@ -399,7 +399,7 @@ namespace StardewHack.WearMoreRings
                 case "Shirt":        Game1.player.shirtItem.Set (helditem as Clothing);    break;
                 case "Pants":        Game1.player.pantsItem.Set (helditem as Clothing);    break;
                 case "Boots":        Game1.player.boots.Set (helditem as Boots);           break;
-                case "Trinket":      set_trinket(icon.myID - 120, helditem as Trinket);    break;
+                case "Trinket":      set_trinket(icon.myID - 200, helditem as Trinket);    break;
                 default:
                     if (icon.name.StartsWith("Ring ", StringComparison.Ordinal)) {
                         int id = int.Parse(icon.name.Substring(5));
