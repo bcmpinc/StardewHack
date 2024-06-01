@@ -52,6 +52,9 @@ Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
 ## Changes
+#### 0.3:
+* French and Vietnamese translations.
+
 #### 0.2:
 * Fix bug with not parsing escaped quotes in strings correctly.
 * Localization support: it can now translate itself.
