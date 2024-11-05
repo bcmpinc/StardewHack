@@ -1,0 +1,6 @@
+{
+  "MovementSpeedMultiplierName": "Moltiplicatore Velocità Movimento",
+  "MovementSpeedMultiplierTooltip": "La velocità di movimento è moltiplicata per questa quantità. Il valore predefinito della mod è 1,5, ovvero un movimento più veloce del 50%. Impostalo su 1 per disabilitare l'aumento della velocità di movimento.",
+  "ToolChargeDelayName": "Ritardo Carica Strumento",
+  "ToolChargeDelayTooltip": "Tempo necessario per caricare la zappa o l'annaffiatoio in ms. Normalmente questo è 600 ms. Il valore predefinito è 600/1,5 = 400, ovvero una ricarica più veloce del 50%. Impostalo su 600 per disabilitare la ricarica più rapida."
+}
