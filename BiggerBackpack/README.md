@@ -21,6 +21,7 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/spacechase0/BiggerBackpack/issues) or [Nexus](https://www.nexusmods.com/stardewvalley/mods/1845?tab=bugs).
 
 * This mod does not support android / mobile.
+* The 4th inventory row does not show up in the museum.
 
 ## Uninstalling
 To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console and safe your game. 
