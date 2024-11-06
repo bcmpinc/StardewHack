@@ -23,6 +23,9 @@ This mod requires the following mods to be installed:
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes
+#### 7.3
+* Workaround for player no longer being able to hop around after fully charging their tool.
+
 #### 7.2:
 * Italian translation
 

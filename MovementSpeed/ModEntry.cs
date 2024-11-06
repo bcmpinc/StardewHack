@@ -12,14 +12,15 @@ namespace StardewHack.MovementSpeed
         /** The movement speed is multiplied by this amount. The mod's default is 1.5, meaning 50% faster movement. Set this to 1 to disable the increase in movement speed. */
         public float MovementSpeedMultiplier = 1.5f;
         /** Time required for charging the hoe or watering can in ms. Normally this is 600ms. The default is 600/1.5 = 400, meaning 50% faster charging. Set this to 600 to disable faster tool charging. */
-        public int ToolChargeDelay = 400;
+        public int ToolChargeDelay = 399;
     }
     
     public class ModEntry : HackWithConfig<ModEntry, ModConfig>
     {
         public override void HackEntry(IModHelper helper) {
             I18n.Init(helper.Translation);
-
+            if (config.ToolChargeDelay == 400)
+                config.ToolChargeDelay = 399; // For some reason using 400 causes the player to no longer be able to hop around while fully charged. I'm too lazy to figure out why.
             Patch((Farmer f)=>f.getMovementSpeed(), Farmer_getMovementSpeed);
             Patch(typeof(Game1), "UpdateControlInput", Game1_UpdateControlInput);
         }
