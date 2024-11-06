@@ -266,8 +266,7 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_S, // 4
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
                 OpCodes.Stloc_S, // 5
-                OpCodes.Ldloc_S, // 5
-                OpCodes.Call
+                OpCodes.Ldloc_S  // 5
             );
 
             // Get one of the "no match" branches.
@@ -301,8 +300,7 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_1,
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
                 OpCodes.Stloc_2,
-                OpCodes.Ldloc_2,
-                OpCodes.Call
+                OpCodes.Ldloc_2
             );
             // Get one of the "no match" branches.
             var branch = code.FindNext(
@@ -425,8 +423,7 @@ namespace StardewHack.WearMoreRings
                 OpCodes.Ldloc_1,
                 Instructions.Ldfld(typeof(ClickableComponent), nameof(ClickableComponent.name)),
                 OpCodes.Stloc_S, // 4
-                OpCodes.Ldloc_S, // 4
-                OpCodes.Call
+                OpCodes.Ldloc_S  // 4
             );
             // Get one of the "no match" branches.
             var branch = code.FindNext(

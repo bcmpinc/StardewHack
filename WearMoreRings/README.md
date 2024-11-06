@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.6:
+* Compatibility with SDV 1.6.11.
+
 #### 7.5:
 * French, Turkish & Chinese translations.
 
