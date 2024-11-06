@@ -25,6 +25,9 @@ This mod requires the following mods to be installed:
 * [StardewHack](https://www.nexusmods.com/stardewvalley/mods/3213)
 
 ## Known bugs
+* This mod is incompatible with [Tractor Mod](https://www.nexusmods.com/stardewvalley/mods/1401) and causes strange behavior in some circumstances. This cannot be fixed.
+* This mod is probably incompatible with [Don't stop me now](https://www.nexusmods.com/stardewvalley/mods/10941). Right clicking forage causes the player to get stuck.
+
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
 ## Changes

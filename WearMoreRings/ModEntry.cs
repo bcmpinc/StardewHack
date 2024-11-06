@@ -6,6 +6,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Objects;
+using StardewValley.Objects.Trinkets;
 using System;
 using System.Reflection.Emit;
 using System.Collections.Generic;
@@ -51,7 +52,6 @@ namespace StardewHack.WearMoreRings
             Patch((InventoryPage ip)=>ip.draw(null), InventoryPage_draw);
             Patch((InventoryPage ip)=>ip.performHoverAction(0,0), InventoryPage_performHoverAction);
             Patch((InventoryPage ip)=>ip.receiveLeftClick(0,0,false), InventoryPage_receiveLeftClick);
-            Patch(()=>new Ring("0"), Ring_ctor);
             Patch(typeof(ForgeMenu), "_CreateButtons", ForgeMenu_CreateButtons);
         }
         
@@ -501,32 +501,6 @@ namespace StardewHack.WearMoreRings
         }
 #endregion
 
-#region Patch Ring
-        // Not sure how my mod uses this, but the code in the Ring constructor that generates a UniqueID seems seriously flawed.
-        // It has a reasonably high probability of creating duplicates. So this patch replaces it with a number from a randomly seeded PRNG.
-        // It's for migration purposes. When my mod makes multiple rings sequentially, they get the same UniqueID. This prevents that.
-        void Ring_ctor() {
-            var code = FindCode(
-                OpCodes.Ldarg_0,
-                Instructions.Ldfld(typeof(Ring), nameof(Ring.uniqueID)),
-                Instructions.Ldsfld(typeof(Game1), nameof(Game1.year)),
-                Instructions.Ldsfld(typeof(Game1), nameof(Game1.dayOfMonth)),
-                OpCodes.Add
-            );
-            code.Extend(
-                Instructions.Call_get(typeof(Game1), nameof(Game1.stats)),
-                Instructions.Call_get(typeof(Stats), nameof(Stats.ItemsCrafted)),
-                OpCodes.Add,
-                OpCodes.Callvirt
-            );
-            code = code.SubRange(2,code.length-3);
-            code.Replace(
-                // ModEntry.random.Next()
-                Instructions.Ldsfld(typeof(ModEntry), nameof(random)),
-                Instructions.Call(typeof(Random), nameof(Random.Next))
-            );
-        }
-#endregion Patch Ring
     }
 }
 

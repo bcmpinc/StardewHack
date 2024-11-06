@@ -52,6 +52,9 @@ Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
 ## Changes
+#### 0.4:
+* Italian translation
+
 #### 0.3:
 * French and Vietnamese translations.
 

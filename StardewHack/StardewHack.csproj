@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>StardewHack</AssemblyName>
     <RootNamespace>StardewHack</RootNamespace>
-    <Version>7.3</Version>
+    <Version>7.4</Version>
     <TargetFramework>net6.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
