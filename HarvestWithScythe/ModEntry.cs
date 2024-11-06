@@ -308,62 +308,18 @@ namespace StardewHack.HarvestWithScythe
                 Instructions.Ldarg_1(),
                 Instructions.Call(typeof(ModEntry), nameof(CanScytheCrop), typeof(Crop), typeof(Tool))
             );
-
-            // Add fix for forage, including quality & xp
-            var forage = crop.FindNext(
-                // if (this.crop == null && 
-                OpCodes.Ldarg_0,
-                Instructions.Call_get(typeof(HoeDirt), nameof(HoeDirt.crop)),
-                OpCodes.Brtrue_S,
-                // t.ItemId == "66" &&
-                OpCodes.Ldarg_1,
-                Instructions.Callvirt_get(typeof(Item), nameof(Item.ItemId)),
-                Instructions.Ldstr("66"),
-                OpCodes.Call,
-                OpCodes.Brfalse
-            );
-            forage.Extend(
-	            // location.objects.Remove(tileLocation);
-                OpCodes.Ldloc_0,
-                Instructions.Ldfld(typeof(GameLocation), nameof(GameLocation.objects)),
-                OpCodes.Ldarg_3,
-                OpCodes.Callvirt,
-                OpCodes.Pop
-	        );
-            forage.Replace(
-                Instructions.Ldarg_0(),
-                Instructions.Ldarg_1(),
-                Instructions.Ldloc_0(),
-                Instructions.Ldarg_3(),
-                Instructions.Call(typeof(ModEntry), nameof(harvest_forage_with_xp), typeof(HoeDirt), typeof(Tool), typeof(GameLocation), typeof(Vector2))
-            );
-        }
-
-        static void harvest_forage_with_xp(HoeDirt dirt, Tool t, GameLocation location, Vector2 tileLocation) {
-            if (dirt.crop == null && CanScytheForage(t) && location.objects.ContainsKey(tileLocation) && location.objects[tileLocation].isForage()) {
-				Object o = location.objects[tileLocation];
-                harvest_forage_with_xp(o, t, tileLocation);
-				location.objects.Remove(tileLocation);
-			}
         }
 
         static void harvest_forage_with_xp(Object o, Tool t, Vector2 tileLocation) {
             System.Random r = Utility.CreateDaySaveRandom(tileLocation.X, tileLocation.Y * 777f);
             var who = t.getLastFarmerToUse();
-			if (t.getLastFarmerToUse() != null && who.professions.Contains(16)) {
-				o.Quality = 4;
-			} else if (r.NextDouble() < (double)(who.ForagingLevel / 30f)) {
-				o.Quality = 2;
-			} else if (r.NextDouble() < (double)(who.ForagingLevel / 15f)) {
-				o.Quality = 1;
-			}
-            who.gainExperience(2, 7);
-            Game1.stats.ItemsForaged += 1;
-            var vector = new Vector2(tileLocation.X * 64f + 32f, tileLocation.Y * 64f + 32f);
-			Game1.createItemDebris(o, vector, -1);
+            o.Quality = who.currentLocation.GetHarvestSpawnedObjectQuality(who, o.isForage(), tileLocation);
+            who.currentLocation.OnHarvestedForage(who, o);
+            var spawnPosition = new Vector2(tileLocation.X * 64f + 32f, tileLocation.Y * 64f + 32f);
+			Game1.createItemDebris(o, spawnPosition, -1);
             if (who.professions.Contains(13) && r.NextDouble() < 0.2) {
-                who.gainExperience(2, 7);
-                Game1.createItemDebris(o.getOne(), vector, -1, null, -1);
+                who.currentLocation.OnHarvestedForage(who, o);
+                Game1.createItemDebris(o.getOne(), spawnPosition, -1, null, -1);
             }
         }
 #endregion
