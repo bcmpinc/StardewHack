@@ -111,11 +111,13 @@ function get_locale_name(locale) {
 	return iso639_1[locale] ?? ("[" + locale + "]");
 }
 
-/** Initialize the web app */
-function ready() {
+content_loaded.then(function() {
 	// Map id to their html element
 	for (const e of $("//*[@id]")) el[e.id.replaceAll("-","_")] = e;
+});
 
+/** Initialize the web app */
+function ready() {
 	el.save.addEventListener('click', save);
 	el.download.addEventListener('click', download);
 	el.hide_error.addEventListener('click', ()=>el.error.parentNode.classList.add("hidden"));
@@ -395,7 +397,12 @@ function generate_file() {
 }
 
 function show_error(e) {
-	el.error.replaceChildren(text(e));
-	if (e.stack) el.error.appendChild(text("\n\n"+e.stack));
+	if (e.status) {
+		msg = e.status + ": " + e.statusText + "\n\n";
+		e.text().then((val) => el.error.appendChild(text(val)));
+	} else {
+		el.error.replaceChildren(text(e));
+		if (e.stack) el.error.appendChild(text("\n\n"+e.stack));
+	}
 	el.error.parentNode.classList.remove("hidden");
 }
