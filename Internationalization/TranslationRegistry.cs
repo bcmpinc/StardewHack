@@ -62,7 +62,7 @@ namespace Internationalization
             table = new Dictionary<string, Entry>();
             foreach (var i in registry.GetAll()) {
                 var ent = new Entry(i);
-                if (ent.All.Count > 0) {
+                if (ent.All.Count > 0 && ent.All.ContainsKey("default")) {
                     table[i.Manifest.UniqueID] = ent;
                 }
             }
