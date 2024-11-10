@@ -52,6 +52,10 @@ Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
 ## Changes
+#### 0.5: 
+* Fix issue with error reporting
+* Fix issue with mods that don't have an English translation
+
 #### 0.4:
 * Italian translation
 

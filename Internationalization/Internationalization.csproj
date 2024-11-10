@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Internationalization</AssemblyName>
     <RootNamespace>Internationalization</RootNamespace>
-    <Version>0.4</Version>
+    <Version>0.5</Version>
     <TargetFramework>net6.0</TargetFramework>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>

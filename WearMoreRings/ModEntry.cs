@@ -16,7 +16,7 @@ namespace StardewHack.WearMoreRings
     public class ModConfig
     {
         /** How many ring slots are available. */
-        public int Rings = 8;
+        public int Rings = 6;
         public bool BonusTrinket = false;
     }
 
