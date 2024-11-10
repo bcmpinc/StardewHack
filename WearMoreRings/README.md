@@ -1,13 +1,13 @@
 # Wear More Rings
 
 ## Description
-Configure the amount of ring slots in your inventory. By default adds 6 additional ring slots.
+Configure the amount of ring slots in your inventory. By default adds 4 additional ring slots.
 
 ## Config
 *Note: run Stardew Valley once with this mod enabled to generate the `config.json` file.*
 
 * `Rings`: Number of ring slots available. Normally this is 2, this mod increases it to 6. Max = 20.
-* `BonusTrinket`: Whether unlocking trinkets gives you two slots instead of one (untested).
+* `BonusTrinket`: Whether unlocking trinkets gives you two trinket slots instead of one.
 
 ## Console Commands
 * `player_openforge`:        Opens the forge menu.
