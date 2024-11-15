@@ -1,0 +1,26 @@
+{
+
+
+    // Boolean options.
+    HarvestWithSwordName: "剣で収穫",     HarvestWithSwordTooltip: "剣を鎌として使用できる",
+    AllForageName:        "すべての採集物を鎌で切る",      AllForageTooltip:        "鎌が耕された土壌の作物だけではなく、野生の作物にも機能する。\nこれにより、Tractor Modで問題が発生する可能性があります。",
+
+    // Plucking Scythe
+    PluckingScytheName:   "鎌で摘み取る",   PluckingScytheTooltip:   "鎌を振り回しながら植物を摘み取ることができるかどうか。",
+    PS_Never:   "鎌を振り回しているときは摘み取ることができない",
+    PS_Invalid: "鎌で刈り取れない場合のみ掴み取る",
+    PS_Always:  "常に掴み取る",
+
+    // Harvest Mode
+    HarvestModeSection: "収穫モード",
+    HM_Hand:   "手作業のみ",
+    HM_Irid:   "デフォルト",
+    HM_Gold:   "手作業または金の鎌",
+    HM_Both:   "手作業または鎌",
+    HM_Scythe: "鎌のみ",
+    HM_None:   "作物を収穫できない",
+    PluckableCropsName:   "手作業で収穫できる作物",   PluckableCropsTooltip:   "通常は手でしか収穫できない作物をどのようにして収穫できるか。", 
+    ScythableCropsName:   "鎌で収穫できる作物", ScythableCropsTooltip:   "通常は鎌でしか収穫できない作物を、どのようにして収穫できるか。",
+    FlowersName:          "花",                FlowersTooltip:          "花を収穫する方法。",
+    ForageName:           "野生の作物",                 ForageTooltip:           "野生の作物を収穫する方法。",
+}
