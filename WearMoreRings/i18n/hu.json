@@ -1,0 +1,8 @@
+{
+  "DestroyRingChestsCommand": "Eltávolítja az összes hátralévő gyűrűtartó ládát, amelyek a játékos gyűrűinek tárolására alkalmasak. A bennük található tárgyakat a lábaid elé dobja.",
+  "OpenForgeCommand": "Megnyitja a kovácsműhely menüt.",
+  "RingsName": "Gyűrűk",
+  "RingsTooltip": "Hány gyűrűt viselhetsz?",
+  "BonusTrinketName": "Bónusz kiegészítő",
+  "BonusTrinketTooltip": "Egy áráért két ékszerhelyet kapsz-e."
+}
