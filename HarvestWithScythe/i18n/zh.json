@@ -1,23 +1,39 @@
 ﻿{
-    // 翻译人员信息
-    // 其它选项
-    HarvestWithSwordName: "武器收割",     HarvestWithSwordTooltip: "装备武器时候可以用作镰刀.",
-    AllForageName:        "镰刀收割采集物",      AllForageTooltip:        "镰刀是否也适用于耕地以外的草地.这可能会导致拖拉机模组的兼容问题.",
-    // 挥舞镰刀
-    PluckingScytheName:   "手动收割模式",   PluckingScytheTooltip:   "你是否可以在挥舞镰刀的时候采集物品.",
-    PS_Never:   "挥舞镰刀时不能手动收割",   Unable to convert Chinese
-    PS_Invalid: "除非装备镰刀否则无法收割",   Unable to convert Chinese
-    PS_Always:  "始终选择使用手动收割作物",   Unable to convert Chinese
-    // 收获模式
-    HarvestModeSection: "收获模式",
-    HM_Hand:   "手动模式",   Unable to convert Chinese
-    HM_Irid:   "默认模式",   Unable to convert Chinese
-    HM_Gold:   "手动或金镰刀",   Unable to convert Chinese
-    HM_Both:   "手动或任意镰刀",   Unable to convert Chinese
-    HM_Scythe: "只能使用镰刀",   Unable to convert Chinese
-    HM_None:   "作物不能收割",   Unable to convert Chinese
-    PluckableCropsName:   "手动收割作物",   PluckableCropsTooltip:   "通常只能用手动模式收割的作物也可以被收割.", 
-    ScythableCropsName:   "镰刀收割作物", ScythableCropsTooltip:   "通常只能用镰刀收割的作物也可以被收割.",
-    FlowersName:          "花卉",                FlowersTooltip:          "花卉如何收割.",
-    ForageName:           "采集物",                 ForageTooltip:           "采集物如何收割.",
+    // 翻译提供者: <Xingluguwuyu6>
+
+    // 开关选项
+    "HarvestWithSwordName": "使用剑收割",
+    "HarvestWithSwordTooltip": "是否可以用剑像镰刀一样收割作物。",
+
+    "AllForageName":        "镰刀收割所有可觅食物品",
+    "AllForageTooltip":     "是否可以用镰刀收割不在耕地上的可觅食物品。这可能会与拖拉机模组产生冲突。",
+
+    // 镰刀采摘
+    "PluckingScytheName":   "使用镰刀采摘",
+    "PluckingScytheTooltip": "持镰刀时是否仍然可以手动采摘作物。",
+
+    "PS_Never":   "持镰刀时无法采摘",
+    "PS_Invalid": "仅当镰刀无法收割该作物时可采摘",
+    "PS_Always":  "始终可以采摘作物",
+
+    // 收割模式
+    "HarvestModeSection": "收割模式",
+    "HM_Hand":   "手工收割",
+    "HM_Irid":   "游戏默认行为",
+    "HM_Gold":   "手工或使用金色镰刀收割",
+    "HM_Both":   "手工或使用任意镰刀收割",
+    "HM_Scythe": "仅使用镰刀收割",
+    "HM_None":   "作物无法被收割",
+
+    "PluckableCropsName":   "可手工收割的作物",
+    "PluckableCropsTooltip": "通常只能手工收割的作物应如何被收割。",
+
+    "ScythableCropsName":   "可镰刀收割的作物",
+    "ScythableCropsTooltip": "通常只能用镰刀收割的作物应如何被收割。",
+
+    "FlowersName":          "花",
+    "FlowersTooltip":       "花应如何被收割。",
+
+    "ForageName":           "可觅食物品",
+    "ForageTooltip":        "可觅食物品应如何被收割。",
 }
