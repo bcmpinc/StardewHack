@@ -1,0 +1,33 @@
+{
+    // Tłumaczenie dostarczone przez: insane.Ari
+
+    // Opcje logiczne (Boolean).
+    HarvestWithSwordName: "Zbieranie mieczem",
+    HarvestWithSwordTooltip: "Czy miecz może być używany jako kosa.",
+    AllForageName: "Koszenie wszystkich zbiorów",
+    AllForageTooltip: "Czy kosa powinna działać również na zbiory, które nie znajdują się na uprawianej ziemi. Może to powodować problemy z modyfikacją Tractor.",
+
+    // Koszenie zrywające
+    PluckingScytheName: "Zrywanie kosą",
+    PluckingScytheTooltip: "Czy można zrywać rośliny, trzymając kosę.",
+    PS_Never: "Nie można zrywać, trzymając kosę",
+    PS_Invalid: "Tylko jeśli kosa nie może zebrać rośliny",
+    PS_Always: "Zawsze zrywaj roślinę",
+
+    // Tryb zbierania
+    HarvestModeSection: "Tryb zbierania",
+    HM_Hand: "Ręcznie",
+    HM_Irid: "Domyślne zachowanie",
+    HM_Gold: "Ręcznie lub złotą kosą",
+    HM_Both: "Ręcznie lub dowolną kosą",
+    HM_Scythe: "Tylko kosą",
+    HM_None: "Rośliny nie mogą być zbierane",
+    PluckableCropsName: "Rośliny zbierane ręcznie",
+    PluckableCropsTooltip: "Jak rośliny, które normalnie mogą być zbierane tylko ręcznie, mogą być zbierane.",
+    ScythableCropsName: "Rośliny zbierane kosą",
+    ScythableCropsTooltip: "Jak rośliny, które normalnie mogą być zbierane tylko kosą, mogą być zbierane.",
+    FlowersName: "Kwiaty",
+    FlowersTooltip: "Jak kwiaty mogą być zbierane.",
+    ForageName: "Zbiory",
+    ForageTooltip: "Jak zbiory mogą być zbierane."
+}
