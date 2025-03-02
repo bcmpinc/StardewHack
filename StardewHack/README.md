@@ -20,9 +20,9 @@ This library is used by the following mods:
 * [Wear More Rings](https://www.nexusmods.com/stardewvalley/mods/3214):                     Adds 4 additional ring slots to your inventory.
 
 ## FAQ
-**Do the mods also work on Android?** With the exception of Bigger Backpack and Wear More Rings, the mods also work on Android. 
+**Do the mods also work on Android?** Probably not. Android is not supported and I have no plans to add support. However you can still try and if SDV starts without any errors it might still work.
 
-**Does mod *x* work on the latest version of Stardew Valley?** Please check the SMAPI [mod compatibility](https://smapi.io/mods) page for up-to-date information. The mods that broke in 1.5 have been updated. If there's no download for 1.5, then the download for 1.4 will also work on 1.5.
+**Does mod *x* work on the latest version of Stardew Valley?** Please check the SMAPI [mod compatibility](https://smapi.io/mods) page for up-to-date information.
 
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
