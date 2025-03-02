@@ -32,6 +32,10 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * When using a sword as scythe on grass it has a 0% of producing hay.
 
 ## Changes
+#### 7.5:
+* Added Polish translation.
+* Updated Chinese translation.
+
 #### 7.4:
 * Remove patch for xp and quality when harvesting forage with a scythe (this is now in SDV vanilla)
 
