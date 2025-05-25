@@ -1,0 +1,7 @@
+{
+    // Translation provided by: <Schn1ek3>
+    DestroyRingChestsCommand: "Entfernt alle verbleibenden Ringtruhen, die zur Aufbewahrung der Ringe des Spielers verwendet werden. Alle darin enthaltenen Gegenstände werden dir vor die Füße fallen gelassen.",
+    OpenForgeCommand: "Öffnet das Schmiedemenü.",
+    RingsName: "Ringe", RingsTooltip: "Wie viele Ringplätze verfügbar sind.", 
+    BonusTrinketName: "Bonus-Schmuckstück", BonusTrinketTooltip: "Ob du zwei Schmuckstück-Plätze zum Preis von einem bekommst.",
+}
