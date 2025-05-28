@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.8
+* Fixed issue where loading an existing save that did not use WMR yet, would cause equipped rings to be duplicated.
+
 #### 7.7
 * Reduce default number of rings to 6.
 * Trinkets now show below rings if ting count is <= 6.

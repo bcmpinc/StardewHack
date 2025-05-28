@@ -1,6 +1,7 @@
 ﻿using StardewValley;
 using StardewValley.Objects;
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace StardewHack.WearMoreRings
@@ -43,15 +44,19 @@ namespace StardewHack.WearMoreRings
                         }
                     }
                 }
+                Save();
+                ModEntry.getInstance().Monitor.Log($"Loaded WMR container ring", StardewModdingAPI.LogLevel.Trace);
             } else {
                 // Create a new combined ring for storage.
                 container = new CombinedRing();
-                this[0] = who.leftRing.Value;
-                this[1] = who.rightRing.Value;
-                who.leftRing.Value = container;
+                var ring0 = who.leftRing.Value;
+                var ring1 = who.rightRing.Value;
+                who.leftRing.Value = container; // This must be set before we assign the rings.
                 who.rightRing.Value = null;
+                this[0] = ring0;
+                this[1] = ring1;
+                ModEntry.getInstance().Monitor.Log($"Created new WMR container ring", StardewModdingAPI.LogLevel.Trace);
             }
-            Save();
         }
 
         /// <summary>
