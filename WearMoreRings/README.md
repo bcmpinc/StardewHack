@@ -32,6 +32,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 Mods adding additional rings most should work out of the box. For backwards compatibility this mod provides an API to access the equipped rings: [IWearMoreRingsAPI](https://github.com/bcmpinc/StardewHack/blob/master/WearMoreRings/IWearMoreRingsAPI.cs).
 
 ## Changes
+#### 7.9
+* Added German translation.
+
 #### 7.8
 * Fixed issue where loading an existing save that did not use WMR yet, would cause equipped rings to be duplicated.
 
