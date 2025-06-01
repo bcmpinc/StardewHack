@@ -55,6 +55,7 @@ namespace StardewHack.WearMoreRings
                 who.rightRing.Value = null;
                 this[0] = ring0;
                 this[1] = ring1;
+                Save();
                 ModEntry.getInstance().Monitor.Log($"Created new WMR container ring", StardewModdingAPI.LogLevel.Trace);
             }
         }
