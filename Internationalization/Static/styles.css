@@ -1,10 +1,15 @@
 ﻿@charset "utf-8";
 
 /* Global formatting */
-body {
+body::before {
+	content: "";
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
 	background: linear-gradient(180deg, rgb(0,44,92) 0%, rgb(4,118,227,1) 50%, rgb(105,239,224) 100%);
-	background-attachment: fixed;
-	height: 100%;
+	z-index: -1;
+}
+
+body {
 	font-family: sans-serif;
 	margin: 0;
 }
@@ -33,7 +38,7 @@ legend {
 	gap: 0.5em;
 	flex-wrap: wrap;
 }
-.menu .spacer {
+.menu > .spacer {
 	flex-grow: 1;
 }
 #current:before {
@@ -115,6 +120,6 @@ textarea {
 #old {
 	white-space: break-spaces;
 }
-#old .value {
+.readonly {
 	color: #666;
 }
