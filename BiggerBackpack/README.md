@@ -22,6 +22,7 @@ Please report bugs on [GitHub](https://github.com/spacechase0/BiggerBackpack/iss
 
 * This mod does not support android / mobile.
 * The 4th inventory row does not show up in the museum.
+* There is only one upgrade. If you want more, take a look at [The Return Of Custom Backpack Framework](https://www.nexusmods.com/stardewvalley/mods/21588).
 
 ## Uninstalling
 To remove the mod, first run `player_setbackpacksize 36` in the SMAPI console and safe your game. 
