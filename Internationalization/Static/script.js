@@ -309,7 +309,7 @@ function update_progress() {
 	const locale_info = info.mods[el.mod.value].locales[el.locale.value];
 	const elements = $('.//*[@data-key]', el.new);
 	const total = elements.length;
-	const lines = elements.filter((x)=>x.value).length;
+	const lines = elements.filter((x)=>x.textContent).length;
 	if (locale_info) {
 		locale_info.lines_translated = lines;
 	}
