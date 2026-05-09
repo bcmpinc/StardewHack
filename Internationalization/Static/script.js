@@ -204,8 +204,14 @@ function* generate_editor(content) {
 			function* generate_entry() {
 				yield node("span", {'class': "key", text: key});
 				yield node("span", {'class': "default", text: value});
-				let field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value});
-				field.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
+				let field = node("span", {
+					'class': "value",
+					"data-key": key,
+					"data-position": m.indices.groups.value,
+					"contentEditable": "plaintext-only"
+				});
+				field.addEventListener('input', (e)=>set_text(e.target.dataset.key, e.target.textContent));
+				field.addEventListener('input', (e)=>console.log(e.target.dataset.key, e.target.textContent));
 				if (error) {
 					field.classList.add("error");
 					field.setAttribute("title", error);

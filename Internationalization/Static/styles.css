@@ -53,7 +53,7 @@ select, option, button {
 .complete { color: #090; }
 .partial  { color: #770; }
 .missing  { color: #900; }
-label:after {
+label::after {
 	content: ":"
 }
 
@@ -79,7 +79,7 @@ label:after {
 
 .entry {
 	display: grid;
-	margin: 0.5em 0;
+	margin: 1em 0;
 	grid-template-columns: 1fr auto;
 	grid-template-rows:    auto auto;
 	grid-template-areas: 
@@ -90,10 +90,6 @@ label:after {
 	outline: 0.2em ridge rgba(32,192,255,0.5);
 	outline-offset: 0.3em;
 	border-radius: 0.1em;
-}
-
-textarea {
-	resize: none;
 }
 
 .key {
@@ -110,7 +106,6 @@ textarea {
 	background: rgba(255,255,255,0.3);
 	grid-area: value;
 	border: none;
-	font-size: large;
 	white-space: pre-wrap;
 }
 .value:focus {
