@@ -211,12 +211,15 @@ function* generate_editor(content) {
 					"contentEditable": "plaintext-only"
 				});
 				field.addEventListener('input', (e)=>set_text(e.target.dataset.key, e.target.textContent));
-				field.addEventListener('input', (e)=>console.log(e.target.dataset.key, e.target.textContent));
 				if (error) {
 					field.classList.add("error");
 					field.setAttribute("title", error);
 				}
-				r.addEventListener('click', ()=>field.focus());
+				r.addEventListener('click', ()=>{
+					if (document.getSelection().isCollapsed) {
+						field.focus();
+					}
+				});
 				yield field;
 			}
 		}

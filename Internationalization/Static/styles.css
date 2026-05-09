@@ -74,22 +74,27 @@ label::after {
 .comment{
 	white-space: preserve-breaks;
 	color:#080;
+}
+
+.comment, .entry {
 	margin: 0.5em 0;
+	padding: 0.1em 0.5em;
 }
 
 .entry {
 	display: grid;
-	margin: 1em 0;
 	grid-template-columns: 1fr auto;
 	grid-template-rows:    auto auto;
 	grid-template-areas: 
 		"default key"
 		"value value";
+	background: rgba(255,255,255,0.4);
+	border-radius: 0.3em;
 }
 .entry:focus-within {
 	outline: 0.2em ridge rgba(32,192,255,0.5);
-	outline-offset: 0.3em;
-	border-radius: 0.1em;
+	outline-offset: 0.0em;
+	border-radius: 0.3em;
 }
 
 .key {
@@ -98,16 +103,20 @@ label::after {
 }
 
 .default {
+	color: #642;
 	grid-area: default;
 	white-space: pre-wrap;
 }
 
 .value {
-	background: rgba(255,255,255,0.3);
 	grid-area: value;
 	border: none;
 	white-space: pre-wrap;
 }
 .value:focus {
     outline: 0px solid transparent;
+}
+
+.default, .value, .key {
+	padding: 0.1em;
 }
