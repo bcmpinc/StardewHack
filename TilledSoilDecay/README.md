@@ -18,6 +18,9 @@ This mod requires the following mods to be installed:
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
+* The decay prevention does no longer work during season changes.
+* Incompatible with Immersive Sprinklers (and possible Immersive Scarecrows).
+
 ## Changes
 #### 7.4:
 * Korean translation.
