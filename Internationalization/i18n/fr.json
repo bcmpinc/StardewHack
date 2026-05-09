@@ -7,7 +7,6 @@
   "download": "Charger",
   "error": "Erreur",
   "hide": "cacher",
-  "new_translation": "Nouvelle traduction",
-  "old_translation": "Ancienne traduction",
+  "translation": "Traduction",
   "error.total_lines": "L’analyse a échoué à reconnaître {{count}} entrées de traduction dans default.json."
 }

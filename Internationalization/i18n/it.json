@@ -7,7 +7,6 @@
   "download": "Scarica",
   "error": "Errore",
   "hide": "Nascondi",
-  "new_translation": "Nuova Traduzione",
-  "old_translation": "Vecchia Traduzione",
+  "translation": "Traduzione",
   "error.total_lines": "Analizzatore non è riuscito a riconoscere tutte le {{count}} voci di traduzione in default.json."
 }

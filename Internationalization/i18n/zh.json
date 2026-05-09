@@ -7,7 +7,6 @@
   "download": "下载",
   "error": "错误",
   "hide": "隐藏",
-  "new_translation": "新翻译",
-  "old_translation": "旧翻译",
+  "translation": "翻译",
   "error.total_lines": "解析器无法识别 default.json 中的所有 {{count}} 翻译条目。"
 }

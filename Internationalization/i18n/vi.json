@@ -7,7 +7,6 @@
   "download": "Tải xuống",
   "error": "Lỗi",
   "hide": "Ẩn",
-  "new_translation": "Bản dịch mới",
-  "old_translation": "Bản dịch cũ",
+  "translation": "Bản dịch",
   "error.total_lines": "Trình phân tích không nhận dạng được tất cả các mục dịch {{count}} trong default.json."
 }
