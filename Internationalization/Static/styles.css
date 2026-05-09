@@ -41,7 +41,7 @@ legend {
 .menu > .spacer {
 	flex-grow: 1;
 }
-#current:before {
+#current::before {
 	content: "← ";
 }
 select, option, button { 
@@ -115,11 +115,4 @@ textarea {
 }
 .value:focus {
     outline: 0px solid transparent;
-}
-
-#old {
-	white-space: break-spaces;
-}
-.readonly {
-	color: #666;
 }

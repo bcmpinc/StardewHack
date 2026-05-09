@@ -8,8 +8,7 @@
 	"download": "Download",
 	"error": "Error",
 	"hide": "Hide",
-	"new_translation": "New translation",
-	"old_translation": "Old translation",
+	"translation": "Translation",
 	
 	// Messages
 	"error.total_lines": "Parser failed to recognize all {{count}} translation entries in default.json.",

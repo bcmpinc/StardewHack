@@ -3,15 +3,6 @@
  * @author bcmpinc
  */
 
-/** Whether to show the old translation on the bottom of the page.
- *
- * @deprecated Still functional, but planned for removal.
- * You can turn it back on by setting it to `true`. However, if you do, please
- * leave a comment on my mod page to explain why, so I know that it's still
- * being used and for what purpose.
- */
-const SHOW_OLD_TRANSLATION = false;
-
 /** List of all elements with an id field, indexed by the id value. */
 const el = {};
 
@@ -138,7 +129,6 @@ function ready() {
 	el.save.addEventListener('click', save);
 	el.download.addEventListener('click', download);
 	el.hide_error.addEventListener('click', ()=>el.error.parentNode.classList.add("hidden"));
-	el.old_panel.classList.toggle("hidden", !SHOW_OLD_TRANSLATION);
 
 	// Populate mod picker.
 	const mod_options = sort_and_map(info.mods, (x)=>x.name, (mod,id) => node("option", {value:id, text: mod.name}));
@@ -198,7 +188,7 @@ function update_mod() {
 	).catch(show_error);
 }
 
-function* generate_editor(content, readonly) {
+function* generate_editor(content) {
 	let pos = 0;
 	for (const m of content.matchAll(TRANSLATION_PARSE_REGEX)) {
 		const g = m.groups;
@@ -213,22 +203,15 @@ function* generate_editor(content, readonly) {
 
 			function* generate_entry() {
 				yield node("span", {'class': "key", text: key});
-				let field_value;
-				let field_text;
-				if (readonly) {
-					yield field_value = node("span", {'class': "default", "data-key": key}),
-					yield field_text = node("textarea", {'class': "value readonly", text: value, readonly:""});
-					field_text.addEventListener('focus', (e)=>e.target.select());
-				} else {
-					yield node("span", {'class': "default", text: value});
-					yield field_value = field_text = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value});
-					field_text.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
-				}
+				yield node("span", {'class': "default", text: value});
+				let field = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value});
+				field.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
 				if (error) {
-					field_value.classList.add("error");
-					field_value.setAttribute("title", error);
+					field.classList.add("error");
+					field.setAttribute("title", error);
 				}
-				r.addEventListener('click', ()=>field_text.focus());
+				r.addEventListener('click', ()=>field.focus());
+				yield field;
 			}
 		}
 		pos = m.index + m[0].length;
@@ -253,21 +236,6 @@ async function update_locale() {
 			show_error(language["error.total_lines"].replace("{{count}}", actual_total))
 		}
 	}).catch(show_error);
-	
-	if (SHOW_OLD_TRANSLATION) {
-		// Generate old translation contents
-		fetch("/file/" + modid + "/" + locale).then(as_text).catch((x)=>Promise.resolve("")).then(
-		(text_old) => {
-			el.old.replaceChildren(...generate_editor(text_old, true));
-			fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
-			(lang) => {
-				if (!lang) return;
-				for (const e of $('.//*[@data-key]', el.old)) {
-					e.replaceChildren(text(lang[e.dataset.key] ?? ""));
-				}
-			}).catch(show_error);	
-		}).catch(show_error);
-	}
 	
 	// Update what mods have the current locale available
 	for (const mod of $("./option", el.mod)) {
