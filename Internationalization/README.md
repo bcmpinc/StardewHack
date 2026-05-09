@@ -52,6 +52,9 @@ Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
 ## Changes
+#### 0.6:
+* Performance improvements. Files with up to 10000 entries should load in only a few seconds.
+
 #### 0.5: 
 * Fix issue with error reporting
 * Fix issue with mods that don't have an English translation

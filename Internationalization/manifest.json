@@ -1,7 +1,7 @@
 ﻿{
    "Name": "Internationalization",
    "Author": "bcmpinc",
-   "Version": "0.5",
+   "Version": "0.6",
    "Description": "Mod translation tool",
    "UniqueID": "bcmpinc.Internationalization",
    "EntryDll": "Internationalization.dll",
