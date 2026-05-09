@@ -180,8 +180,8 @@ function update_mod() {
 	
 	const text_new = fetch("/file/" + modid + "/default").then(as_text).then((text_new) => {
 		// Generate the translation editor for this mod
-		el.new.replaceChildren(...generate_editor(text_new));
-		el.new.dataset.raw = text_new;
+		el.translation.replaceChildren(...generate_editor(text_new));
+		el.translation.dataset.raw = text_new;
 	}).then(
 		// Load the selected locale
 		update_locale
@@ -236,7 +236,7 @@ async function update_locale() {
 	// Load current translation from game
 	fetch("/lang/" + el.mod.value + "/" + locale).then(as_json).catch((x)=>Promise.resolve({})).then(
 	(lang) => {
-		for (const e of $('.//*[@data-key]', el.new)) {
+		for (const e of $('.//*[@data-key]', el.translation)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
 		}
 		const [lines,total] = update_progress();
@@ -310,7 +310,7 @@ function mark_modified(mod, locale, status) {
 
 function update_progress() {
 	const locale_info = info.mods[el.mod.value].locales[el.locale.value];
-	const elements = $('.//*[@data-key]', el.new);
+	const elements = $('.//*[@data-key]', el.translation);
 	const total = elements.length;
 	const lines = elements.filter((x)=>x.textContent).length;
 	if (locale_info) {
@@ -355,9 +355,9 @@ function parse_position(pos) {
 }
 
 function generate_file() {
-	const raw = el.new.dataset.raw;
+	const raw = el.translation.dataset.raw;
 	const result = [];
-	const entries = $('.//*[@data-position]', el.new);
+	const entries = $('.//*[@data-position]', el.translation);
 	entries.sort(compare_property((e) => parse_position(e.dataset.position).begin));
 	let pos = 0;
 	for (const e of entries) {
