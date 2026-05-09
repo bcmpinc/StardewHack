@@ -78,12 +78,6 @@ function is_ok(res) {if(!res.ok) throw res;}
 function as_text(res) {is_ok(res); return res.text();}
 function as_json(res) {is_ok(res); return res.json();}
 
-/** Modify textarea to fit contents. Must be part of document to work. */
-function textarea_fit(e) {
-	e.style.height = "1lh";
-	e.style.height = (e.scrollHeight-4)+"px";
-}
-
 /**
  * Like Array.prototype.map, but for objects.
  * Takes an additional argument to determine sorting order.
@@ -146,26 +140,6 @@ function ready() {
 	el.hide_error.addEventListener('click', ()=>el.error.parentNode.classList.add("hidden"));
 	el.old_panel.classList.toggle("hidden", !SHOW_OLD_TRANSLATION);
 
-	// Update textboxes to fit content on window resize.
-	let resize_timer;
-	let resize_pos;
-	window.addEventListener("resize", () => {
-		resize_pos = 0;
-		if (!resize_timer) {
-			resize_timer = setInterval(resize_textareas, 20);
-		}
-		function resize_textareas() {
-			const array = $("//textarea");
-			let count = 0;
-			for (; resize_pos < array.length; resize_pos++) {
-				textarea_fit(array[resize_pos]);
-				if (++count >= 50) return;
-			}
-			clearInterval(resize_timer)
-			resize_timer = null;
-		}
-	});
-	
 	// Populate mod picker.
 	const mod_options = sort_and_map(info.mods, (x)=>x.name, (mod,id) => node("option", {value:id, text: mod.name}));
 	el.mod.replaceChildren(...mod_options);
@@ -248,7 +222,6 @@ function* generate_editor(content, readonly) {
 				} else {
 					yield node("span", {'class': "default", text: value});
 					yield field_value = field_text = node("textarea", {'class': "value", "data-key": key, "data-position":m.indices.groups.value});
-					field_text.addEventListener('input', (e)=>textarea_fit(e.target));
 					field_text.addEventListener('change', (e)=>set_text(e.target.dataset.key, e.target.value));
 				}
 				if (error) {
@@ -273,7 +246,6 @@ async function update_locale() {
 	(lang) => {
 		for (const e of $('.//*[@data-key]', el.new)) {
 			e.replaceChildren(text(lang[e.dataset.key] ?? ""));
-			textarea_fit(e);
 		}
 		const [lines,total] = update_progress();
 		const actual_total = info.mods[modid].lines_total;
@@ -287,7 +259,6 @@ async function update_locale() {
 		fetch("/file/" + modid + "/" + locale).then(as_text).catch((x)=>Promise.resolve("")).then(
 		(text_old) => {
 			el.old.replaceChildren(...generate_editor(text_old, true));
-			for (const x of $(".//textarea", el.old)) textarea_fit(x);
 			fetch("/lang/" + el.mod.value + "/default").then(as_json).then(
 			(lang) => {
 				if (!lang) return;
