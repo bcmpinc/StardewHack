@@ -51,10 +51,17 @@ mod author.
 Note: if you accidentally close the game while you were editing a language file,
 the download button will still work.
 
+## Known bugs
+Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
+
+* If you have your browser's developer console open while loading a large translation file, 
+your browser tab might hang. Close the developer console and the tab before trying to open 
+the editor in a new tab.
+
 ## Changes
 #### 0.6:
 * Performance improvements. Files with up to 10000 entries should load in only a few seconds.
-* Added button to find untranslated texts.
+* Added a button to find untranslated texts.
 
 #### 0.5: 
 * Fix issue with error reporting
