@@ -151,6 +151,29 @@ function ready() {
 		update_locale();
 		copy_style_from_option(el.locale);
 	});
+	
+	// Attach search logic for next empty entry button.
+	let last_found;
+	el.find_new.addEventListener('click', function(){
+		const empty_entries = $('.//*[@data-key][.=""]', el.translation);
+		let empty;
+		search: {
+			let saw_last = false;
+			for (empty of empty_entries) {
+				if (saw_last) break search;
+				if (empty == last_found) {
+					saw_last = true;
+				}
+			}
+			for (empty of empty_entries) {
+				break search;
+			}
+			return;
+		}
+		last_found = empty;
+		empty.scrollIntoView({behavior: "instant", block: "center"});
+		empty.focus();
+	});
 
 	update_mod();
 	
@@ -363,7 +386,7 @@ function generate_file() {
 	for (const e of entries) {
 		const range = parse_position(e.dataset.position);
 		result.push(raw.slice(pos, range.begin));
-		result.push(JSON.stringify(e.value));
+		result.push(JSON.stringify(e.textContent));
 		pos = range.end;
 	}
 	result.push(raw.slice(pos));

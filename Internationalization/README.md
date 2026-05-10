@@ -54,6 +54,7 @@ the download button will still work.
 ## Changes
 #### 0.6:
 * Performance improvements. Files with up to 10000 entries should load in only a few seconds.
+* Added button to find untranslated texts.
 
 #### 0.5: 
 * Fix issue with error reporting

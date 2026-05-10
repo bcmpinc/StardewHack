@@ -107,8 +107,10 @@ label::after {
 }
 .entry:focus-within {
 	outline: 0.2em ridge rgba(32,192,255,0.5);
-	outline-offset: 0.0em;
 	border-radius: 0.3em;
+}
+.entry:has(>.value:empty), .entry:has(>.value>br) {
+	background: rgba(128,255,255,0.4);
 }
 
 .key {
@@ -129,7 +131,7 @@ label::after {
 	white-space: pre-wrap;
 }
 .value:focus {
-    outline: 0px solid transparent;
+    outline: 0 solid transparent;
 }
 
 .default, .value, .key {
