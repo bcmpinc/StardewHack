@@ -54,9 +54,7 @@ the download button will still work.
 ## Known bugs
 Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 
-* If you have your browser's developer console open while loading a large translation file, 
-your browser tab might hang. Close the developer console and the tab before trying to open 
-the editor in a new tab.
+* If you have your browser's developer console open while loading a large translation file, your browser tab might hang. Close the developer console and the tab before trying to open the editor in a new tab.
 
 ## Changes
 #### 0.6:

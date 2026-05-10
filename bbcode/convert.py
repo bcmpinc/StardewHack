@@ -24,14 +24,14 @@ for f in files:
     text = re.sub("[`](.+?)[`]", "[code]\\1[/code]", text)
 
     # Convert lists
-    text = re.sub("^[*](.+)", "[list]\n[*]\\1\n[/list]", text, flags=re.MULTILINE)
-    text = re.sub("^  [*](.+)", "[list]\n[list]\n[*]\\1\n[/list]\n[/list]", text, flags=re.MULTILINE)
-    text = re.sub("\[/list\]\n\[list\]\n", "", text)
-    text = re.sub("\[/list\]\n\[list\]\n", "", text)
+    text = re.sub("^[*](.+)", "[list][*]\\1\n[/list]", text, flags=re.MULTILINE)
+    text = re.sub("^  [*](.+)", "[list][list][*]\\1\n[/list][/list]", text, flags=re.MULTILINE)
+    text = re.sub("\[/list\]\n\[list\]", "", text)
+    text = re.sub("\[/list\]\n\[list\]", "", text)
 
     # Remove extraneous line breaks
-    text = re.sub("\n+\[list\]", "[list]", text)
-    text = re.sub("\[/list\]\n+", "[/list]", text)
+    text = re.sub("\n+\[list\]", "\n[list]", text)
+    text = re.sub("\[/list\]\n+", "[/list]\n", text)
     text = re.sub("([A-Za-z.,]) *\n([A-Za-z])", "\\1 \\2", text)
 
     # Merge whitespace
