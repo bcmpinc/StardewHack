@@ -14,8 +14,8 @@ using GenericModConfigMenu;
 namespace BiggerBackpack
 {
     public class ModConfig {
-        /** How much you have to pay to buy this backpack in the shop. (default = 50000).*/
-        public int BackpackCost = 50000;
+        /** How much you have to pay to buy this backpack in the shop. (default = 100000).*/
+        public int BackpackCost = 100000;
     }
     
     public class ModEntry : HackWithConfig<ModEntry,ModConfig>
@@ -63,8 +63,9 @@ namespace BiggerBackpack
                 case "24": newMax = 24; break;
                 case "36": newMax = 36; break;
                 case "48": newMax = 48; break;
+                case "60": newMax = 60; break;
                 default:
-                    Monitor.Log("The new size must be 12, 24, 36 or 48.", LogLevel.Error);
+                    Monitor.Log("The new size must be 12, 24, 36, 48 or 60.", LogLevel.Error);
                     return;
             }
             
@@ -120,7 +121,7 @@ namespace BiggerBackpack
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.maxItems)),
                 check[2], // Nothing jumps here so reusing this should be OK.
-                Instructions.Ldc_I4_S(48),
+                Instructions.Ldc_I4_S(60),
                 check[4], // We'll create a new jump in check later.
                 // drawBiggerBackpack(b);
                 Instructions.Ldarg_1(),
@@ -156,7 +157,7 @@ namespace BiggerBackpack
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.maxItems)),
                 code[3], // Nothing jumps here so reusing this should be OK.
-                Instructions.Ldc_I4_S(48),
+                Instructions.Ldc_I4_S(60),
                 Instructions.Bne_Un(AttachLabel(code[0])),
                 // return getBackpackSprite(position);
                 Instructions.Ldarg_1(),
@@ -195,7 +196,7 @@ namespace BiggerBackpack
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.maxItems)),
                 code[2],
-                Instructions.Ldc_I4_S(48),
+                Instructions.Ldc_I4_S(60),
                 code[4],
                 Instructions.Call(typeof(ModEntry), nameof(clickBackpack)),
                 Instructions.Br((Label)code[len-1].operand)
@@ -231,7 +232,7 @@ namespace BiggerBackpack
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.maxItems)),
                 code[2],
-                Instructions.Ldc_I4_S(48),
+                Instructions.Ldc_I4_S(60),
                 Instructions.Bge(AttachLabel(get_player)),
                 //   && Game1.player.Money >= Mod.getBackpackCost()) {
                 Instructions.Call_get(typeof(Game1), nameof(Game1.player)),
@@ -245,7 +246,7 @@ namespace BiggerBackpack
                 get_player,
                 Instructions.Ldfld(typeof(Farmer), nameof(Farmer.maxItems)),
                 code[2],
-                Instructions.Ldc_I4_S(48),
+                Instructions.Ldc_I4_S(60),
                 code[4]
             );
         }
@@ -255,12 +256,12 @@ namespace BiggerBackpack
 #region Resize GUI 
         public static void shiftIconsDown(List<ClickableComponent> equipmentIcons){
             foreach (var icon in equipmentIcons) {
-                icon.bounds.Y += Game1.tileSize;
+                icon.bounds.Y += Game1.tileSize * 2;
             }
         }
         
         void resize_inventory() {
-            // Change inventory size from default (36) to 48
+            // Change inventory size from default (36) to 60
             var inv = FindCode(
                 OpCodes.Ldc_I4_M1,  // Size (-1 = default)
                 OpCodes.Ldc_I4_3,   // Rows
@@ -268,15 +269,15 @@ namespace BiggerBackpack
                 OpCodes.Ldc_I4_0,
                 OpCodes.Ldc_I4_1
             );
-            inv[0] = Instructions.Ldc_I4(48);
-            inv[1] = Instructions.Ldc_I4_4();
+            inv[0] = Instructions.Ldc_I4(60);
+            inv[1] = Instructions.Ldc_I4_5();
         }
         
         void InventoryPage_ctor() {
             BeginCode().Prepend(
                 // height += Game1.tileSize;
                 Instructions.Ldarg_S(4),
-                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Ldc_I4(Game1.tileSize * 2),
                 Instructions.Add(),
                 Instructions.Starg_S(4)
             );
@@ -321,7 +322,7 @@ namespace BiggerBackpack
                 Instructions.Add(),
                 Instructions.Ldsfld(typeof(IClickableMenu), nameof(IClickableMenu.spaceToClearTopBorder)),
                 Instructions.Add(),
-                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Ldc_I4(Game1.tileSize * 2),
                 Instructions.Add(),
                 Instructions.Stloc_S(yoffset)
             );
@@ -357,7 +358,7 @@ namespace BiggerBackpack
             BeginCode().Prepend(
                 // height += Game1.tileSize;
                 Instructions.Ldarg_S(4),
-                Instructions.Ldc_I4_S(Game1.tileSize),
+                Instructions.Ldc_I4(Game1.tileSize * 2),
                 Instructions.Add(),
                 Instructions.Starg_S(4)
             );
@@ -458,7 +459,7 @@ namespace BiggerBackpack
                     OpCodes.Mul,
                     OpCodes.Add
                 );
-                code[0].operand = 600 + Game1.tileSize;
+                code[0].operand = 600 + Game1.tileSize * 2;
             }
         }
         
