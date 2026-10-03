@@ -385,8 +385,10 @@ function generate_file() {
 	let pos = 0;
 	for (const e of entries) {
 		const range = parse_position(e.dataset.position);
-		result.push(raw.slice(pos, range.begin));
-		result.push(JSON.stringify(e.textContent));
+		if (e.textContent) {
+			result.push(raw.slice(pos, range.begin));
+			result.push(JSON.stringify(e.textContent));
+		}
 		pos = range.end;
 	}
 	result.push(raw.slice(pos));

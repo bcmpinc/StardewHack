@@ -57,6 +57,9 @@ Please report bugs on [GitHub](https://github.com/bcmpinc/StardewHack/issues).
 * If you have your browser's developer console open while loading a large translation file, your browser tab might hang. Close the developer console and the tab before trying to open the editor in a new tab.
 
 ## Changes
+#### 0.7:
+* Download and save now exclude entries that have no text in them.
+
 #### 0.6:
 * Performance improvements. Files with up to 10000 entries should load in only a few seconds.
 * Added a button to find untranslated texts.
